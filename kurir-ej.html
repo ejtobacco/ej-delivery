@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KURIR - EJ DELIVERY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); --text-main: #FFFFFF; --safe: #22C55E; --blue: #2563eb; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); color: var(--text-main); padding: 15px; }
+        .glass-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 15px; margin-bottom: 12px; }
+        .btn-action { background: var(--gold); color: black; border: none; padding: 10px; border-radius: 10px; font-weight: 800; font-size: 11px; cursor: pointer; width: 100%; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-box { text-align: center; padding: 15px; background: var(--glass); border-radius: 15px; border: 1px solid var(--glass-border); }
+    </style>
+</head>
+<body>
+
+    <h2 style="color:var(--gold); margin-bottom:15px; text-align:center;">EJ DELIVERY</h2>
+
+    <div class="stats-grid">
+        <div class="stat-box"><p style="font-size:9px; color:var(--gold);">PAKET HARI INI</p><b id="paketCount">0</b></div>
+        <div class="stat-box"><p style="font-size:9px; color:var(--safe);">SISA TUNAI (COD)</p><b id="tunai">Rp0</b></div>
+    </div>
+
+    <div id="list">Memuat...</div>
+
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
+    <script>
+        const OWNER_WA = "6281210481935";
+        const firebaseConfig = { apiKey: "AIzaSyAVQGysGRlYJ2b4PekM3vaXKtx6UFvNlCk", databaseURL: "https://ej-tobacco-express-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        let orders = []; let setoran = 0;
+
+        db.ref('pesanan').on('value', snap => {
+            orders = Object.keys(snap.val() || {}).map(k => ({id:k, ...snap.val()[k]})).reverse();
+            const today = new Date().toLocaleDateString('id-ID').replace(/\//g, '-');
+            db.ref('setoran/' + today).on('value', s => { setoran = s.val() || 0; render(); });
+        });
+
+        async function updateStatus(id, status) {
+            const pos = await new Promise(r => navigator.geolocation.getCurrentPosition(p => r(p.coords), () => r(null), {timeout:3000}));
+            if(pos) db.ref('tracking/kurir_ej').set({ lat: pos.latitude, lng: pos.longitude, time: new Date().toLocaleString() });
+            db.ref('pesanan/' + id).update({ status: status }).then(() => {
+                if(status === 'Terkirim') {
+                    const o = orders.find(x => x.id === id);
+                    window.location.href = `https://wa.me/${OWNER_WA}?text=*EJ DELIVERY*%0A✅ TERKIRIM: ${o.namaPembeli}%0A💰 COD: Rp${Number(o.total).toLocaleString()}`;
+                }
+            });
+        }
+
+        function render() {
+            const today = new Date().toLocaleDateString('id-ID');
+            const filtered = orders.filter(o => o.status !== 'Terkirim' || o.tanggal === today);
+            const selesai = filtered.filter(o => o.status === 'Terkirim');
+            const codSum = selesai.filter(o => o.metode === 'COD').reduce((a,b)=>a+Number(b.total), 0);
+            
+            document.getElementById('paketCount').innerText = selesai.length;
+            document.getElementById('tunai').innerText = "Rp" + (codSum - setoran).toLocaleString();
+
+            document.getElementById('list').innerHTML = filtered.map(o => `
+                <div class="glass-card" style="border-left: 4px solid ${o.status==='Diantar'?'#2563eb':(o.status==='Terkirim'?'#22C55E':'#D4AF37')}">
+                    <p style="font-size:10px; color:var(--gold)">${o.noPesanan} | ${o.metode}</p>
+                    <h3 style="margin:5px 0;">${o.namaPembeli}</h3>
+                    <p style="font-size:11px; opacity:0.7;">📍 ${o.alamat}</p>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
+                        ${o.status!=='Terkirim' ? `<button class="btn-action" onclick="updateStatus('${o.id}','Diantar')">🚚 ANTAR</button>` : ''}
+                        ${o.status!=='Terkirim' ? `<button class="btn-action" style="background:#22C55E; color:white;" onclick="updateStatus('${o.id}','Terkirim')">✅ SELESAI</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
