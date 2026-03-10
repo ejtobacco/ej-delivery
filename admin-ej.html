@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EJ ADMIN - SINKRON</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#050505">
+    <title>EJ ADMIN - PREMIUM SYSTEM</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); --text-main: #FFFFFF; --safe: #22C55E; --danger: #EF4444; --warning: #FACC15; }
+        :root { --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); --text-main: #FFFFFF; --safe: #22C55E; --danger: #EF4444; --warning: #FACC15; --wa: #25D366; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: var(--text-main); padding: 15px; padding-bottom: 50px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .logo-text { color: var(--gold); font-weight: 800; font-size: 20px; text-transform: uppercase; }
+        .logo-text-container { display: flex; flex-direction: column; }
+        .main-logo-text { color: var(--gold); font-weight: 800; font-size: 20px; letter-spacing: 1px; }
+        .sub-logo-text { color: #fff; font-size: 11px; opacity: 0.8; letter-spacing: 2px; }
         .report-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
         .report-box { background: var(--glass); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; text-align: center; cursor: pointer; }
         .report-box.active { background: rgba(212, 175, 55, 0.15); border-color: var(--gold); }
@@ -21,19 +21,25 @@
         input, textarea, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; color: white; margin-bottom: 10px; outline: none; }
         .btn-main { background: linear-gradient(135deg, #F7E08C, #D4AF37); color: #000; border: none; padding: 14px; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; }
         .order-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; }
-        #waPrompt { position:fixed; bottom:20px; left:20px; right:20px; background:#25D366; color:white; padding:20px; border-radius:15px; text-align:center; display:none; z-index:999; }
+        .modal-foto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; }
+        .modal-foto img { max-width: 90%; border-radius: 15px; border: 2px solid var(--gold); }
+        #waPrompt { position:fixed; bottom:20px; left:20px; right:20px; background:var(--wa); color:white; padding:20px; border-radius:15px; text-align:center; z-index:10000; display:none; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="logo-text">EJ TOBACCO DELIVERY</div>
-        <div id="runningClock" style="font-size: 14px; font-weight: 800; color: var(--safe);">00:00:00</div>
+        <div class="logo-text-container">
+            <div class="main-logo-text">EJ TOBACCO</div>
+            <div class="sub-logo-text">DELIVERY</div>
+        </div>
+        <div style="text-align: right;">
+            <div id="runningClock" style="font-size: 14px; font-weight: 800; color: var(--safe);">00:00:00</div>
+            <div id="currentDay" style="font-size: 9px; color: var(--gold); font-weight: 800;">LOADING...</div>
+        </div>
     </div>
 
-    <div style="display: flex; gap: 5px; margin-bottom: 15px;">
-        <input type="date" id="datePicker" onchange="updateAll()" style="border-color: var(--gold); background: rgba(212, 175, 55, 0.1); color: var(--gold); text-align: center; font-weight: 800; flex: 1;">
-    </div>
+    <input type="date" id="datePicker" onchange="updateAll()" style="border-color: var(--gold); background: rgba(212, 175, 55, 0.1); color: var(--gold); text-align: center; font-weight: 800; margin-bottom:15px;">
 
     <div class="report-grid">
         <div class="report-box active" id="f-Semua" onclick="setFilter('Semua')"><span>Sisa</span><b id="countProses">0</b></div>
@@ -41,20 +47,20 @@
         <div class="report-box" id="f-Gagal" onclick="setFilter('Gagal')" style="border-color: var(--danger);"><span>Cancel</span><b id="countGagal">0</b></div>
     </div>
 
-    <div class="report-box" style="margin-bottom: 20px; border-color: var(--safe); background: rgba(34, 197, 94, 0.05);">
-        <span style="color: var(--safe); font-size: 10px; font-weight: 800;">SALDO DI KURIR (TOTAL)</span>
-        <b id="dailyTunai" style="font-size: 20px; color: var(--safe);">Rp0</b>
+    <div class="report-box" style="margin-bottom: 20px; border-color: var(--safe); background: rgba(34, 197, 94, 0.05); padding:15px;">
+        <span style="color: var(--safe); font-size: 10px; font-weight: 800;">TOTAL SALDO DI KURIR</span>
+        <b id="dailyTunai" style="font-size: 22px; color: var(--safe);">Rp0</b>
     </div>
 
     <div class="glass-card">
-        <input type="text" id="noPesanan" placeholder="No Resi">
+        <input type="text" id="noPesanan" placeholder="No Resi (#001)">
         <input type="text" id="pembeli" placeholder="Nama Pembeli">
         <input type="text" id="nohp" placeholder="WhatsApp (08xx)">
-        <textarea id="alamat" placeholder="Alamat"></textarea>
-        <input type="text" id="mapLink" placeholder="Link Maps">
-        <select id="metodeBayar" onchange="toggleTotal()"><option value="COD">COD</option><option value="Transfer">Transfer</option></select>
-        <input type="number" id="total" placeholder="Total (Rp)">
-        <button class="btn-main" onclick="tambah()">SIMPAN & PRINT</button>
+        <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
+        <input type="text" id="mapLink" placeholder="Link Google Maps">
+        <select id="metodeBayar" onchange="toggleTotal()"><option value="COD">Metode: COD</option><option value="Transfer">Metode: Transfer</option></select>
+        <input type="number" id="total" placeholder="Harga COD (Rp)">
+        <button class="btn-main" onclick="tambah()">SIMPAN & PRINT RESI</button>
     </div>
 
     <div class="glass-card">
@@ -62,12 +68,14 @@
         <button class="btn-main" style="background:var(--safe); color:white" onclick="setor()">TERIMA SETORAN</button>
     </div>
 
-    <input type="text" id="searchBar" placeholder="🔍 Cari..." oninput="renderList()" style="width:100%; border-radius:12px; background:var(--glass); border:1px solid var(--gold); color:white; padding:12px; margin-bottom:15px; outline:none;">
-    <div id="adminList" class="glass-card">Memuat...</div>
+    <input type="text" id="searchBar" placeholder="🔍 Cari nama/resi..." oninput="renderList()" style="width:100%; border-radius:12px; background:var(--glass); border:1px solid var(--gold); color:white; padding:12px; margin-bottom:15px; outline:none;">
+    
+    <div id="adminList" class="glass-card">Memuat data...</div>
 
+    <div id="modalFoto" class="modal-foto" onclick="this.style.display='none'"><img id="imgBukti" src=""><p style="color:var(--gold); margin-top:15px; font-weight:800;">KLIK UNTUK TUTUP</p></div>
     <div id="waPrompt">
-        <p style="font-size:12px; margin-bottom:10px;">✅ Tersimpan!</p>
-        <button id="btnWAOpen" style="background:white; color:black; border:none; padding:10px; border-radius:8px; font-weight:800; width:100%;">KIRIM WA SEKARANG</button>
+        <p style="font-size:12px; margin-bottom:10px;">✅ Pesanan Tersimpan!</p>
+        <button id="btnWAOpen" style="background:white; color:black; border:none; padding:12px; border-radius:10px; font-weight:800; width:100%;">KIRIM WA KE PEMBELI</button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
@@ -82,28 +90,39 @@
         const initDate = () => { const n = new Date(); document.getElementById('datePicker').value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; };
         initDate();
 
+        // Listener Utama
         db.ref('pesanan').on('value', snap => {
-            const val = snap.val();
-            allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
-            syncSaldo();
+            allOrders = snap.val() ? Object.keys(snap.val()).map(k => ({id:k, ...snap.val()[k]})).reverse() : [];
+            updateAll();
+            autoCleanup(); // Jalankan hapus otomatis 90 hari
         });
         db.ref('setoran').on('value', snap => {
             totalSetoranGlobal = Object.values(snap.val() || {}).reduce((a, b) => a + b, 0);
-            syncSaldo();
+            updateAll();
         });
 
-        function syncSaldo() {
-            let s=0, g=0, p=0, totalCOD = 0;
+        // Fitur Auto Hapus 90 Hari
+        function autoCleanup() {
+            const limit = Date.now() - (90 * 24 * 60 * 60 * 1000);
+            allOrders.forEach(o => {
+                const p = o.tanggal.split('/');
+                const tgl = new Date(`${p[2]}-${p[1]}-${p[0]}`).getTime();
+                if (tgl < limit) db.ref('pesanan/' + o.id).remove();
+            });
+        }
+
+        function updateAll() {
+            let s=0, g=0, p=0, totalCODAll = 0;
             const tgl = formatTglDB(document.getElementById('datePicker').value);
             allOrders.forEach(o => {
                 if (o.tanggal === tgl) { if (o.status === 'Terkirim') s++; else if (o.status === 'Gagal') g++; }
                 if (o.status !== 'Terkirim' && o.status !== 'Gagal') p++;
-                if (o.status === 'Terkirim' && o.metode === 'COD') totalCOD += Number(o.total || 0);
+                if (o.status === 'Terkirim' && o.metode === 'COD') totalCODAll += Number(o.total || 0);
             });
             document.getElementById('countSukses').innerText = s;
             document.getElementById('countGagal').innerText = g;
             document.getElementById('countProses').innerText = p;
-            document.getElementById('dailyTunai').innerText = "Rp" + (totalCOD - totalSetoranGlobal).toLocaleString();
+            document.getElementById('dailyTunai').innerText = "Rp" + (totalCODAll - totalSetoranGlobal).toLocaleString();
             renderList();
         }
 
@@ -117,15 +136,19 @@
                 return mS && mSt;
             });
             filtered.forEach(o => {
-                const wa = String(o.nohp).replace(/\D/g, '').replace(/^0/, '62');
-                const kendala = (o.alasanTunda || o.kendala) ? `<div style="color:var(--warning); font-size:10px; margin-top:5px;">⚠️ ${o.alasanTunda || o.kendala}</div>` : "";
+                const waNum = String(o.nohp).replace(/\D/g, '').replace(/^0/, '62');
+                const infoKendala = (o.alasanTunda || o.kendala) ? `<div style="background:rgba(250,204,21,0.1); border-left:3px solid var(--warning); padding:8px; margin-top:8px; border-radius:5px;"><small style="color:var(--warning); font-weight:800;">⚠️ KENDALA:</small><p style="font-size:11px;">${o.alasanTunda || o.kendala}</p></div>` : "";
                 html += `<div class="order-item">
                     <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
                     <small>${o.status} | Rp${Number(o.total).toLocaleString()}</small>
-                    ${kendala}
-                    <div style="display:flex; gap:5px; margin-top:8px;">
-                        <button onclick="reprint('${o.id}')" style="background:var(--gold); border:none; padding:5px; border-radius:5px; flex:1; font-weight:800;">PRINT</button>
-                        <button onclick="hapus('${o.id}')" style="background:var(--danger); color:white; border:none; padding:5px; border-radius:5px; flex:1; font-weight:800;">HAPUS</button>
+                    ${infoKendala}
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
+                        <a href="https://wa.me/${waNum}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
+                        <button onclick="reprint('${o.id}')" style="background:var(--gold); border:none; padding:8px; border-radius:8px; font-weight:800; font-size:10px;">PRINT</button>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:5px;">
+                        ${o.buktiFoto ? `<button onclick="viewFoto('${o.buktiFoto}')" style="background:var(--safe); border:none; padding:8px; border-radius:8px; color:white; font-size:10px; font-weight:800;">LIHAT FOTO</button>` : `<div style="background:var(--glass); border-radius:8px; text-align:center; font-size:10px; padding:8px;">NO FOTO</div>`}
+                        <button onclick="hapus('${o.id}')" style="background:var(--danger); border:none; padding:8px; border-radius:8px; color:white; font-size:10px; font-weight:800;">HAPUS</button>
                     </div>
                 </div>`;
             });
@@ -134,28 +157,35 @@
 
         function tambah() {
             const n = new Date();
-            const d = { noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), namaPembeli: document.getElementById('pembeli').value, nohp: document.getElementById('nohp').value, alamat: document.getElementById('alamat').value, mapLink: document.getElementById('mapLink').value, total: document.getElementById('total').value || 0, metode: document.getElementById('metodeBayar').value, status: 'Menunggu', tanggal: formatTglDB(n), waktu: n.toLocaleTimeString('id-ID') };
-            db.ref('pesanan').push(d).then(() => { lastOrder = d; executePrint(); showWA(d); document.querySelectorAll('input, textarea').forEach(i => i.value=""); });
+            const d = { noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), namaPembeli: document.getElementById('pembeli').value, nohp: document.getElementById('nohp').value, alamat: document.getElementById('alamat').value, mapLink: document.getElementById('mapLink').value, total: document.getElementById('total').value || 0, metode: document.getElementById('metodeBayar').value, status: 'Menunggu', tanggal: formatTglDB(n), waktu: n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) };
+            if(!d.namaPembeli) return alert("Nama Wajib!");
+            db.ref('pesanan').push(d).then(() => { lastOrder = d; executePrint(); showWAPrompt(d); document.querySelectorAll('.glass-card input, .glass-card textarea').forEach(i => i.value=""); });
         }
 
         function executePrint() {
             const cleanNo = lastOrder.noPesanan.replace(/[^a-zA-Z0-9]/g, "");
-            const text = `[C]<b>EJ TOBACCO DELIVERY</b>\n[C]==========================\n[C]RESI: ${lastOrder.noPesanan}\n[L]PEMBELI: ${lastOrder.namaPembeli}\n[L]TOTAL: Rp${Number(lastOrder.total).toLocaleString()}\n[L]METODE: ${lastOrder.metode}\n[C][b]code128,3,80,${cleanNo},yes\n\n\n`;
+            const text = `[C]<b>EJ TOBACCO DELIVERY</b>\n[C]================================================\n[C]RESI: ${lastOrder.noPesanan}\n[L]PENERIMA: ${lastOrder.namaPembeli}\n[L]TOTAL: Rp${Number(lastOrder.total).toLocaleString()}\n[C]================================================\n[C][b]code128,3,80,${cleanNo},yes\n\n\n\n\n`;
             window.location.href = "rawbt:" + encodeURI(text);
         }
 
-        function showWA(d) {
+        function showWAPrompt(d) {
             const wa = String(d.nohp).replace(/\D/g, '').replace(/^0/, '62');
-            const url = `https://wa.me/${wa}?text=${encodeURIComponent("*EJ TOBACCO*\nResi: "+d.noPesanan+"\nTotal: Rp"+Number(d.total).toLocaleString())}`;
+            const msg = encodeURIComponent(`*EJ TOBACCO DELIVERY*\nHalo Kak ${d.namaPembeli}, pesanan Anda sedang diproses.\nResi: ${d.noPesanan}\nTotal: Rp${Number(d.total).toLocaleString()}`);
             document.getElementById('waPrompt').style.display='block';
-            document.getElementById('btnWAOpen').onclick = () => { window.open(url); document.getElementById('waPrompt').style.display='none'; };
+            document.getElementById('btnWAOpen').onclick = () => { window.open(`https://wa.me/${wa}?text=${msg}`); document.getElementById('waPrompt').style.display='none'; };
         }
 
-        function setor() { const j = Number(document.getElementById('jumlahSetoran').value); db.ref('setoran').push(j).then(() => { alert("Diterima!"); document.getElementById('jumlahSetoran').value=""; }); }
+        function viewFoto(src) { document.getElementById('imgBukti').src = src; document.getElementById('modalFoto').style.display = 'flex'; }
+        function setor() { const j = Number(document.getElementById('jumlahSetoran').value); if(j>0) db.ref('setoran').push(j).then(() => { alert("Setoran Diterima!"); document.getElementById('jumlahSetoran').value=""; }); }
         function hapus(id) { if(confirm("Hapus?")) db.ref('pesanan/'+id).remove(); }
-        function setFilter(f) { currentFilter = f; document.querySelectorAll('.report-box').forEach(el => el.classList.remove('active')); document.getElementById('f-'+f).classList.add('active'); syncSaldo(); }
-        function updateAll() { syncSaldo(); }
-        setInterval(() => { document.getElementById('runningClock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
+        function reprint(id) { lastOrder = allOrders.find(o => o.id === id); if(lastOrder) executePrint(); }
+        function setFilter(f) { currentFilter = f; document.querySelectorAll('.report-box').forEach(el => el.classList.remove('active')); document.getElementById('f-'+f).classList.add('active'); updateAll(); }
+        function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
+        setInterval(() => { 
+            const n = new Date();
+            document.getElementById('runningClock').innerText = n.toLocaleTimeString('id-ID'); 
+            document.getElementById('currentDay').innerText = n.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'}).toUpperCase();
+        }, 1000);
     </script>
 </body>
 </html>
