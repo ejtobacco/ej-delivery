@@ -67,10 +67,10 @@
     <div class="glass-card">
         <input type="text" id="noPesanan" placeholder="No Pesanan (#001)">
         <input type="text" id="pembeli" placeholder="Nama Pembeli">
-        <input type="text" id="nohp" placeholder="WhatsApp">
+        <input type="text" id="nohp" placeholder="WhatsApp (Mulai dari 0/62)">
         <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
-        <input type="text" id="mapLink" placeholder="Link Map Manual (Opsional)">
-        <select id="metodeBayar" onchange="toggleTotal()"><option value="COD">COD</option><option value="Transfer">Transfer</option></select>
+        <input type="text" id="mapLink" placeholder="Link Map (Opsional)">
+        <select id="metodeBayar" onchange="toggleTotal()"><option value="COD">Metode: COD</option><option value="Transfer">Metode: Transfer</option></select>
         <input type="number" id="total" placeholder="Harga COD (Rp)">
         <button class="btn-main" onclick="tambah()">SIMPAN & CETAK</button>
     </div>
@@ -100,7 +100,6 @@
         let allOrders = [], totalSetoranGlobal = 0, currentFilter = "Semua", lastOrder = null;
         let lastDateString = "";
 
-        // FUNGSI KUNCI: STANDAR DD/MM/YYYY
         function formatTglDB(date) {
             const d = new Date(date);
             const tgl = String(d.getDate()).padStart(2, '0');
@@ -110,12 +109,12 @@
         }
 
         function initDate() {
-            const n = new Date();
-            const y = n.getFullYear();
-            const m = String(n.getMonth() + 1).padStart(2, '0');
-            const d = String(n.getDate()).padStart(2, '0');
-            document.getElementById('datePicker').value = `${y}-${m}-${d}`;
-            lastDateString = formatTglDB(n);
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            document.getElementById('datePicker').value = `${year}-${month}-${day}`;
+            lastDateString = formatTglDB(now);
         }
         initDate();
 
@@ -136,23 +135,16 @@
                 const menit = now.getMinutes().toString().padStart(2, '0');
                 const detik = now.getSeconds().toString().padStart(2, '0');
                 document.getElementById('runningClock').innerText = `${jam}:${menit}:${detik}`;
-                
                 const opsi = { day: 'numeric', month: 'short', year: 'numeric' };
                 document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', opsi).toUpperCase();
-                
                 const checkToday = formatTglDB(now);
-                if (checkToday !== lastDateString) {
-                    lastDateString = checkToday;
-                    initDate(); 
-                    updateAll();
-                }
+                if (checkToday !== lastDateString) { lastDateString = checkToday; initDate(); updateAll(); }
             }, 1000);
         }
 
         db.ref('pesanan').on('value', snap => {
             const val = snap.val();
             allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
-            
             const hariIni = new Date();
             allOrders.forEach(o => {
                 if (o.tanggal) {
@@ -162,7 +154,6 @@
                     if (selisihHari > 90) db.ref('pesanan/' + o.id).remove();
                 }
             });
-
             db.ref('setoran').on('value', sSnap => {
                 totalSetoranGlobal = Object.values(sSnap.val() || {}).reduce((a, b) => a + b, 0);
                 updateAll();
@@ -203,11 +194,10 @@
             });
 
             if(filtered.length === 0) {
-                html = `<p style="text-align:center; opacity:0.5; padding:20px;">Belum ada data ${currentFilter} untuk tanggal ${tglTarget}</p>`;
+                html = `<p style="text-align:center; opacity:0.5; padding:20px;">Kosong.</p>`;
             } else {
                 filtered.forEach(o => {
                     const wa = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-                    const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/${encodeURIComponent(o.alamat || "")}`;
                     html += `<div class="order-item">
                         <span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br>
                         <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
@@ -215,7 +205,7 @@
                         ${o.catatan ? `<div style="background:rgba(212, 175, 55, 0.1); padding:6px; border-radius:8px; margin-top:8px; border-left:3px solid var(--gold);"><p style="font-size:10px; color:var(--gold); font-weight:800;">📝 ${o.catatan}</p></div>` : ''}
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
                             <a href="https://wa.me/${wa}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
-                            <a href="${mapsUrl}" target="_blank" style="background:var(--blue); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">MAPS</a>
+                            ${o.mapLink ? `<a href="${o.mapLink}" target="_blank" style="background:var(--blue); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">MAPS</a>` : `<div style="background:var(--glass); color:gray; padding:8px; border-radius:8px; text-align:center; font-size:10px;">NO MAPS</div>`}
                         </div>
                         ${o.buktiFoto ? `<button class="btn-small" style="background:var(--safe); width:100%; margin-top:5px;" onclick="viewFoto('${o.buktiFoto}')">🖼️ LIHAT BUKTI FOTO</button>` : ''}
                         <button style="background:var(--danger); width:100%; color:white; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="hapus('${o.id}')">HAPUS DATA</button>
@@ -236,10 +226,7 @@
             db.ref('pesanan').push(d).then(() => { lastOrder = d; executePrint(); document.querySelectorAll('input, textarea').forEach(i => i.value = ""); });
         }
 
-        function reprint(id) {
-            lastOrder = allOrders.find(o => o.id === id);
-            if(lastOrder) executePrint();
-        }
+        function reprint(id) { lastOrder = allOrders.find(o => o.id === id); if(lastOrder) executePrint(); }
 
         function executePrint() {
             if(!lastOrder) return;
@@ -255,7 +242,6 @@
         }
 
         function hapus(id) { if(confirm("Hapus?")) db.ref('pesanan/' + id).remove(); }
-        
         startClock();
     </script>
 </body>
