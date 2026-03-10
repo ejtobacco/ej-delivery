@@ -79,7 +79,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
-        // Setup Tanggal Hari Ini secara Default
         let targetDate = new Date();
         document.getElementById('datePicker').valueAsDate = targetDate;
 
@@ -111,7 +110,7 @@
         function updateAll() {
             const dateStr = getFormattedDate(targetDate);
             const dayKey = dateStr.replace(/\/| /g, '-');
-            db.ref('setoran/' + dayKey).once('value', s => {
+            db.ref('setoran/' + dayKey).on('value', s => {
                 setoran = s.val() || 0;
                 updateDashboard(dateStr);
                 renderList(dateStr);
@@ -143,15 +142,17 @@
             });
             filtered.forEach(o => {
                 const wa = String(o.nohp).replace(/\D/g, '').replace(/^0/, '62');
+                // PERBAIKAN LINK MAPS
+                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat)}`;
                 html += `<div class="order-item"><span>${o.waktu}</span><br><b>${o.noPesanan} - ${o.namaPembeli}</b><br><small>${o.status} | Rp${Number(o.total).toLocaleString()}</small>
-                <div class="btn-row"><a href="https://wa.me/${wa}" class="btn-small" style="background:var(--wa)">WA</a><a href="http://googleusercontent.com/maps.google.com/maps?q=${encodeURIComponent(o.alamat)}" class="btn-small" style="background:var(--blue)">MAPS</a></div>
+                <div class="btn-row"><a href="https://wa.me/${wa}" class="btn-small" style="background:var(--wa)">WA</a><a href="${mapsUrl}" target="_blank" class="btn-small" style="background:var(--blue)">MAPS</a></div>
                 <button class="btn-small" style="background:var(--danger); width:100%; margin-top:8px;" onclick="hapus('${o.id}')">HAPUS</button></div>`;
             });
-            document.getElementById('adminList').innerHTML = html || `<p style="text-align:center; opacity:0.5; padding:20px;">Tidak ada data di tanggal ini.</p>`;
+            document.getElementById('adminList').innerHTML = html || `<p style="text-align:center; opacity:0.5; padding:20px;">Tidak ada data.</p>`;
         }
 
         function tambah() {
-            const dateStr = getFormattedDate(new Date()); // Selalu simpan dengan tanggal asli hari ini
+            const dateStr = getFormattedDate(new Date());
             const d = { noPesanan: document.getElementById('noPesanan').value, namaPembeli: document.getElementById('pembeli').value, nohp: document.getElementById('nohp').value, alamat: document.getElementById('alamat').value, total: document.getElementById('total').value || 0, metode: document.getElementById('metodeBayar').value, status: 'Menunggu', tanggal: dateStr, waktu: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) };
             db.ref('pesanan').push(d).then(() => { lastOrder = d; alert('Simpan!'); cetak(); document.querySelectorAll('input, textarea').forEach(i => i.value = ""); });
         }
@@ -159,7 +160,7 @@
             const dateStr = getFormattedDate(targetDate);
             const dayKey = dateStr.replace(/\/| /g, '-');
             const j = Number(document.getElementById('jumlahSetoran').value); 
-            db.ref('setoran/' + dayKey).transaction(cv => (cv || 0) + j).then(() => { alert("Setoran Diterima!"); document.getElementById('jumlahSetoran').value = ""; updateAll(); }); 
+            db.ref('setoran/' + dayKey).transaction(cv => (cv || 0) + j).then(() => { alert("Setoran Berhasil!"); document.getElementById('jumlahSetoran').value = ""; }); 
         }
         function cetak() { document.getElementById('receipt-content').innerHTML = `NO: ${lastOrder.noPesanan}<br>NAMA: ${lastOrder.namaPembeli}<br>TOTAL: Rp${Number(lastOrder.total).toLocaleString()}`; window.print(); }
         function hapus(id) { if(confirm("Hapus?")) db.ref('pesanan/' + id).remove(); }
