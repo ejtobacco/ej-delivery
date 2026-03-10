@@ -22,6 +22,7 @@
         .report-box b { display: block; font-size: 14px; margin-top: 4px; }
         .glass-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
         input, textarea, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; color: white; margin-bottom: 10px; outline: none; }
+        input:focus, textarea:focus { border-color: var(--gold); }
         .btn-main { background: linear-gradient(135deg, #F7E08C, #D4AF37); color: #000; border: none; padding: 14px; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; }
         .order-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; }
         .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
@@ -38,7 +39,7 @@
         <div style="font-size: 9px; font-weight: 800; background: var(--glass); padding: 5px 10px; border-radius: 8px;">RIWAYAT & INPUT</div>
     </div>
 
-    <span class="report-title">LIHAT TANGGAL LAIN (RIWAYAT)</span>
+    <span class="report-title">LIHAT TANGGAL LAIN</span>
     <input type="date" id="datePicker" onchange="changeDate()">
 
     <div class="report-grid">
@@ -53,10 +54,11 @@
     </div>
 
     <div class="glass-card">
-        <input type="text" id="noPesanan" placeholder="No Pesanan">
+        <input type="text" id="noPesanan" placeholder="No Pesanan (#001)">
         <input type="text" id="pembeli" placeholder="Nama Pembeli">
-        <input type="text" id="nohp" placeholder="WhatsApp">
+        <input type="text" id="nohp" placeholder="WhatsApp (08...)">
         <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
+        <input type="text" id="mapLink" placeholder="Tempel Link Google Maps Disini (Opsional)">
         <select id="metodeBayar" onchange="toggleTotal()"><option value="COD">COD</option><option value="Transfer">Transfer</option></select>
         <input type="number" id="total" placeholder="Harga COD (Rp)">
         <button class="btn-main" onclick="tambah()">SIMPAN & CETAK</button>
@@ -81,25 +83,16 @@
         
         let targetDate = new Date();
         document.getElementById('datePicker').valueAsDate = targetDate;
-
         let allOrders = [], setoran = 0, currentFilter = "Semua", lastOrder = null;
 
-        function changeDate() {
-            targetDate = new Date(document.getElementById('datePicker').value);
-            updateAll();
-        }
-
-        function getFormattedDate(date) {
-            return date.toLocaleDateString('id-ID');
-        }
-
+        function changeDate() { targetDate = new Date(document.getElementById('datePicker').value); updateAll(); }
+        function getFormattedDate(date) { return date.toLocaleDateString('id-ID'); }
         function setFilter(f) {
             currentFilter = f;
             document.querySelectorAll('.report-box').forEach(el => el.classList.remove('active'));
             document.getElementById('f-' + f).classList.add('active');
             renderList();
         }
-
         function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
 
         db.ref('pesanan').on('value', snap => {
@@ -142,28 +135,46 @@
             });
             filtered.forEach(o => {
                 const wa = String(o.nohp).replace(/\D/g, '').replace(/^0/, '62');
-                // PERBAIKAN LINK MAPS
-                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat)}`;
+                // LOGIKA MAPS: Gunakan link inputan jika ada, jika tidak gunakan alamat teks
+                const mapsUrl = o.mapLink && o.mapLink.includes('http') ? o.mapLink : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat)}`;
+                
                 html += `<div class="order-item"><span>${o.waktu}</span><br><b>${o.noPesanan} - ${o.namaPembeli}</b><br><small>${o.status} | Rp${Number(o.total).toLocaleString()}</small>
                 <div class="btn-row"><a href="https://wa.me/${wa}" class="btn-small" style="background:var(--wa)">WA</a><a href="${mapsUrl}" target="_blank" class="btn-small" style="background:var(--blue)">MAPS</a></div>
                 <button class="btn-small" style="background:var(--danger); width:100%; margin-top:8px;" onclick="hapus('${o.id}')">HAPUS</button></div>`;
             });
-            document.getElementById('adminList').innerHTML = html || `<p style="text-align:center; opacity:0.5; padding:20px;">Tidak ada data.</p>`;
+            document.getElementById('adminList').innerHTML = html || `<p style="text-align:center; opacity:0.5; padding:20px;">Kosong.</p>`;
         }
 
         function tambah() {
             const dateStr = getFormattedDate(new Date());
-            const d = { noPesanan: document.getElementById('noPesanan').value, namaPembeli: document.getElementById('pembeli').value, nohp: document.getElementById('nohp').value, alamat: document.getElementById('alamat').value, total: document.getElementById('total').value || 0, metode: document.getElementById('metodeBayar').value, status: 'Menunggu', tanggal: dateStr, waktu: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) };
-            db.ref('pesanan').push(d).then(() => { lastOrder = d; alert('Simpan!'); cetak(); document.querySelectorAll('input, textarea').forEach(i => i.value = ""); });
+            const d = { 
+                noPesanan: document.getElementById('noPesanan').value, 
+                namaPembeli: document.getElementById('pembeli').value, 
+                nohp: document.getElementById('nohp').value, 
+                alamat: document.getElementById('alamat').value, 
+                mapLink: document.getElementById('mapLink').value, // DATA LINK MAP DISIMPAN DISINI
+                total: document.getElementById('total').value || 0, 
+                metode: document.getElementById('metodeBayar').value, 
+                status: 'Menunggu', 
+                tanggal: dateStr, 
+                waktu: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) 
+            };
+            if(!d.namaPembeli) return alert("Nama wajib!");
+            db.ref('pesanan').push(d).then(() => { 
+                lastOrder = d; 
+                alert('Berhasil Disimpan!'); 
+                cetak(); 
+                document.querySelectorAll('input, textarea').forEach(i => i.value = ""); 
+            });
         }
         function setor() { 
             const dateStr = getFormattedDate(targetDate);
             const dayKey = dateStr.replace(/\/| /g, '-');
             const j = Number(document.getElementById('jumlahSetoran').value); 
-            db.ref('setoran/' + dayKey).transaction(cv => (cv || 0) + j).then(() => { alert("Setoran Berhasil!"); document.getElementById('jumlahSetoran').value = ""; }); 
+            db.ref('setoran/' + dayKey).transaction(cv => (cv || 0) + j).then(() => { alert("Setoran Diterima!"); document.getElementById('jumlahSetoran').value = ""; }); 
         }
         function cetak() { document.getElementById('receipt-content').innerHTML = `NO: ${lastOrder.noPesanan}<br>NAMA: ${lastOrder.namaPembeli}<br>TOTAL: Rp${Number(lastOrder.total).toLocaleString()}`; window.print(); }
-        function hapus(id) { if(confirm("Hapus?")) db.ref('pesanan/' + id).remove(); }
+        function hapus(id) { if(confirm("Hapus Permanen?")) db.ref('pesanan/' + id).remove(); }
     </script>
 </body>
 </html>
