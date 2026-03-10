@@ -8,14 +8,14 @@
   "theme_color": "#D4AF37",
   "icons": [
     {
-      "src": "logo-ej.svg",
+      "src": "logo-baru.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
     },
     {
-      "src": "logo-ej.svg",
+      "src": "logo-baru.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
     }
   ]
 }
