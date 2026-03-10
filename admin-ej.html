@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EJ ADMIN</title>
+    <title>EJ ADMIN PRO</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#D4AF37">
     <link rel="icon" href="https://api.iconify.design/material-symbols:admin-panel-settings-rounded.svg?color=%23D4AF37">
@@ -14,18 +14,24 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: var(--text-main); padding: 15px; padding-bottom: 50px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        
+        .report-title { font-size: 10px; font-weight: 800; color: #fff; margin-bottom: 8px; display: block; border-left: 3px solid var(--gold); padding-left: 8px; }
         .report-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
         .report-box { background: var(--glass); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
-        .report-box:active { transform: scale(0.95); background: rgba(212, 175, 55, 0.1); }
+        .report-box.active { background: rgba(212, 175, 55, 0.15); border-color: var(--gold); }
         .report-box span { font-size: 7px; font-weight: 800; color: var(--gold); text-transform: uppercase; }
         .report-box b { display: block; font-size: 14px; margin-top: 4px; }
+
         .glass-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
         input, textarea, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; color: white; margin-bottom: 10px; outline: none; }
         .btn-main { background: linear-gradient(135deg, #F7E08C, #D4AF37); color: #000; border: none; padding: 14px; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; }
+        
         .order-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; }
         .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
         .btn-small { padding: 10px; border-radius: 8px; font-weight: 800; font-size: 10px; text-align: center; text-decoration: none; color: white; border: none; cursor: pointer; }
-        .active-filter { border-color: var(--gold); background: rgba(212, 175, 55, 0.1); }
+        
+        #receipt-print { display: none; }
+        @media print { body * { visibility: hidden; } #receipt-print, #receipt-print * { visibility: visible; } #receipt-print { position: absolute; left: 0; top: 0; width: 100%; color: black; font-family: monospace; } }
     </style>
 </head>
 <body>
@@ -35,20 +41,42 @@
         <div id="dateLabel" style="font-size: 9px; font-weight: 800; background: var(--glass); padding: 5px 10px; border-radius: 8px;">-- --- ----</div>
     </div>
 
+    <span class="report-title">HARI INI (KLIK UNTUK FILTER)</span>
     <div class="report-grid">
-        <div class="report-box" id="f-semua" onclick="setFilter('Semua')"><span>Total</span><b id="countTotal">0</b></div>
-        <div class="report-box" id="f-sukses" onclick="setFilter('Terkirim')" style="border-color: var(--safe);"><span>Sukses</span><b id="countSukses">0</b></div>
-        <div class="report-box" id="f-gagal" onclick="setFilter('Gagal')" style="border-color: var(--danger);"><span>Gagal</span><b id="countGagal">0</b></div>
+        <div class="report-box active" id="f-Semua" onclick="setFilter('Semua')"><span>Sisa</span><b id="countProses">0</b></div>
+        <div class="report-box" id="f-Terkirim" onclick="setFilter('Terkirim')" style="border-color: var(--safe);"><span>Sukses</span><b id="countSukses">0</b></div>
+        <div class="report-box" id="f-Gagal" onclick="setFilter('Gagal')" style="border-color: var(--danger);"><span>Gagal</span><b id="countGagal">0</b></div>
+    </div>
+
+    <div class="report-box" style="margin-bottom: 20px; border-color: var(--safe); background: rgba(34, 197, 94, 0.05); cursor: default;">
+        <span style="color: var(--safe);">OMSET COD HARI INI</span>
+        <b id="dailyCod" style="font-size: 20px; color: var(--safe);">Rp0</b>
+    </div>
+
+    <span class="report-title">BULAN INI</span>
+    <div class="report-box" style="margin-bottom: 20px; cursor: default;">
+        <div style="display:flex; justify-content: space-around;">
+            <div><span>Total Paket</span><b id="monthlyPaket">0</b></div>
+            <div><span>Total Omset</span><b id="monthlyCod">Rp0</b></div>
+        </div>
     </div>
 
     <div class="glass-card">
-        <input type="text" id="noPesanan" placeholder="No Pesanan">
+        <input type="text" id="noPesanan" placeholder="No Pesanan (#001)">
         <input type="text" id="pembeli" placeholder="Nama Pembeli">
-        <input type="text" id="searchBar" placeholder="🔍 Cari nama/no pesanan..." oninput="renderList()" style="border-color: var(--gold);">
+        <input type="text" id="nohp" placeholder="WhatsApp (08...)">
+        <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
+        <select id="metodeBayar" onchange="toggleTotal()"><option value="COD">COD</option><option value="Transfer">Transfer</option></select>
+        <input type="number" id="total" placeholder="Harga COD (Rp)">
         <button class="btn-main" onclick="tambah()">SIMPAN & CETAK</button>
     </div>
 
+    <span class="report-title">CARI DATA</span>
+    <input type="text" id="searchBar" placeholder="🔍 Cari nama atau no pesanan..." oninput="renderList()" style="width:100%; padding:12px; border-radius:12px; background:var(--glass); border:1px solid var(--gold); color:white; margin-bottom:15px; outline:none;">
+
     <div id="adminList" class="glass-card">Memuat...</div>
+
+    <div id="receipt-print"><div style="padding: 20px;"><h3>EJ TOBACCO</h3><hr><div id="receipt-content"></div><hr></div></div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
@@ -56,31 +84,49 @@
         const firebaseConfig = { apiKey: "AIzaSyAVQGysGRlYJ2b4PekM3vaXKtx6UFvNlCk", databaseURL: "https://ej-tobacco-express-default-rtdb.asia-southeast1.firebasedatabase.app" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const todayStr = new Date().toLocaleDateString('id-ID');
+        const now = new Date();
+        const todayStr = now.toLocaleDateString('id-ID');
         let allOrders = [];
         let currentFilter = "Semua";
+        let lastOrder = null;
 
-        function setFilter(f) { currentFilter = f; renderList(); }
+        document.getElementById('dateLabel').innerText = todayStr.toUpperCase();
+
+        function setFilter(f) {
+            currentFilter = f;
+            document.querySelectorAll('.report-box').forEach(el => el.classList.remove('active'));
+            document.getElementById('f-' + f).classList.add('active');
+            renderList();
+        }
+
+        function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
 
         db.ref('pesanan').on('value', snap => {
             const data = snap.val() || {};
             allOrders = Object.keys(data).map(k => ({id:k, ...data[k]})).reverse();
-            updateStats();
+            updateDashboard();
             renderList();
         });
 
-        function updateStats() {
-            let s = 0, g = 0, t = 0;
+        function updateDashboard() {
+            let dSukses = 0, dGagal = 0, dProses = 0, dCod = 0, mPaket = 0, mCod = 0;
+            const currentMonth = now.getMonth() + 1;
+
             allOrders.forEach(o => {
-                if(o.tanggal === todayStr) {
-                    t++;
-                    if(o.status === 'Terkirim') s++;
-                    if(o.status === 'Gagal') g++;
-                }
+                const dateParts = o.tanggal.split("/");
+                if (o.status === 'Terkirim') {
+                    if (o.tanggal === todayStr) { dSukses++; if(o.metode==='COD') dCod += Number(o.total); }
+                    if (parseInt(dateParts[1]) === currentMonth && o.tanggal.includes("/" + now.getFullYear())) { mPaket++; if(o.metode==='COD') mCod += Number(o.total); }
+                } else if (o.status === 'Gagal' && o.tanggal === todayStr) { dGagal++; }
+                else if (o.tanggal === todayStr) { dProses++; }
             });
-            document.getElementById('countTotal').innerText = t;
-            document.getElementById('countSukses').innerText = s;
-            document.getElementById('countGagal').innerText = g;
+
+            document.getElementById('countSukses').innerText = dSukses;
+            document.getElementById('countGagal').innerText = dGagal;
+            document.getElementById('countProses').innerText = dProses;
+            document.getElementById('dailyCod').innerText = "Rp" + dCod.toLocaleString();
+            document.getElementById('monthlyPaket').innerText = mPaket;
+            document.getElementById('monthlyCod').innerText = "Rp" + mCod.toLocaleString();
         }
 
         function renderList() {
@@ -89,21 +135,34 @@
             
             const filtered = allOrders.filter(o => {
                 const matchSearch = o.namaPembeli.toLowerCase().includes(keyword) || o.noPesanan.toLowerCase().includes(keyword);
-                const matchStatus = currentFilter === "Semua" ? o.tanggal === todayStr : o.status === currentFilter && o.tanggal === todayStr;
+                let matchStatus = false;
+                if(currentFilter === "Semua") matchStatus = (o.tanggal === todayStr && o.status !== 'Terkirim' && o.status !== 'Gagal');
+                else matchStatus = (o.status === currentFilter && o.tanggal === todayStr);
                 return matchSearch && matchStatus;
             });
 
             filtered.forEach(o => {
+                const wa = String(o.nohp).replace(/\D/g, '').replace(/^0/, '62');
                 html += `<div class="order-item">
-                    <span style="font-size:9px; color:var(--gold)">${o.waktu} | ${o.status}</span><br>
-                    <b>${o.noPesanan} - ${o.namaPembeli}</b>
-                    <button class="btn-small" style="background:var(--danger); width:100%; margin-top:5px;" onclick="hapus('${o.id}')">HAPUS</button>
+                    <span style="font-size:9px; color:var(--gold); font-weight:800;">${o.tanggal} | ${o.waktu}</span><br>
+                    <b style="font-size:15px;">${o.noPesanan} - ${o.namaPembeli}</b><br>
+                    <small>${o.status} | ${o.metode} | Rp${Number(o.total).toLocaleString()}</small>
+                    <div class="btn-row">
+                        <a href="https://wa.me/${wa}" class="btn-small" style="background:var(--wa)">WA</a>
+                        <a href="http://googleusercontent.com/maps.google.com/maps?q=${encodeURIComponent(o.alamat)}" class="btn-small" style="background:var(--blue)">MAPS</a>
+                    </div>
+                    <button class="btn-small" style="background:var(--danger); width:100%; margin-top:8px;" onclick="hapus('${o.id}')">HAPUS DATA</button>
                 </div>`;
             });
-            document.getElementById('adminList').innerHTML = html || `<p style="text-align:center; opacity:0.5;">Tidak ada paket ${currentFilter}</p>`;
+            document.getElementById('adminList').innerHTML = html || `<p style="text-align:center; opacity:0.5; padding:20px;">Tidak ada data ${currentFilter}</p>`;
         }
-        
-        function tambah() { /* Logika tambah sama seperti sebelumnya */ }
+
+        function tambah() {
+            const d = { noPesanan: document.getElementById('noPesanan').value, namaPembeli: document.getElementById('pembeli').value, nohp: document.getElementById('nohp').value, alamat: document.getElementById('alamat').value, total: document.getElementById('total').value || 0, metode: document.getElementById('metodeBayar').value, status: 'Menunggu', tanggal: todayStr, waktu: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) };
+            if(!d.namaPembeli) return alert("Isi Nama!");
+            db.ref('pesanan').push(d).then(() => { lastOrder = d; alert('Simpan!'); cetak(); document.querySelectorAll('input, textarea').forEach(i => i.value = ""); });
+        }
+        function cetak() { document.getElementById('receipt-content').innerHTML = `NO: ${lastOrder.noPesanan}<br>NAMA: ${lastOrder.namaPembeli}<br>JAM: ${lastOrder.waktu}<br>TOTAL: Rp${Number(lastOrder.total).toLocaleString()}`; window.print(); }
         function hapus(id) { if(confirm("Hapus?")) db.ref('pesanan/' + id).remove(); }
     </script>
 </body>
