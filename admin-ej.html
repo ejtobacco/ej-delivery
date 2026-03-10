@@ -26,8 +26,6 @@
         .btn-small { padding: 10px; border-radius: 8px; font-weight: 800; font-size: 10px; text-align: center; text-decoration: none; color: white; border: none; cursor: pointer; }
         .modal-foto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
         .modal-foto img { max-width: 90%; max-height: 70%; border: 2px solid var(--gold); border-radius: 15px; }
-        
-        /* CETAK RESI */
         #receipt-print { display: none; }
         @media print {
             body * { visibility: hidden; background: none !important; color: #000 !important; }
@@ -87,7 +85,7 @@
 
     <div id="modalFoto" class="modal-foto" onclick="this.style.display='none'">
         <img id="imgBukti" src="">
-        <p style="color:var(--gold); margin-top:15px; font-weight:800; font-size:12px;">KLIK MANA SAJA UNTUK TUTUP</p>
+        <p style="color:var(--gold); margin-top:15px; font-weight:800; font-size:12px;">KLIK DIMANA SAJA UNTUK TUTUP</p>
     </div>
 
     <div id="receipt-print"><div id="receipt-content"></div></div>
@@ -102,11 +100,23 @@
         let allOrders = [], totalSetoranGlobal = 0, currentFilter = "Semua", lastOrder = null;
         let lastDateString = new Date().toLocaleDateString('id-ID');
 
-        document.getElementById('datePicker').valueAsDate = new Date();
+        // Set Awal ke Hari Ini (Local Time)
+        function initDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            document.getElementById('datePicker').value = `${year}-${month}-${day}`;
+        }
+        initDate();
 
         function getFormattedDate(date) { return date.toLocaleDateString('id-ID'); }
         function changeDate() { updateAll(); }
-        function goToToday() { document.getElementById('datePicker').valueAsDate = new Date(); updateAll(); }
+
+        function goToToday() { 
+            initDate(); 
+            updateAll(); 
+        }
         
         function setFilter(f) {
             currentFilter = f;
@@ -129,7 +139,7 @@
                 const checkToday = getFormattedDate(now);
                 if (checkToday !== lastDateString) {
                     lastDateString = checkToday;
-                    document.getElementById('datePicker').valueAsDate = now;
+                    initDate(); 
                     updateAll();
                 }
             }, 1000);
@@ -139,6 +149,7 @@
             const val = snap.val();
             allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
             
+            // Auto-clean 90 Hari
             const hariIni = new Date();
             allOrders.forEach(o => {
                 if (o.tanggal) {
@@ -157,7 +168,14 @@
 
         function updateAll() {
             const pickerVal = document.getElementById('datePicker').value;
-            const dateStr = pickerVal ? getFormattedDate(new Date(pickerVal)) : getFormattedDate(new Date());
+            let dateStr;
+            if (pickerVal) {
+                const parts = pickerVal.split('-');
+                const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                dateStr = getFormattedDate(d);
+            } else {
+                dateStr = getFormattedDate(new Date());
+            }
             updateDashboard(dateStr);
             renderList(dateStr);
         }
@@ -176,7 +194,7 @@
             document.getElementById('countGagal').innerText = g;
             document.getElementById('countProses').innerText = p;
             const saldoKurir = totalCodSuksesGlobal - totalSetoranGlobal;
-            document.getElementById('dailyTunai').innerText = "Rp" + saldoKurir.toLocaleString();
+            document.getElementById('dailyTunai').innerText = "Rp" + (saldoKurir).toLocaleString();
         }
 
         function renderList(dateStr) {
@@ -190,7 +208,7 @@
 
             filtered.forEach(o => {
                 const wa = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-                const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat || "")}`;
+                const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/${encodeURIComponent(o.alamat || "")}`;
                 html += `<div class="order-item">
                     <span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br>
                     <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
