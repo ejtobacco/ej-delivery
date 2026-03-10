@@ -98,18 +98,28 @@
         const db = firebase.database();
         
         let allOrders = [], totalSetoranGlobal = 0, currentFilter = "Semua", lastOrder = null;
-        let lastDateString = new Date().toLocaleDateString('id-ID');
+        let lastDateString = "";
 
+        // Fungsi Format Tanggal Standar Database (dd/mm/yyyy)
+        function formatDateToDB(date) {
+            const d = new Date(date);
+            const day = d.getDate().toString().padStart(2, '0');
+            const month = (d.getMonth() + 1).toString().padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        // Set Awal Kalender
         function initDate() {
             const now = new Date();
             const year = now.getFullYear();
             const month = (now.getMonth() + 1).toString().padStart(2, '0');
             const day = now.getDate().toString().padStart(2, '0');
             document.getElementById('datePicker').value = `${year}-${month}-${day}`;
+            lastDateString = formatDateToDB(now);
         }
         initDate();
 
-        function getFormattedDate(date) { return date.toLocaleDateString('id-ID'); }
         function changeDate() { updateAll(); }
         function goToToday() { initDate(); updateAll(); }
         
@@ -117,7 +127,7 @@
             currentFilter = f;
             document.querySelectorAll('.report-box').forEach(el => el.classList.remove('active'));
             document.getElementById('f-' + f).classList.add('active');
-            renderList();
+            updateAll();
         }
 
         function startClock() {
@@ -131,7 +141,7 @@
                 const opsi = { day: 'numeric', month: 'short', year: 'numeric' };
                 document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', opsi).toUpperCase();
                 
-                const checkToday = getFormattedDate(now);
+                const checkToday = formatDateToDB(now);
                 if (checkToday !== lastDateString) {
                     lastDateString = checkToday;
                     initDate(); 
@@ -163,22 +173,18 @@
 
         function updateAll() {
             const pickerVal = document.getElementById('datePicker').value;
-            let dateStr;
-            if (pickerVal) {
-                const parts = pickerVal.split('-');
-                const d = new Date(parts[0], parts[1] - 1, parts[2]);
-                dateStr = getFormattedDate(d);
-            } else {
-                dateStr = getFormattedDate(new Date());
-            }
-            updateDashboard(dateStr);
-            renderList(dateStr);
+            // Ubah format input kalender (yyyy-mm-dd) jadi (dd/mm/yyyy)
+            const parts = pickerVal.split('-');
+            const targetTanggal = `${parts[2]}/${parts[1]}/${parts[0]}`;
+            
+            updateDashboard(targetTanggal);
+            renderList(targetTanggal);
         }
 
-        function updateDashboard(dateStr) {
+        function updateDashboard(targetTanggal) {
             let s = 0, g = 0, p = 0, totalCodSuksesGlobal = 0;
             allOrders.forEach(o => {
-                if (o.tanggal === dateStr) {
+                if (o.tanggal === targetTanggal) {
                     if (o.status === 'Terkirim') s++;
                     else if (o.status === 'Gagal') g++;
                 }
@@ -192,36 +198,40 @@
             document.getElementById('dailyTunai').innerText = "Rp" + (saldoKurir).toLocaleString();
         }
 
-        function renderList(dateStr) {
+        function renderList(targetTanggal) {
             const keyword = document.getElementById('searchBar').value.toLowerCase();
             let html = "";
             const filtered = allOrders.filter(o => {
                 const matchSearch = (o.namaPembeli || "").toLowerCase().includes(keyword) || (o.noPesanan || "").toLowerCase().includes(keyword);
-                let matchStatus = (currentFilter === "Semua") ? (o.status !== 'Terkirim' && o.status !== 'Gagal') : (o.status === currentFilter && o.tanggal === dateStr);
+                let matchStatus = (currentFilter === "Semua") ? (o.status !== 'Terkirim' && o.status !== 'Gagal') : (o.status === currentFilter && o.tanggal === targetTanggal);
                 return matchSearch && matchStatus;
             });
 
-            filtered.forEach(o => {
-                const wa = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-                const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat || "")}`;
-                
-                html += `<div class="order-item">
-                    <span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br>
-                    <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
-                    <small>${o.status} | Rp${Number(o.total).toLocaleString()}</small>
+            if(filtered.length === 0) {
+                html = `<p style="text-align:center; opacity:0.5; padding:20px;">Belum ada data ${currentFilter} untuk tanggal ${targetTanggal}</p>`;
+            } else {
+                filtered.forEach(o => {
+                    const wa = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
+                    const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat || "")}`;
                     
-                    ${o.catatan ? `<div style="background:rgba(212, 175, 55, 0.1); padding:6px; border-radius:8px; margin-top:8px; border-left:3px solid var(--gold);"><p style="font-size:10px; color:var(--gold); font-weight:800;">📝 ${o.catatan}</p></div>` : ''}
+                    html += `<div class="order-item">
+                        <span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br>
+                        <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
+                        <small>${o.status} | Rp${Number(o.total).toLocaleString()}</small>
+                        
+                        ${o.catatan ? `<div style="background:rgba(212, 175, 55, 0.1); padding:6px; border-radius:8px; margin-top:8px; border-left:3px solid var(--gold);"><p style="font-size:10px; color:var(--gold); font-weight:800;">📝 ${o.catatan}</p></div>` : ''}
 
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
-                        <a href="https://wa.me/${wa}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
-                        <a href="${mapsUrl}" target="_blank" style="background:var(--blue); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">MAPS</a>
-                    </div>
-                    ${o.buktiFoto ? `<button class="btn-small" style="background:var(--safe); width:100%; margin-top:5px;" onclick="viewFoto('${o.buktiFoto}')">🖼️ LIHAT BUKTI FOTO</button>` : ''}
-                    <button style="background:var(--danger); width:100%; color:white; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="hapus('${o.id}')">HAPUS DATA</button>
-                    <button style="background:var(--gold); width:100%; color:black; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">CETAK RESI</button>
-                </div>`;
-            });
-            document.getElementById('adminList').innerHTML = html || `<p style="text-align:center; opacity:0.5;">Kosong.</p>`;
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
+                            <a href="https://wa.me/${wa}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
+                            <a href="${mapsUrl}" target="_blank" style="background:var(--blue); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">MAPS</a>
+                        </div>
+                        ${o.buktiFoto ? `<button class="btn-small" style="background:var(--safe); width:100%; margin-top:5px;" onclick="viewFoto('${o.buktiFoto}')">🖼️ LIHAT BUKTI FOTO</button>` : ''}
+                        <button style="background:var(--danger); width:100%; color:white; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="hapus('${o.id}')">HAPUS DATA</button>
+                        <button style="background:var(--gold); width:100%; color:black; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">CETAK RESI</button>
+                    </div>`;
+                });
+            }
+            document.getElementById('adminList').innerHTML = html;
         }
 
         function viewFoto(src) { document.getElementById('imgBukti').src = src; document.getElementById('modalFoto').style.display = 'flex'; }
@@ -229,7 +239,18 @@
 
         function tambah() {
             const fisikDate = new Date();
-            const d = { noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), namaPembeli: document.getElementById('pembeli').value, nohp: document.getElementById('nohp').value, alamat: document.getElementById('alamat').value, mapLink: document.getElementById('mapLink').value, total: document.getElementById('total').value || 0, metode: document.getElementById('metodeBayar').value, status: 'Menunggu', tanggal: getFormattedDate(fisikDate), waktu: fisikDate.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) };
+            const d = { 
+                noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), 
+                namaPembeli: document.getElementById('pembeli').value, 
+                nohp: document.getElementById('nohp').value, 
+                alamat: document.getElementById('alamat').value, 
+                mapLink: document.getElementById('mapLink').value, 
+                total: document.getElementById('total').value || 0, 
+                metode: document.getElementById('metodeBayar').value, 
+                status: 'Menunggu', 
+                tanggal: formatDateToDB(fisikDate), 
+                waktu: fisikDate.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) 
+            };
             if(!d.namaPembeli) return alert("Nama wajib!");
             db.ref('pesanan').push(d).then(() => { lastOrder = d; executePrint(); document.querySelectorAll('input, textarea').forEach(i => i.value = ""); });
         }
@@ -263,7 +284,7 @@
         }
 
         function setor() { 
-            const dayKey = getFormattedDate(new Date()).replace(/\/| /g, '-');
+            const dayKey = formatDateToDB(new Date()).replace(/\/| /g, '-');
             const j = Number(document.getElementById('jumlahSetoran').value); 
             db.ref('setoran/' + dayKey).transaction(cv => (cv || 0) + j).then(() => { alert("Setoran Diterima!"); document.getElementById('jumlahSetoran').value = ""; }); 
         }
