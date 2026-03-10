@@ -14,7 +14,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: var(--text-main); padding: 15px; }
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .stat-box { text-align: center; padding: 10px; background: var(--glass); border-radius: 12px; border: 1px solid var(--glass-border); cursor: pointer; }
+        .stat-box { text-align: center; padding: 10px; background: var(--glass); border-radius: 12px; border: 1px solid var(--glass-border); cursor: pointer; transition: 0.3s; }
         .stat-box.active { background: rgba(212, 175, 55, 0.15); border-color: var(--gold); }
         .stat-box span { font-size: 7px; color: var(--gold); display: block; }
         .stat-box b { font-size: 14px; }
@@ -88,7 +88,8 @@
 
                     if (matchSearch && matchStatus) {
                         const wa = String(o.nohp || "").replace(/\D/g, '').replace(/^0/,'62');
-                        const mapsUrl = `http://googleusercontent.com/maps.google.com/maps?q=${encodeURIComponent(o.alamat || "")}`;
+                        const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat || "")}`;
+                        
                         html += `<div class="order-card">
                             <div class="date-tag">${o.tanggal}</div>
                             <h3>${o.namaPembeli}</h3>
@@ -135,7 +136,7 @@
 
         function updateStatus(id, status, foto = null) {
             const data = { status: status }; if(foto) data.buktiFoto = foto;
-            db.ref('pesanan/' + id).update(data).then(() => alert("Berhasil!"));
+            db.ref('pesanan/' + id).update(data).then(() => alert("Status Berhasil Diupdate!"));
         }
     </script>
 </body>
