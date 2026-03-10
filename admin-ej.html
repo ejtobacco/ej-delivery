@@ -26,11 +26,14 @@
         .btn-small { padding: 10px; border-radius: 8px; font-weight: 800; font-size: 10px; text-align: center; text-decoration: none; color: white; border: none; cursor: pointer; }
         .modal-foto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
         .modal-foto img { max-width: 90%; max-height: 70%; border: 2px solid var(--gold); border-radius: 15px; }
+        
+        /* DESAIN RESI CETAK */
         #receipt-print { display: none; }
         @media print {
             body * { visibility: hidden; background: none !important; color: #000 !important; }
             #receipt-print, #receipt-print * { visibility: visible !important; display: block !important; color: #000 !important; }
-            #receipt-print { position: absolute; left: 0; top: 0; width: 100%; background: #fff !important; font-family: monospace; padding: 20px; }
+            #receipt-print { position: absolute; left: 0; top: 0; width: 100%; background: #fff !important; font-family: 'Courier New', monospace; padding: 10px; }
+            .line { border-bottom: 1px dashed #000; margin: 10px 0; }
         }
     </style>
 </head>
@@ -48,8 +51,8 @@
     </div>
 
     <div style="display: flex; gap: 5px; margin-bottom: 15px;">
-        <input type="date" id="datePicker" onchange="changeDate()" style="border-color: var(--gold); background: rgba(212, 175, 55, 0.1); color: var(--gold); text-align: center; font-weight: 800; margin-bottom: 0; flex: 1;">
-        <button onclick="goToToday()" style="background: var(--gold); border: none; border-radius: 12px; padding: 0 15px; font-weight: 800; font-size: 10px; color: black; cursor: pointer;">HARI INI</button>
+        <input type="date" id="datePicker" onchange="changeDate()" style="border-color: var(--gold); background: rgba(212, 175, 55, 0.1); color: var(--gold); text-align: center; font-weight: 800; flex: 1; cursor: pointer;">
+        <button onclick="goToToday()" style="background: var(--gold); border: none; border-radius: 12px; padding: 0 15px; font-weight: 800; font-size: 10px; color: black;">HARI INI</button>
     </div>
 
     <div class="report-grid">
@@ -59,7 +62,7 @@
     </div>
 
     <div class="report-box" style="margin-bottom: 20px; border-color: var(--safe); background: rgba(34, 197, 94, 0.05); cursor: default;">
-        <span style="color: var(--safe);">TOTAL SALDO DI KURIR (SEMUA COD)</span>
+        <span style="color: var(--safe);">TOTAL SALDO DI KURIR</span>
         <b id="dailyTunai" style="font-size: 20px; color: var(--safe);">Rp0</b>
     </div>
 
@@ -88,7 +91,9 @@
         <p style="color:var(--gold); margin-top:15px; font-weight:800; font-size:12px;">KLIK DIMANA SAJA UNTUK TUTUP</p>
     </div>
 
-    <div id="receipt-print"><div id="receipt-content"></div></div>
+    <div id="receipt-print">
+        <div id="receipt-content"></div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
@@ -98,7 +103,7 @@
         const db = firebase.database();
         
         let allOrders = [], totalSetoranGlobal = 0, currentFilter = "Semua", lastOrder = null;
-        let lastCheckedDate = new Date().toLocaleDateString('id-ID');
+        let lastDateString = new Date().toLocaleDateString('id-ID');
 
         document.getElementById('datePicker').valueAsDate = new Date();
 
@@ -124,15 +129,12 @@
                 const opsi = { day: 'numeric', month: 'short', year: 'numeric' };
                 document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', opsi).toUpperCase();
                 
-                // AUTO SYNC TANGGAL JIKA GANTI HARI
-                const currentDate = getFormattedDate(now);
-                if (currentDate !== lastCheckedDate) {
-                    lastCheckedDate = currentDate;
+                const checkToday = getFormattedDate(now);
+                if (checkToday !== lastDateString) {
+                    lastDateString = checkToday;
                     document.getElementById('datePicker').valueAsDate = now;
                     updateAll();
                 }
-
-                if(jam === "00" && menit === "00" && detik === "01") location.reload();
             }, 1000);
         }
 
@@ -152,16 +154,14 @@
             });
 
             db.ref('setoran').on('value', sSnap => {
-                const sVal = sSnap.val() || {};
-                totalSetoranGlobal = Object.values(sVal).reduce((a, b) => a + b, 0);
+                totalSetoranGlobal = Object.values(sSnap.val() || {}).reduce((a, b) => a + b, 0);
                 updateAll();
             });
         });
 
         function updateAll() {
             const pickerVal = document.getElementById('datePicker').value;
-            const pickerDate = pickerVal ? new Date(pickerVal) : new Date();
-            const dateStr = getFormattedDate(pickerDate);
+            const dateStr = pickerVal ? getFormattedDate(new Date(pickerVal)) : getFormattedDate(new Date());
             updateDashboard(dateStr);
             renderList(dateStr);
         }
@@ -179,8 +179,7 @@
             document.getElementById('countSukses').innerText = s;
             document.getElementById('countGagal').innerText = g;
             document.getElementById('countProses').innerText = p;
-            const saldoKurir = totalCodSuksesGlobal - totalSetoranGlobal;
-            document.getElementById('dailyTunai').innerText = "Rp" + saldoKurir.toLocaleString();
+            document.getElementById('dailyTunai').innerText = "Rp" + (totalCodSuksesGlobal - totalSetoranGlobal).toLocaleString();
         }
 
         function renderList(dateStr) {
@@ -194,7 +193,7 @@
 
             filtered.forEach(o => {
                 const wa = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-                const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `http://googleusercontent.com/maps.google.com/maps?q=${encodeURIComponent(o.alamat || "")}`;
+                const mapsUrl = `http://googleusercontent.com/maps.google.com/maps?q=${encodeURIComponent(o.alamat || "")}`;
                 html += `<div class="order-item">
                     <span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br>
                     <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
@@ -205,6 +204,7 @@
                         <a href="${mapsUrl}" target="_blank" style="background:var(--blue); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">MAPS</a>
                     </div>
                     <button style="background:var(--danger); width:100%; color:white; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="hapus('${o.id}')">HAPUS</button>
+                    <button style="background:var(--gold); width:100%; color:black; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">CETAK ULANG</button>
                 </div>`;
             });
             document.getElementById('adminList').innerHTML = html || `<p style="text-align:center; opacity:0.5;">Kosong.</p>`;
@@ -214,21 +214,59 @@
         function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
 
         function tambah() {
-            const d = { noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), namaPembeli: document.getElementById('pembeli').value, nohp: document.getElementById('nohp').value, alamat: document.getElementById('alamat').value, mapLink: document.getElementById('mapLink').value, total: document.getElementById('total').value || 0, metode: document.getElementById('metodeBayar').value, status: 'Menunggu', tanggal: getFormattedDate(new Date()), waktu: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) };
+            const fisikDate = new Date();
+            const d = { 
+                noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), 
+                namaPembeli: document.getElementById('pembeli').value, 
+                nohp: document.getElementById('nohp').value, 
+                alamat: document.getElementById('alamat').value, 
+                mapLink: document.getElementById('mapLink').value, 
+                total: document.getElementById('total').value || 0, 
+                metode: document.getElementById('metodeBayar').value, 
+                status: 'Menunggu', 
+                tanggal: getFormattedDate(fisikDate), 
+                waktu: fisikDate.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) 
+            };
             if(!d.namaPembeli) return alert("Nama wajib!");
-            db.ref('pesanan').push(d).then(() => { lastOrder = d; cetak(); document.querySelectorAll('input, textarea').forEach(i => i.value = ""); });
+            db.ref('pesanan').push(d).then(() => { 
+                lastOrder = d; 
+                executePrint(); 
+                document.querySelectorAll('input, textarea').forEach(i => i.value = ""); 
+            });
+        }
+
+        function reprint(id) {
+            lastOrder = allOrders.find(o => o.id === id);
+            if(lastOrder) executePrint();
+        }
+
+        function executePrint() {
+            if(!lastOrder) return;
+            document.getElementById('receipt-content').innerHTML = `
+                <div style="text-align:center; font-weight:bold; font-size:20px;">EJ TOBACCO</div>
+                <div style="text-align:center; font-size:12px;">Delivery Express Service</div>
+                <div class="line"></div>
+                <div style="font-size:14px;">
+                    <b>ID: ${lastOrder.noPesanan}</b><br>
+                    TGL: ${lastOrder.tanggal} | ${lastOrder.waktu}<br>
+                    <div class="line"></div>
+                    PELANGGAN: ${lastOrder.namaPembeli}<br>
+                    WA: ${lastOrder.nohp}<br>
+                    ALAMAT: ${lastOrder.alamat}<br>
+                    <div class="line"></div>
+                    METODE: ${lastOrder.metode}<br>
+                    <span style="font-size:18px; font-weight:bold;">TOTAL: Rp${Number(lastOrder.total).toLocaleString()}</span>
+                </div>
+                <div class="line"></div>
+                <div style="text-align:center; font-size:11px;">Simpan resi ini sebagai bukti.<br>Terima kasih!</div>
+            `;
+            setTimeout(() => { window.print(); }, 500);
         }
 
         function setor() { 
             const dayKey = getFormattedDate(new Date()).replace(/\/| /g, '-');
             const j = Number(document.getElementById('jumlahSetoran').value); 
             db.ref('setoran/' + dayKey).transaction(cv => (cv || 0) + j).then(() => { alert("Setoran Diterima!"); document.getElementById('jumlahSetoran').value = ""; }); 
-        }
-
-        function cetak() {
-            if(!lastOrder) return;
-            document.getElementById('receipt-content').innerHTML = `<div style="color:#000; font-family:monospace; padding:10px; border:1px solid #000;"><center><b>EJ TOBACCO</b></center><br>ID: ${lastOrder.noPesanan}<br>TGL: ${lastOrder.tanggal}<br>NAMA: ${lastOrder.namaPembeli}<br>TOTAL: Rp${Number(lastOrder.total).toLocaleString()}</div>`;
-            setTimeout(() => { window.print(); }, 500);
         }
 
         function hapus(id) { if(confirm("Hapus?")) db.ref('pesanan/' + id).remove(); }
