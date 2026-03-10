@@ -4,85 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EJ DELIVERY</title>
-    <link rel="icon" href="https://api.iconify.design/material-symbols:delivery-dining-rounded.svg?color=%23D4AF37">
-    <link rel="apple-touch-icon" href="https://api.iconify.design/material-symbols:delivery-dining-rounded.svg?color=%23D4AF37">
-
+    <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); --text-main: #FFFFFF; --safe: #22C55E; --danger: #EF4444; --blue: #2563eb; --wa: #25D366; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: var(--text-main); padding: 15px; }
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .stat-box { text-align: center; padding: 10px; background: var(--glass); border-radius: 12px; border: 1px solid var(--glass-border); }
+        .stat-box { text-align: center; padding: 10px; background: var(--glass); border-radius: 12px; border: 1px solid var(--glass-border); cursor: pointer; }
         .stat-box span { font-size: 7px; color: var(--gold); display: block; }
         .stat-box b { font-size: 14px; }
         .order-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 18px; margin-bottom: 15px; border-left: 5px solid var(--gold); }
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .btn { border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 10px; cursor: pointer; color: white; text-align: center; text-decoration: none; text-transform: uppercase; }
+        .btn { border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 10px; cursor: pointer; color: white; text-align: center; text-decoration: none; }
     </style>
 </head>
 <body>
 
-    <h2 style="color:var(--gold); text-align:center; margin-bottom:15px;">EJ DELIVERY</h2>
+    <h2 style="color:var(--gold); text-align:center; margin-bottom:15px;">KURIR EJ</h2>
 
     <div class="stat-grid">
-        <div class="stat-box"><span>Sisa</span><b id="countProses">0</b></div>
-        <div class="stat-box" style="border-color: var(--safe);"><span>Sukses</span><b id="countSukses">0</b></div>
-        <div class="stat-box" style="border-color: var(--danger);"><span>Gagal</span><b id="countGagal">0</b></div>
+        <div class="stat-box" onclick="setFilter('Sisa')"><span>Sisa</span><b id="countProses">0</b></div>
+        <div class="stat-box" onclick="setFilter('Terkirim')" style="border-color: var(--safe);"><span>Sukses</span><b id="countSukses">0</b></div>
+        <div class="stat-box" onclick="setFilter('Gagal')" style="border-color: var(--danger);"><span>Gagal</span><b id="countGagal">0</b></div>
     </div>
+
+    <input type="text" id="searchBar" placeholder="🔍 Cari nama..." oninput="renderList()" style="width:100%; padding:12px; border-radius:12px; background:var(--glass); border:1px solid var(--gold); color:white; margin-bottom:15px;">
 
     <div id="list">Memuat...</div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
     <script>
-        const OWNER_WA = "6281210481935";
         const firebaseConfig = { apiKey: "AIzaSyAVQGysGRlYJ2b4PekM3vaXKtx6UFvNlCk", databaseURL: "https://ej-tobacco-express-default-rtdb.asia-southeast1.firebasedatabase.app" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const todayStr = new Date().toLocaleDateString('id-ID');
+        let allOrders = [];
+        let currentFilter = "Sisa";
+
+        function setFilter(f) { currentFilter = f; renderList(); }
 
         db.ref('pesanan').on('value', snap => {
             const data = snap.val() || {};
-            let html = "", dSukses = 0, dGagal = 0, dProses = 0;
-            Object.keys(data).reverse().forEach(k => {
-                const o = data[k];
-                if (o.tanggal === todayStr) {
-                    if (o.status === 'Terkirim') dSukses++; else if (o.status === 'Gagal') dGagal++; else dProses++;
-                }
-
-                if (o.status === 'Menunggu' || o.status === 'Diantar' || (o.tanggal === todayStr && (o.status === 'Terkirim' || o.status === 'Gagal'))) {
-                    const wa = String(o.nohp).replace(/\D/g, '').replace(/^0/,'62');
-                    const color = o.status==='Terkirim'?'#22C55E':(o.status==='Gagal'?'#EF4444':(o.status==='Diantar'?'#2563eb':'#D4AF37'));
-                    html += `
-                    <div class="order-card" style="border-left-color:${color}">
-                        <p style="font-size:9px; color:var(--gold); font-weight:800;">${o.noPesanan} | ${o.waktu || '--:--'}</p>
-                        <h3 style="margin:5px 0;">${o.namaPembeli}</h3>
-                        <p style="font-size:11px; opacity:0.7;">📍 ${o.alamat}</p>
-                        ${o.status !== 'Terkirim' && o.status !== 'Gagal' ? `
-                        <div class="btn-group">
-                            <button class="btn" style="background:#222; border:1px solid #444" onclick="updateStatus('${o.id}','Diantar')">🚚 ANTAR</button>
-                            <button class="btn" style="background:var(--safe)" onclick="updateStatus('${o.id}','Terkirim')">✅ SUKSES</button>
-                        </div>
-                        <button class="btn" style="background:none; border:1px solid var(--danger); color:var(--danger); width:100%; margin-top:8px;" onclick="updateStatus('${o.id}','Gagal')">❌ GAGAL / RETUR</button>
-                        ` : `<p style="font-size:10px; color:${color}; margin-top:10px; font-weight:800;">STATUS: ${o.status.toUpperCase()}</p>`}
-                        <div class="btn-group">
-                            <a href="https://www.google.com/maps/search/${encodeURIComponent(o.alamat)}" class="btn" style="background:var(--blue)">📍 MAPS</a>
-                            <a href="https://wa.me/${wa}" class="btn" style="background:var(--wa)">💬 WA</a>
-                        </div>
-                    </div>`;
-                }
-            });
-            document.getElementById('countSukses').innerText = dSukses;
-            document.getElementById('countGagal').innerText = dGagal;
-            document.getElementById('countProses').innerText = dProses;
-            document.getElementById('list').innerHTML = html || "Belum ada tugas!";
+            allOrders = Object.keys(data).map(k => ({id:k, ...data[k]})).reverse();
+            renderList();
         });
 
-        async function updateStatus(id, status) {
-            if(status === 'Gagal' && !confirm("Tandai Gagal?")) return;
-            db.ref('pesanan/' + id).update({ status: status });
+        function renderList() {
+            const keyword = document.getElementById('searchBar').value.toLowerCase();
+            let html = "", s = 0, g = 0, p = 0;
+
+            allOrders.forEach(o => {
+                if(o.tanggal === todayStr) {
+                    if(o.status === 'Terkirim') s++;
+                    else if(o.status === 'Gagal') g++;
+                    else p++;
+
+                    const matchSearch = o.namaPembeli.toLowerCase().includes(keyword);
+                    let matchStatus = false;
+                    if(currentFilter === "Sisa") matchStatus = (o.status !== 'Terkirim' && o.status !== 'Gagal');
+                    else matchStatus = (o.status === currentFilter);
+
+                    if(matchSearch && matchStatus) {
+                        html += `<div class="order-card">
+                            <p style="font-size:9px; color:var(--gold);">${o.waktu} | ${o.status}</p>
+                            <h3>${o.namaPembeli}</h3>
+                            <div class="btn-group">
+                                <button class="btn" style="background:var(--safe)" onclick="updateStatus('${o.id}','Terkirim')">SUKSES</button>
+                                <button class="btn" style="background:var(--danger)" onclick="updateStatus('${o.id}','Gagal')">GAGAL</button>
+                            </div>
+                        </div>`;
+                    }
+                }
+            });
+            document.getElementById('countSukses').innerText = s;
+            document.getElementById('countGagal').innerText = g;
+            document.getElementById('countProses').innerText = p;
+            document.getElementById('list').innerHTML = html || `<p style="text-align:center; opacity:0.5;">Tidak ada paket ${currentFilter}</p>`;
         }
+
+        function updateStatus(id, status) { db.ref('pesanan/' + id).update({ status: status }); }
     </script>
 </body>
 </html>
