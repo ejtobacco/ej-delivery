@@ -8,32 +8,32 @@
     <meta name="theme-color" content="#050505">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); --text-main: #FFFFFF; --safe: #22C55E; --danger: #EF4444; --warning: #FACC15; --blue: #2563eb; }
+        :root { --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); --text-main: #FFFFFF; --safe: #22C55E; --danger: #EF4444; --warning: #FACC15; --blue: #2563eb; --wa: #25D366; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: var(--text-main); padding: 15px; padding-bottom: 80px; }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .logo-text { color: var(--gold); font-weight: 800; font-size: 18px; letter-spacing: 1px; }
 
-        /* Filter Tab Menu */
         .tab-menu { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         .tab-btn { background: var(--glass); border: 1px solid var(--glass-border); padding: 10px; border-radius: 12px; color: white; font-weight: 800; font-size: 11px; text-align: center; cursor: pointer; }
         .tab-btn.active { background: rgba(212, 175, 55, 0.2); border-color: var(--gold); color: var(--gold); }
 
         .search-box { width: 100%; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; color: white; margin-bottom: 15px; outline: none; }
 
-        .glass-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 18px; margin-bottom: 15px; position: relative; overflow: hidden; }
+        .glass-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 18px; margin-bottom: 15px; position: relative; }
         .status-badge { position: absolute; top: 0; right: 0; padding: 5px 12px; font-size: 9px; font-weight: 800; border-radius: 0 0 0 12px; text-transform: uppercase; }
 
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
-        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; color: white; text-align: center; text-decoration: none; }
+        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; color: white; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        
         .btn-success { background: var(--safe); }
         .btn-warning { background: var(--warning); color: black; }
-        .btn-maps { background: var(--blue); width: 100%; margin-top: 8px; display: block; }
+        .btn-danger { background: var(--danger); }
+        .btn-wa { background: var(--wa); width: 100%; margin-top: 15px; }
+        .btn-maps { background: var(--blue); width: 100%; margin-top: 8px; }
 
         .empty-state { text-align: center; padding: 40px; opacity: 0.5; font-size: 13px; }
-        
-        /* Modal Foto Preview */
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; justify-content:center; align-items:center; }
         .modal img { max-width: 90%; border-radius: 10px; border: 2px solid var(--gold); }
     </style>
@@ -110,9 +110,14 @@
                 const badgeColor = o.status === 'Terkirim' ? 'var(--safe)' : (o.status === 'Gagal' ? 'var(--danger)' : 'var(--gold)');
                 let alasanHtml = o.alasanTunda ? `<div style="background:rgba(250,204,21,0.1); color:var(--warning); padding:8px; border-radius:8px; font-size:11px; margin-top:10px; border-left:3px solid var(--warning);"><b>KENDALA:</b> ${o.alasanTunda}</div>` : "";
                 
+                // Konversi nomor WA
+                const waNum = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
+                const teksWA = encodeURIComponent(`Halo Kak ${o.namaPembeli},\nSaya Kurir dari *EJ TOBACCO*. Ingin mengantar pesanan paket Kakak.\n\nApakah sedang ada di tempat?`);
+                
                 let actionButtons = "";
                 if (o.status !== 'Terkirim' && o.status !== 'Gagal') {
                     actionButtons = `
+                        <a href="https://wa.me/${waNum}?text=${teksWA}" class="btn btn-wa">💬 HUBUNGI PEMBELI (WA)</a>
                         <div class="btn-group">
                             <button class="btn btn-success" onclick="updateStatus('${o.id}', 'Terkirim')">✅ SELESAI</button>
                             <button class="btn btn-warning" onclick="updateStatus('${o.id}', 'Tunda')">⚠️ TUNDA</button>
