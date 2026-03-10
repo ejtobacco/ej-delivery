@@ -66,27 +66,58 @@
         function renderList() {
             const keyword = document.getElementById('searchBar').value.toLowerCase();
             let html = "", s = 0, g = 0, p = 0, codSum = 0;
+            
             allOrders.forEach(o => {
-                if(o.tanggal === todayStr) {
-                    if(o.status === 'Terkirim') { s++; if(o.metode==='COD') codSum += Number(o.total); }
-                    else if(o.status === 'Gagal') g++;
-                    else p++;
+                // LOGIKA BARU:
+                // 1. Paket "Menunggu" (Sisa) akan SELALU muncul (akumulasi hari-hari sebelumnya)
+                // 2. Paket "Terkirim" & "Gagal" hanya muncul jika tanggalnya hari ini (agar laporan harian bersih)
+                
+                const isSisa = (o.status !== 'Terkirim' && o.status !== 'Gagal');
+                const isToday = (o.tanggal === todayStr);
+
+                if (isSisa || isToday) {
+                    if (o.status === 'Terkirim' && isToday) { 
+                        s++; 
+                        if(o.metode==='COD') codSum += Number(o.total); 
+                    }
+                    else if (o.status === 'Gagal' && isToday) { 
+                        g++; 
+                    }
+                    else if (isSisa) { 
+                        p++; 
+                    }
+
                     const matchSearch = o.namaPembeli.toLowerCase().includes(keyword);
-                    let matchStatus = currentFilter === "Sisa" ? (o.status !== 'Terkirim' && o.status !== 'Gagal') : (o.status === currentFilter);
-                    if(matchSearch && matchStatus) {
+                    let matchStatus = currentFilter === "Sisa" ? isSisa : (o.status === currentFilter && isToday);
+
+                    if (matchSearch && matchStatus) {
                         const wa = String(o.nohp).replace(/\D/g, '').replace(/^0/,'62');
                         const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat)}`;
-                        html += `<div class="order-item order-card"><h3>${o.namaPembeli}</h3><p>${o.alamat}</p><p style="color:var(--gold)">${o.metode} | Rp${Number(o.total).toLocaleString()}</p>
-                        ${o.status!=='Terkirim'&&o.status!=='Gagal' ? `<div class="btn-group"><button class="btn" style="background:var(--safe)" onclick="updateStatus('${o.id}','Terkirim')">SUKSES</button><button class="btn" style="background:var(--danger)" onclick="updateStatus('${o.id}','Gagal')">GAGAL</button></div>`:''}
-                        <div class="btn-group"><a href="${mapsUrl}" target="_blank" class="btn" style="background:var(--blue)">MAPS</a><a href="https://wa.me/${wa}" class="btn" style="background:var(--wa)">WA</a></div></div>`;
+                        
+                        html += `<div class="order-card">
+                            <small style="color:var(--gold); font-size:9px;">${o.tanggal} - ${o.waktu}</small>
+                            <h3>${o.namaPembeli}</h3>
+                            <p>${o.alamat}</p>
+                            <p style="color:var(--gold)">${o.metode} | Rp${Number(o.total).toLocaleString()}</p>
+                            ${isSisa ? `
+                            <div class="btn-group">
+                                <button class="btn" style="background:var(--safe)" onclick="updateStatus('${o.id}','Terkirim')">SUKSES</button>
+                                <button class="btn" style="background:var(--danger)" onclick="updateStatus('${o.id}','Gagal')">GAGAL</button>
+                            </div>` : ''}
+                            <div class="btn-group">
+                                <a href="${mapsUrl}" target="_blank" class="btn" style="background:var(--blue)">MAPS</a>
+                                <a href="https://wa.me/${wa}" class="btn" style="background:var(--wa)">WA</a>
+                            </div>
+                        </div>`;
                     }
                 }
             });
+            
             document.getElementById('countSukses').innerText = s;
             document.getElementById('countGagal').innerText = g;
             document.getElementById('countProses').innerText = p;
             document.getElementById('tunaiTangan').innerText = "Rp" + (codSum - setoran).toLocaleString();
-            document.getElementById('list').innerHTML = html || "Kosong";
+            document.getElementById('list').innerHTML = html || "<p style='text-align:center; opacity:0.5; padding:20px;'>Tidak ada paket sisa.</p>";
         }
 
         async function updateStatus(id, status) {
@@ -95,3 +126,4 @@
     </script>
 </body>
 </html>
+
