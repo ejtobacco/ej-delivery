@@ -18,9 +18,11 @@
         .stat-box.active { background: rgba(212, 175, 55, 0.15); border-color: var(--gold); }
         .stat-box span { font-size: 7px; color: var(--gold); display: block; }
         .stat-box b { font-size: 14px; }
-        .order-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 18px; margin-bottom: 15px; border-left: 5px solid var(--gold); }
+        .order-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 18px; margin-bottom: 15px; border-left: 5px solid var(--gold); position: relative; }
+        .date-tag { position: absolute; top: 12px; right: 18px; font-size: 8px; color: var(--gold); opacity: 0.6; font-weight: 800; }
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .btn { border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 10px; cursor: pointer; color: white; text-align: center; text-decoration: none; }
+        .btn { border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 10px; cursor: pointer; color: white; text-align: center; text-decoration: none; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; border-radius: 12px; background: var(--glass); border: 1px solid var(--gold); color: white; margin-bottom: 15px; outline: none; }
     </style>
 </head>
 <body>
@@ -28,18 +30,18 @@
     <h2 style="color:var(--gold); text-align:center; margin-bottom:15px; letter-spacing:2px;">KURIR EJ</h2>
 
     <div class="stat-grid">
-        <div class="stat-box active" id="f-Sisa" onclick="setFilter('Sisa')"><span>Sisa</span><b id="countProses">0</b></div>
-        <div class="stat-box" id="f-Terkirim" onclick="setFilter('Terkirim')" style="border-color: var(--safe);"><span>Sukses</span><b id="countSukses">0</b></div>
-        <div class="stat-box" id="f-Gagal" onclick="setFilter('Gagal')" style="border-color: var(--danger);"><span>Gagal</span><b id="countGagal">0</b></div>
+        <div class="stat-box active" id="f-Sisa" onclick="setFilter('Sisa')"><span>Sisa (Total)</span><b id="countProses">0</b></div>
+        <div class="stat-box" id="f-Terkirim" onclick="setFilter('Terkirim')" style="border-color: var(--safe);"><span>Sukses Hari Ini</span><b id="countSukses">0</b></div>
+        <div class="stat-box" id="f-Gagal" onclick="setFilter('Gagal')" style="border-color: var(--danger);"><span>Gagal Hari Ini</span><b id="countGagal">0</b></div>
     </div>
 
     <div class="stat-box" style="margin-bottom: 20px; border-color: var(--safe); background: rgba(34, 197, 94, 0.05); cursor: default;">
-        <span style="color: var(--safe);">TUNAI DI TANGAN (BELUM SETOR)</span>
+        <span style="color: var(--safe);">TUNAI HARI INI (BELUM SETOR)</span>
         <b id="tunaiTangan" style="font-size: 18px; color: var(--safe);">Rp0</b>
     </div>
 
-    <input type="text" id="searchBar" placeholder="🔍 Cari nama..." oninput="renderList()" style="width:100%; padding:12px; border-radius:12px; background:var(--glass); border:1px solid var(--gold); color:white; margin-bottom:15px; outline:none;">
-    <div id="list">Memuat...</div>
+    <input type="text" id="searchBar" placeholder="🔍 Cari nama pembeli..." oninput="renderList()">
+    <div id="list">Memuat tugas...</div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
@@ -66,27 +68,20 @@
         function renderList() {
             const keyword = document.getElementById('searchBar').value.toLowerCase();
             let html = "", s = 0, g = 0, p = 0, codSum = 0;
-            
+
             allOrders.forEach(o => {
-                // LOGIKA BARU:
-                // 1. Paket "Menunggu" (Sisa) akan SELALU muncul (akumulasi hari-hari sebelumnya)
-                // 2. Paket "Terkirim" & "Gagal" hanya muncul jika tanggalnya hari ini (agar laporan harian bersih)
-                
                 const isSisa = (o.status !== 'Terkirim' && o.status !== 'Gagal');
                 const isToday = (o.tanggal === todayStr);
 
-                if (isSisa || isToday) {
-                    if (o.status === 'Terkirim' && isToday) { 
-                        s++; 
-                        if(o.metode==='COD') codSum += Number(o.total); 
-                    }
-                    else if (o.status === 'Gagal' && isToday) { 
-                        g++; 
-                    }
-                    else if (isSisa) { 
-                        p++; 
-                    }
+                // Hitung Statistik
+                if (isToday) {
+                    if (o.status === 'Terkirim') { s++; if(o.metode==='COD') codSum += Number(o.total); }
+                    else if (o.status === 'Gagal') g++;
+                }
+                if (isSisa) p++;
 
+                // Logika Filter Tampilan
+                if (isSisa || isToday) {
                     const matchSearch = o.namaPembeli.toLowerCase().includes(keyword);
                     let matchStatus = currentFilter === "Sisa" ? isSisa : (o.status === currentFilter && isToday);
 
@@ -95,15 +90,18 @@
                         const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat)}`;
                         
                         html += `<div class="order-card">
-                            <small style="color:var(--gold); font-size:9px;">${o.tanggal} - ${o.waktu}</small>
+                            <div class="date-tag">${o.tanggal}</div>
+                            <p style="font-size:9px; color:var(--gold); font-weight:800; margin-bottom:4px;">${o.noPesanan} | ${o.waktu}</p>
                             <h3>${o.namaPembeli}</h3>
-                            <p>${o.alamat}</p>
-                            <p style="color:var(--gold)">${o.metode} | Rp${Number(o.total).toLocaleString()}</p>
+                            <p style="font-size:11px; opacity:0.7; margin-bottom:8px;">📍 ${o.alamat}</p>
+                            <p style="color:var(--gold); font-weight:800; font-size:12px;">${o.metode} | Rp${Number(o.total).toLocaleString()}</p>
+                            
                             ${isSisa ? `
                             <div class="btn-group">
                                 <button class="btn" style="background:var(--safe)" onclick="updateStatus('${o.id}','Terkirim')">SUKSES</button>
                                 <button class="btn" style="background:var(--danger)" onclick="updateStatus('${o.id}','Gagal')">GAGAL</button>
-                            </div>` : ''}
+                            </div>` : `<p style="color:var(--gold); font-size:10px; margin-top:10px; font-weight:800;">STATUS: ${o.status.toUpperCase()}</p>`}
+
                             <div class="btn-group">
                                 <a href="${mapsUrl}" target="_blank" class="btn" style="background:var(--blue)">MAPS</a>
                                 <a href="https://wa.me/${wa}" class="btn" style="background:var(--wa)">WA</a>
@@ -112,12 +110,11 @@
                     }
                 }
             });
-            
             document.getElementById('countSukses').innerText = s;
             document.getElementById('countGagal').innerText = g;
             document.getElementById('countProses').innerText = p;
             document.getElementById('tunaiTangan').innerText = "Rp" + (codSum - setoran).toLocaleString();
-            document.getElementById('list').innerHTML = html || "<p style='text-align:center; opacity:0.5; padding:20px;'>Tidak ada paket sisa.</p>";
+            document.getElementById('list').innerHTML = html || "<p style='text-align:center; opacity:0.5; padding:20px;'>Kosong.</p>";
         }
 
         async function updateStatus(id, status) {
@@ -126,4 +123,3 @@
     </script>
 </body>
 </html>
-
