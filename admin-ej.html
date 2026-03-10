@@ -20,48 +20,20 @@
         .report-box span { font-size: 7px; font-weight: 800; color: var(--gold); text-transform: uppercase; }
         .report-box b { display: block; font-size: 14px; margin-top: 4px; }
         .glass-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
-        input, textarea, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; color: white; margin-bottom: 10px; outline: none; transition: 0.3s; }
+        input, textarea, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; color: white; margin-bottom: 10px; outline: none; }
         .btn-main { background: linear-gradient(135deg, #F7E08C, #D4AF37); color: #000; border: none; padding: 14px; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; }
         .order-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; }
-        #datePicker { border-color: var(--gold); background: rgba(212, 175, 55, 0.1); font-weight: 800; color: var(--gold); margin-bottom: 15px; text-align: center; }
-
-/* CSS KHUSUS PRINTER & PDF */
-        #receipt-print { display: none; }
+        .btn-small { padding: 10px; border-radius: 8px; font-weight: 800; font-size: 10px; text-align: center; text-decoration: none; color: white; border: none; cursor: pointer; }
         
+        /* STYLE MODAL FOTO */
+        .modal-foto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
+        .modal-foto img { max-width: 90%; max-height: 70%; border: 2px solid var(--gold); border-radius: 15px; }
+        
+        #receipt-print { display: none; }
         @media print {
-            /* Sembunyikan semua elemen layar */
-            body * { visibility: hidden; background: none !important; color: #000 !important; }
-            
-            /* Tampilkan area resi */
-            #receipt-print, #receipt-print * { 
-                visibility: visible !important; 
-                display: block !important;
-                color: #000 !important; /* Paksa Hitam */
-            }
-            
-            #receipt-print { 
-                position: absolute; 
-                left: 0; 
-                top: 0; 
-                width: 100%; 
-                background: #fff !important;
-                padding: 0;
-                margin: 0;
-            }
-            
-            .p-header { 
-                text-align: center; 
-                border-bottom: 2px dashed #000 !important; 
-                padding-bottom: 10px; 
-                margin-bottom: 10px; 
-            }
-            
-            .p-footer { 
-                text-align: center; 
-                border-top: 2px dashed #000 !important; 
-                margin-top: 10px; 
-                padding-top: 10px; 
-            }
+            body * { visibility: hidden; }
+            #receipt-print, #receipt-print * { visibility: visible; }
+            #receipt-print { display: block !important; position: absolute; left: 0; top: 0; width: 100%; color: #000 !important; background: #fff !important; font-family: monospace; padding: 20px; }
         }
     </style>
 </head>
@@ -72,7 +44,7 @@
         <div style="font-size: 9px; font-weight: 800; background: var(--glass); padding: 5px 10px; border-radius: 8px;">DASHBOARD</div>
     </div>
 
-    <input type="date" id="datePicker" onchange="changeDate()">
+    <input type="date" id="datePicker" onchange="changeDate()" style="border-color: var(--gold); background: rgba(212, 175, 55, 0.1); color: var(--gold); text-align: center; font-weight: 800;">
 
     <div class="report-grid">
         <div class="report-box active" id="f-Semua" onclick="setFilter('Semua')"><span>Sisa</span><b id="countProses">0</b></div>
@@ -102,15 +74,16 @@
     </div>
 
     <input type="text" id="searchBar" placeholder="🔍 Cari nama/no pesanan..." oninput="renderList()" style="width:100%; padding:12px; border-radius:12px; background:var(--glass); border:1px solid var(--gold); color:white; margin-bottom:15px; outline:none;">
+    
     <div id="adminList" class="glass-card">Memuat...</div>
 
+    <div id="modalFoto" class="modal-foto" onclick="this.style.display='none'">
+        <img id="imgBukti" src="">
+        <p style="color:var(--gold); margin-top:15px; font-weight:800; font-size:12px;">KLIK MANA SAJA UNTUK TUTUP</p>
+    </div>
+
     <div id="receipt-print">
-        <div class="p-header">
-            <b style="font-size: 20px;">EJ TOBACCO</b><br>
-            <span>Layanan Delivery Express</span>
-        </div>
         <div id="receipt-content"></div>
-        <div class="p-footer">Terima Kasih Atas Pesanannya!</div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
@@ -171,67 +144,58 @@
                 let matchStatus = currentFilter === "Semua" ? (o.tanggal === dateStr && o.status !== 'Terkirim' && o.status !== 'Gagal') : (o.status === currentFilter && o.tanggal === dateStr);
                 return matchSearch && matchStatus;
             });
+
             filtered.forEach(o => {
                 const wa = String(o.nohp).replace(/\D/g, '').replace(/^0/, '62');
                 const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat)}`;
-                html += `<div class="order-item"><span>${o.waktu}</span><br><b>${o.noPesanan} - ${o.namaPembeli}</b><br><small>${o.status} | Rp${Number(o.total).toLocaleString()}</small>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:10px;"><a href="https://wa.me/${wa}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a><a href="${mapsUrl}" target="_blank" style="background:var(--blue); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">MAPS</a></div>
-                <button style="background:var(--danger); width:100%; color:white; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="hapus('${o.id}')">HAPUS</button></div>`;
+                
+                html += `<div class="order-item">
+                    <span style="font-size:9px; color:var(--gold)">${o.waktu}</span><br>
+                    <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
+                    <small>${o.status} | Rp${Number(o.total).toLocaleString()}</small>
+                    
+                    ${o.buktiFoto ? `<button class="btn-small" style="background:var(--safe); width:100%; margin-top:8px;" onclick="viewFoto('${o.buktiFoto}')">🖼️ LIHAT BUKTI FOTO</button>` : ''}
+                    
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
+                        <a href="https://wa.me/${wa}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
+                        <a href="${mapsUrl}" target="_blank" style="background:var(--blue); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">MAPS</a>
+                    </div>
+                    <button style="background:var(--danger); width:100%; color:white; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="hapus('${o.id}')">HAPUS</button>
+                </div>`;
             });
             document.getElementById('adminList').innerHTML = html || `<p style="text-align:center; opacity:0.5;">Kosong.</p>`;
+        }
+
+        function viewFoto(src) {
+            document.getElementById('imgBukti').src = src;
+            document.getElementById('modalFoto').style.display = 'flex';
         }
 
         function tambah() {
             const dateStr = getFormattedDate(new Date());
             const d = { noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), namaPembeli: document.getElementById('pembeli').value, nohp: document.getElementById('nohp').value, alamat: document.getElementById('alamat').value, mapLink: document.getElementById('mapLink').value, total: document.getElementById('total').value || 0, metode: document.getElementById('metodeBayar').value, status: 'Menunggu', tanggal: dateStr, waktu: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) };
             if(!d.namaPembeli) return alert("Nama wajib!");
-            db.ref('pesanan').push(d).then(() => { 
-                lastOrder = d; 
-                cetak(); 
-                document.querySelectorAll('input, textarea').forEach(i => i.value = ""); 
-            });
+            db.ref('pesanan').push(d).then(() => { lastOrder = d; cetak(); document.querySelectorAll('input, textarea').forEach(i => i.value = ""); });
         }
+
         function setor() { 
             const dateStr = getFormattedDate(targetDate);
             const dayKey = dateStr.replace(/\/| /g, '-');
             const j = Number(document.getElementById('jumlahSetoran').value); 
             db.ref('setoran/' + dayKey).transaction(cv => (cv || 0) + j).then(() => { alert("Setoran Diterima!"); document.getElementById('jumlahSetoran').value = ""; }); 
         }
-function cetak() {
-            if(!lastOrder) return;
-            
-            const areaCetak = document.getElementById('receipt-content');
-            // Gunakan format teks yang sangat sederhana agar PDF mudah membacanya
-            areaCetak.innerHTML = `
-                <div style="color: #000 !important; font-family: monospace; font-size: 14px;">
-                    <div style="text-align:center; font-weight:bold; font-size:18px;">EJ TOBACCO</div>
-                    <div style="text-align:center; margin-bottom:10px;">Delivery Express</div>
-                    <div style="border-bottom:1px dashed #000;"></div>
-                    
-                    <p><b>ID: ${lastOrder.noPesanan}</b></p>
-                    <p>Tgl: ${lastOrder.tanggal} | ${lastOrder.waktu}</p>
-                    <div style="border-bottom:1px dashed #000; margin:10px 0;"></div>
-                    
-                    <p>NAMA: ${lastOrder.namaPembeli}</p>
-                    <p>ALAMAT: ${lastOrder.alamat}</p>
-                    <p>WA: ${lastOrder.nohp}</p>
-                    <div style="border-bottom:1px dashed #000; margin:10px 0;"></div>
-                    
-                    <p>METODE: ${lastOrder.metode}</p>
-                    <p style="font-size:20px; font-weight:bold;">TOTAL: Rp${Number(lastOrder.total).toLocaleString()}</p>
-                    
-                    <div style="border-bottom:1px dashed #000; margin:10px 0;"></div>
-                    <div style="text-align:center; font-size:10px;">Terima Kasih Atas Pesanannya!</div>
-                </div>
-            `;
 
-            // Jeda sedikit agar konten terisi sempurna sebelum jendela print/PDF muncul
-            setTimeout(() => { 
-                window.print(); 
-            }, 700);
+        function cetak() {
+            if(!lastOrder) return;
+            document.getElementById('receipt-content').innerHTML = `<div style="color:#000; font-family:monospace; padding:20px;">
+                <center><b>EJ TOBACCO</b><br>Express Delivery</center><br>
+                ID: ${lastOrder.noPesanan}<br>TGL: ${lastOrder.tanggal}<br>---<br>
+                NAMA: ${lastOrder.namaPembeli}<br>TOTAL: Rp${Number(lastOrder.total).toLocaleString()}
+            </div>`;
+            setTimeout(() => { window.print(); }, 500);
         }
+
         function hapus(id) { if(confirm("Hapus?")) db.ref('pesanan/' + id).remove(); }
     </script>
 </body>
 </html>
-
