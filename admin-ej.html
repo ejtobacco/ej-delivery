@@ -15,7 +15,7 @@
         body { background: var(--bg); color: var(--text-main); padding: 15px; padding-bottom: 50px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .report-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-        .report-box { background: var(--glass); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; text-align: center; cursor: pointer; }
+        .report-box { background: var(--glass); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; }
         .report-box.active { background: rgba(212, 175, 55, 0.15); border-color: var(--gold); }
         .report-box span { font-size: 7px; font-weight: 800; color: var(--gold); text-transform: uppercase; }
         .report-box b { display: block; font-size: 14px; margin-top: 4px; }
@@ -25,15 +25,16 @@
         .order-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; }
         .btn-small { padding: 10px; border-radius: 8px; font-weight: 800; font-size: 10px; text-align: center; text-decoration: none; color: white; border: none; cursor: pointer; }
         
-        /* STYLE MODAL FOTO */
+        /* STYLE MODAL FOTO BUKTI */
         .modal-foto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
         .modal-foto img { max-width: 90%; max-height: 70%; border: 2px solid var(--gold); border-radius: 15px; }
-        
+
+        /* ANTI POLOS SAAT CETAK */
         #receipt-print { display: none; }
         @media print {
-            body * { visibility: hidden; }
-            #receipt-print, #receipt-print * { visibility: visible; }
-            #receipt-print { display: block !important; position: absolute; left: 0; top: 0; width: 100%; color: #000 !important; background: #fff !important; font-family: monospace; padding: 20px; }
+            body * { visibility: hidden; background: none !important; color: #000 !important; }
+            #receipt-print, #receipt-print * { visibility: visible !important; display: block !important; color: #000 !important; }
+            #receipt-print { position: absolute; left: 0; top: 0; width: 100%; background: #fff !important; font-family: monospace; padding: 20px; }
         }
     </style>
 </head>
@@ -41,10 +42,10 @@
 
     <div class="header">
         <h2 style="color: var(--gold)">EJ ADMIN</h2>
-        <div style="font-size: 9px; font-weight: 800; background: var(--glass); padding: 5px 10px; border-radius: 8px;">DASHBOARD</div>
+        <div style="font-size: 9px; font-weight: 800; background: var(--glass); padding: 5px 10px; border-radius: 8px;">AUTO-CLEAN (90D)</div>
     </div>
 
-    <input type="date" id="datePicker" onchange="changeDate()" style="border-color: var(--gold); background: rgba(212, 175, 55, 0.1); color: var(--gold); text-align: center; font-weight: 800;">
+    <input type="date" id="datePicker" onchange="changeDate()" style="border-color: var(--gold); background: rgba(212, 175, 55, 0.1); color: var(--gold); text-align: center; font-weight: 800; margin-bottom:15px;">
 
     <div class="report-grid">
         <div class="report-box active" id="f-Semua" onclick="setFilter('Semua')"><span>Sisa</span><b id="countProses">0</b></div>
@@ -79,12 +80,10 @@
 
     <div id="modalFoto" class="modal-foto" onclick="this.style.display='none'">
         <img id="imgBukti" src="">
-        <p style="color:var(--gold); margin-top:15px; font-weight:800; font-size:12px;">KLIK MANA SAJA UNTUK TUTUP</p>
+        <p style="color:var(--gold); margin-top:15px; font-weight:800; font-size:12px;">KLIK DIMANA SAJA UNTUK TUTUP</p>
     </div>
 
-    <div id="receipt-print">
-        <div id="receipt-content"></div>
-    </div>
+    <div id="receipt-print"><div id="receipt-content"></div></div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
@@ -96,18 +95,30 @@
         document.getElementById('datePicker').valueAsDate = targetDate;
         let allOrders = [], setoran = 0, currentFilter = "Semua", lastOrder = null;
 
-        function changeDate() { targetDate = new Date(document.getElementById('datePicker').value); updateAll(); }
         function getFormattedDate(date) { return date.toLocaleDateString('id-ID'); }
+        function changeDate() { targetDate = new Date(document.getElementById('datePicker').value); updateAll(); }
+        
         function setFilter(f) {
             currentFilter = f;
             document.querySelectorAll('.report-box').forEach(el => el.classList.remove('active'));
             document.getElementById('f-' + f).classList.add('active');
             renderList();
         }
-        function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
 
         db.ref('pesanan').on('value', snap => {
-            allOrders = Object.keys(snap.val() || {}).map(k => ({id:k, ...snap.val()[k]})).reverse();
+            const val = snap.val();
+            allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
+            
+            // --- LOGIKA HAPUS OTOMATIS 90 HARI ---
+            const hariIni = new Date();
+            allOrders.forEach(o => {
+                if (o.tanggal) {
+                    const parts = o.tanggal.split('/');
+                    const tglPesanan = new Date(parts[2], parts[1] - 1, parts[0]);
+                    const selisihHari = Math.floor((hariIni - tglPesanan) / (1000 * 60 * 60 * 24));
+                    if (selisihHari > 90) db.ref('pesanan/' + o.id).remove();
+                }
+            });
             updateAll();
         });
 
@@ -140,22 +151,19 @@
             const keyword = document.getElementById('searchBar').value.toLowerCase();
             let html = "";
             const filtered = allOrders.filter(o => {
-                const matchSearch = o.namaPembeli.toLowerCase().includes(keyword) || o.noPesanan.toLowerCase().includes(keyword);
+                const matchSearch = (o.namaPembeli || "").toLowerCase().includes(keyword) || (o.noPesanan || "").toLowerCase().includes(keyword);
                 let matchStatus = currentFilter === "Semua" ? (o.tanggal === dateStr && o.status !== 'Terkirim' && o.status !== 'Gagal') : (o.status === currentFilter && o.tanggal === dateStr);
                 return matchSearch && matchStatus;
             });
 
             filtered.forEach(o => {
-                const wa = String(o.nohp).replace(/\D/g, '').replace(/^0/, '62');
-                const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat)}`;
-                
+                const wa = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
+                const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `http://googleusercontent.com/maps.google.com/maps?q=${encodeURIComponent(o.alamat || "")}`;
                 html += `<div class="order-item">
                     <span style="font-size:9px; color:var(--gold)">${o.waktu}</span><br>
                     <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
                     <small>${o.status} | Rp${Number(o.total).toLocaleString()}</small>
-                    
                     ${o.buktiFoto ? `<button class="btn-small" style="background:var(--safe); width:100%; margin-top:8px;" onclick="viewFoto('${o.buktiFoto}')">🖼️ LIHAT BUKTI FOTO</button>` : ''}
-                    
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
                         <a href="https://wa.me/${wa}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
                         <a href="${mapsUrl}" target="_blank" style="background:var(--blue); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">MAPS</a>
@@ -166,10 +174,8 @@
             document.getElementById('adminList').innerHTML = html || `<p style="text-align:center; opacity:0.5;">Kosong.</p>`;
         }
 
-        function viewFoto(src) {
-            document.getElementById('imgBukti').src = src;
-            document.getElementById('modalFoto').style.display = 'flex';
-        }
+        function viewFoto(src) { document.getElementById('imgBukti').src = src; document.getElementById('modalFoto').style.display = 'flex'; }
+        function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
 
         function tambah() {
             const dateStr = getFormattedDate(new Date());
@@ -187,11 +193,16 @@
 
         function cetak() {
             if(!lastOrder) return;
-            document.getElementById('receipt-content').innerHTML = `<div style="color:#000; font-family:monospace; padding:20px;">
-                <center><b>EJ TOBACCO</b><br>Express Delivery</center><br>
-                ID: ${lastOrder.noPesanan}<br>TGL: ${lastOrder.tanggal}<br>---<br>
-                NAMA: ${lastOrder.namaPembeli}<br>TOTAL: Rp${Number(lastOrder.total).toLocaleString()}
-            </div>`;
+            document.getElementById('receipt-content').innerHTML = `
+                <div style="color:#000; font-family:monospace; padding:10px; border:1px solid #000;">
+                    <center><b>EJ TOBACCO</b><br>Express Delivery</center><br>
+                    ID: ${lastOrder.noPesanan}<br>
+                    TGL: ${lastOrder.tanggal} | ${lastOrder.waktu}<br>
+                    ------------------------------<br>
+                    PELANGGAN: ${lastOrder.namaPembeli}<br>
+                    TOTAL: Rp${Number(lastOrder.total).toLocaleString()}<br>
+                    METODE: ${lastOrder.metode}
+                </div>`;
             setTimeout(() => { window.print(); }, 500);
         }
 
