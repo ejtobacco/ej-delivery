@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EJ ADMIN PRO</title>
+    <title>EJ ADMIN PRO - 80MM</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#050505">
     <link rel="icon" href="logo-baru.png" type="image/png">
@@ -23,246 +23,111 @@
         input, textarea, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; color: white; margin-bottom: 10px; outline: none; }
         .btn-main { background: linear-gradient(135deg, #F7E08C, #D4AF37); color: #000; border: none; padding: 14px; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; }
         .order-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; }
-        .btn-small { padding: 10px; border-radius: 8px; font-weight: 800; font-size: 10px; text-align: center; text-decoration: none; color: white; border: none; cursor: pointer; }
-        .modal-foto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
-        .modal-foto img { max-width: 90%; max-height: 70%; border: 2px solid var(--gold); border-radius: 15px; }
-        
-        /* Style struk cadangan untuk layar */
-        #receipt-print { display: none; background: white; color: black; padding: 10px; font-family: 'Courier New', monospace; font-size: 12px; }
+        #receipt-print { display: none; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div>
-            <h2 style="color: var(--gold)">EJ ADMIN</h2>
-            <div id="runningClock" style="font-size: 11px; font-weight: 800; color: var(--safe); margin-top: 2px;">00:00:00</div>
-        </div>
-        <div style="font-size: 9px; font-weight: 800; background: var(--glass); padding: 5px 10px; border-radius: 8px; text-align: right;">
-            PRINTER BT READY<br>
-            <span id="currentDay" style="color: var(--gold);">-- --- ----</span>
-        </div>
+        <div><h2 style="color: var(--gold)">EJ ADMIN</h2><div id="runningClock" style="font-size: 11px; font-weight: 800; color: var(--safe); margin-top: 2px;">00:00:00</div></div>
+        <div style="font-size: 9px; font-weight: 800; background: var(--glass); padding: 5px 10px; border-radius: 8px; text-align: right;">PRINTER 80MM<br><span id="currentDay" style="color: var(--gold);">-- --- ----</span></div>
     </div>
 
-    <div style="display: flex; gap: 5px; margin-bottom: 15px;">
-        <input type="date" id="datePicker" onchange="changeDate()" style="border-color: var(--gold); background: rgba(212, 175, 55, 0.1); color: var(--gold); text-align: center; font-weight: 800; flex: 1; cursor: pointer;">
-        <button onclick="goToToday()" style="background: var(--gold); border: none; border-radius: 12px; padding: 0 15px; font-weight: 800; font-size: 10px; color: black; cursor: pointer;">HARI INI</button>
-    </div>
+    <div style="display: flex; gap: 5px; margin-bottom: 15px;"><input type="date" id="datePicker" onchange="changeDate()" style="border-color: var(--gold); background: rgba(212, 175, 55, 0.1); color: var(--gold); text-align: center; font-weight: 800; flex: 1; cursor: pointer;"><button onclick="goToToday()" style="background: var(--gold); border: none; border-radius: 12px; padding: 0 15px; font-weight: 800; font-size: 10px; color: black; cursor: pointer;">HARI INI</button></div>
 
     <div class="report-grid">
-        <div class="report-box active" id="f-Semua" onclick="setFilter('Semua')"><span>Sisa (Total)</span><b id="countProses">0</b></div>
+        <div class="report-box active" id="f-Semua" onclick="setFilter('Semua')"><span>Sisa</span><b id="countProses">0</b></div>
         <div class="report-box" id="f-Terkirim" onclick="setFilter('Terkirim')" style="border-color: var(--safe);"><span>Sukses</span><b id="countSukses">0</b></div>
         <div class="report-box" id="f-Gagal" onclick="setFilter('Gagal')" style="border-color: var(--danger);"><span>Cancel</span><b id="countGagal">0</b></div>
     </div>
 
-    <div class="report-box" style="margin-bottom: 20px; border-color: var(--safe); background: rgba(34, 197, 94, 0.05); cursor: default;">
-        <span style="color: var(--safe);">TOTAL SALDO DI KURIR</span>
-        <b id="dailyTunai" style="font-size: 20px; color: var(--safe);">Rp0</b>
-    </div>
+    <div class="report-box" style="margin-bottom: 20px; border-color: var(--safe); background: rgba(34, 197, 94, 0.05); cursor: default;"><span style="color: var(--safe);">TOTAL SALDO DI KURIR</span><b id="dailyTunai" style="font-size: 20px; color: var(--safe);">Rp0</b></div>
 
     <div class="glass-card">
-        <input type="text" id="noPesanan" placeholder="No Pesanan (#001)">
-        <input type="text" id="pembeli" placeholder="Nama Pembeli">
-        <input type="text" id="nohp" placeholder="WhatsApp (Mulai dari 0/62)">
-        <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
-        <input type="text" id="mapLink" placeholder="Link Map (Opsional)">
-        <select id="metodeBayar" onchange="toggleTotal()"><option value="COD">Metode: COD</option><option value="Transfer">Metode: Transfer</option></select>
-        <input type="number" id="total" placeholder="Harga COD (Rp)">
-        <button class="btn-main" onclick="tambah()">SIMPAN & CETAK BT</button>
+        <input type="text" id="noPesanan" placeholder="No Pesanan (#001)"><input type="text" id="pembeli" placeholder="Nama Pembeli"><input type="text" id="nohp" placeholder="WhatsApp"><textarea id="alamat" placeholder="Alamat Lengkap"></textarea><input type="text" id="mapLink" placeholder="Link Map (Opsional)"><select id="metodeBayar" onchange="toggleTotal()"><option value="COD">COD</option><option value="Transfer">Transfer</option></select><input type="number" id="total" placeholder="Harga COD (Rp)"><button class="btn-main" onclick="tambah()">SIMPAN & CETAK 80MM</button>
     </div>
 
-    <div class="glass-card">
-        <input type="number" id="jumlahSetoran" placeholder="Input Setoran Masuk (Rp)">
-        <button class="btn-main" style="background:var(--safe); color:white" onclick="setor()">TERIMA SETORAN</button>
-    </div>
-
-    <input type="text" id="searchBar" placeholder="🔍 Cari nama/no pesanan..." oninput="renderList()" style="width:100%; padding:12px; border-radius:12px; background:var(--glass); border:1px solid var(--gold); color:white; margin-bottom:15px; outline:none;">
+    <div class="glass-card"><input type="number" id="jumlahSetoran" placeholder="Input Setoran (Rp)"><button class="btn-main" style="background:var(--safe); color:white" onclick="setor()">TERIMA SETORAN</button></div>
+    <input type="text" id="searchBar" placeholder="🔍 Cari..." oninput="renderList()" style="width:100%; padding:12px; border-radius:12px; background:var(--glass); border:1px solid var(--gold); color:white; margin-bottom:15px;">
     <div id="adminList" class="glass-card">Memuat...</div>
-
-    <div id="modalFoto" class="modal-foto" onclick="this.style.display='none'">
-        <img id="imgBukti" src="">
-        <p style="color:var(--gold); margin-top:15px; font-weight:800; font-size:12px;">KLIK MANA SAJA UNTUK TUTUP</p>
-    </div>
-
     <div id="receipt-print"><div id="receipt-content"></div></div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
     <script>
         const firebaseConfig = { apiKey: "AIzaSyAVQGysGRlYJ2b4PekM3vaXKtx6UFvNlCk", databaseURL: "https://ej-tobacco-express-default-rtdb.asia-southeast1.firebasedatabase.app" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        
+        firebase.initializeApp(firebaseConfig); const db = firebase.database();
         let allOrders = [], totalSetoranGlobal = 0, currentFilter = "Semua", lastOrder = null, lastDateString = "";
-
-        function formatTglDB(date) {
-            const d = new Date(date);
-            const tgl = String(d.getDate()).padStart(2, '0');
-            const bln = String(d.getMonth() + 1).padStart(2, '0');
-            const thn = d.getFullYear();
-            return `${tgl}/${bln}/${thn}`;
-        }
-
-        function initDate() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = (now.getMonth() + 1).toString().padStart(2, '0');
-            const day = now.getDate().toString().padStart(2, '0');
-            document.getElementById('datePicker').value = `${year}-${month}-${day}`;
-            lastDateString = formatTglDB(now);
-        }
+        function formatTglDB(date) { const d = new Date(date); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
+        function initDate() { const n = new Date(); document.getElementById('datePicker').value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; lastDateString = formatTglDB(n); }
         initDate();
-
         function changeDate() { updateAll(); }
         function goToToday() { initDate(); updateAll(); }
-        
-        function setFilter(f) {
-            currentFilter = f;
-            document.querySelectorAll('.report-box').forEach(el => el.classList.remove('active'));
-            document.getElementById('f-' + f).classList.add('active');
-            updateAll();
-        }
-
-        function startClock() {
-            setInterval(() => {
-                const now = new Date();
-                document.getElementById('runningClock').innerText = now.toLocaleTimeString('id-ID');
-                const opsi = { day: 'numeric', month: 'short', year: 'numeric' };
-                document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', opsi).toUpperCase();
-                const checkToday = formatTglDB(now);
-                if (checkToday !== lastDateString) { lastDateString = checkToday; initDate(); updateAll(); }
-            }, 1000);
-        }
-
-        db.ref('pesanan').on('value', snap => {
-            const val = snap.val();
-            allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
-            db.ref('setoran').on('value', sSnap => {
-                totalSetoranGlobal = Object.values(sSnap.val() || {}).reduce((a, b) => a + b, 0);
-                updateAll();
-            });
-        });
-
-        function updateAll() {
-            const pickerVal = document.getElementById('datePicker').value;
-            const parts = pickerVal.split('-');
-            const tglTarget = `${parts[2]}/${parts[1]}/${parts[0]}`;
-            updateDashboard(tglTarget);
-            renderList(tglTarget);
-        }
-
-        function updateDashboard(tglTarget) {
-            let s = 0, g = 0, p = 0, codSukses = 0;
-            allOrders.forEach(o => {
-                if (o.tanggal === tglTarget) {
-                    if (o.status === 'Terkirim') s++;
-                    else if (o.status === 'Gagal') g++;
-                }
-                if (o.status !== 'Terkirim' && o.status !== 'Gagal') p++;
-                if (o.status === 'Terkirim' && o.metode === 'COD') codSukses += Number(o.total || 0);
-            });
-            document.getElementById('countSukses').innerText = s;
-            document.getElementById('countGagal').innerText = g;
-            document.getElementById('countProses').innerText = p;
-            document.getElementById('dailyTunai').innerText = "Rp" + (codSukses - totalSetoranGlobal).toLocaleString();
-        }
-
-        function renderList(tglTarget) {
-            const keyword = document.getElementById('searchBar').value.toLowerCase();
-            let html = "";
-            const filtered = allOrders.filter(o => {
-                const matchSearch = (o.namaPembeli || "").toLowerCase().includes(keyword) || (o.noPesanan || "").toLowerCase().includes(keyword);
-                let matchStatus = (currentFilter === "Semua") ? (o.status !== 'Terkirim' && o.status !== 'Gagal') : (o.status === currentFilter && o.tanggal === tglTarget);
-                return matchSearch && matchStatus;
-            });
-
-            if(filtered.length === 0) {
-                html = `<p style="text-align:center; opacity:0.5; padding:20px;">Kosong.</p>`;
-            } else {
-                filtered.forEach(o => {
-                    const wa = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-                    html += `<div class="order-item">
-                        <span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br>
-                        <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
-                        <small>${o.status} | Rp${Number(o.total).toLocaleString()}</small>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
-                            <a href="https://wa.me/${wa}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
-                            ${o.mapLink ? `<a href="${o.mapLink}" target="_blank" style="background:var(--blue); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">MAPS</a>` : `<div style="background:var(--glass); color:gray; padding:8px; border-radius:8px; text-align:center; font-size:10px;">NO MAPS</div>`}
-                        </div>
-                        <button style="background:var(--gold); width:100%; color:black; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">CETAK ULANG BT</button>
-                        <button style="background:var(--danger); width:100%; color:white; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="hapus('${o.id}')">HAPUS DATA</button>
-                    </div>`;
-                });
-            }
+        function setFilter(f) { currentFilter = f; document.querySelectorAll('.report-box').forEach(el => el.classList.remove('active')); document.getElementById('f-'+f).classList.add('active'); updateAll(); }
+        function startClock() { setInterval(() => { const now = new Date(); document.getElementById('runningClock').innerText = now.toLocaleTimeString('id-ID'); document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'}).toUpperCase(); if (formatTglDB(now) !== lastDateString) { lastDateString = formatTglDB(now); initDate(); updateAll(); } }, 1000); }
+        db.ref('pesanan').on('value', snap => { const val = snap.val(); allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : []; db.ref('setoran').on('value', sSnap => { totalSetoranGlobal = Object.values(sSnap.val() || {}).reduce((a, b) => a + b, 0); updateAll(); }); });
+        function updateAll() { const p = document.getElementById('datePicker').value.split('-'); const tgl = `${p[2]}/${p[1]}/${p[0]}`; updateDashboard(tgl); renderList(tgl); }
+        function updateDashboard(tgl) { let s=0, g=0, p=0, cod=0; allOrders.forEach(o => { if (o.tanggal === tgl) { if (o.status === 'Terkirim') s++; else if (o.status === 'Gagal') g++; } if (o.status !== 'Terkirim' && o.status !== 'Gagal') p++; if (o.status === 'Terkirim' && o.metode === 'COD') cod += Number(o.total || 0); }); document.getElementById('countSukses').innerText = s; document.getElementById('countGagal').innerText = g; document.getElementById('countProses').innerText = p; document.getElementById('dailyTunai').innerText = "Rp" + (cod - totalSetoranGlobal).toLocaleString(); }
+        function renderList(tgl) {
+            const key = document.getElementById('searchBar').value.toLowerCase(); let html = "";
+            const filtered = allOrders.filter(o => { const mS = (o.namaPembeli || "").toLowerCase().includes(key) || (o.noPesanan || "").toLowerCase().includes(key); const mSt = (currentFilter === "Semua") ? (o.status !== 'Terkirim' && o.status !== 'Gagal') : (o.status === currentFilter && o.tanggal === tgl); return mS && mSt; });
+            if(filtered.length === 0) html = `<p style="text-align:center; opacity:0.5; padding:20px;">Kosong.</p>`;
+            else filtered.forEach(o => { const wa = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62'); html += `<div class="order-item"><span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br><b>${o.noPesanan} - ${o.namaPembeli}</b><br><small>${o.status} | Rp${Number(o.total).toLocaleString()}</small><div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;"><a href="https://wa.me/${wa}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>${o.mapLink ? `<a href="${o.mapLink}" target="_blank" style="background:var(--blue); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">MAPS</a>` : `<div style="background:var(--glass); color:gray; padding:8px; border-radius:8px; text-align:center; font-size:10px;">NO MAPS</div>`}</div><button style="background:var(--gold); width:100%; color:black; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">RE-PRINT 80MM</button><button style="background:var(--danger); width:100%; color:white; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="hapus('${o.id}')">HAPUS</button></div>`; });
             document.getElementById('adminList').innerHTML = html;
         }
-
         function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
+        function tambah() { const n = new Date(); const d = { noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), namaPembeli: document.getElementById('pembeli').value, nohp: document.getElementById('nohp').value, alamat: document.getElementById('alamat').value, mapLink: document.getElementById('mapLink').value, total: document.getElementById('total').value || 0, metode: document.getElementById('metodeBayar').value, status: 'Menunggu', tanggal: formatTglDB(n), waktu: n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) }; if(!d.namaPembeli) return alert("Nama wajib!"); db.ref('pesanan').push(d).then(() => { lastOrder = d; executePrint(); document.querySelectorAll('input, textarea').forEach(i => i.value = ""); }); }
+        function reprint(id) { lastOrder = allOrders.find(o => o.id === id); if(lastOrder) executePrint(); }
 
-        function tambah() {
-            const n = new Date();
-            const d = { 
-                noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), 
-                namaPembeli: document.getElementById('pembeli').value, 
-                nohp: document.getElementById('nohp').value, 
-                alamat: document.getElementById('alamat').value, 
-                mapLink: document.getElementById('mapLink').value, 
-                total: document.getElementById('total').value || 0, 
-                metode: document.getElementById('metodeBayar').value, 
-                status: 'Menunggu', 
-                tanggal: formatTglDB(n), 
-                waktu: n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) 
-            };
-            if(!d.namaPembeli) return alert("Nama wajib!");
-            db.ref('pesanan').push(d).then(() => { 
-                lastOrder = d; 
-                executePrint(); 
-                document.querySelectorAll('input, textarea').forEach(i => i.value = ""); 
-            });
-        }
-
-        function reprint(id) { 
-            lastOrder = allOrders.find(o => o.id === id); 
-            if(lastOrder) executePrint(); 
-        }
-
-        // LOGIKA BARU UNTUK PRINTER BLUETOOTH (RAWBT)
+        // LOGIKA CETAK RESI 80MM + BARCODE
         function executePrint() {
             if(!lastOrder) return;
+            const cleanNo = (lastOrder.noPesanan || "").replace(/[^a-zA-Z0-9]/g, "");
 
-            // 1. Susun Teks Polos untuk Printer Thermal
-            const teksPrint = 
-                `      EJ TOBACCO\n` +
-                `   Delivery Express\n` +
-                `--------------------------------\n` +
-                `ID   : ${lastOrder.noPesanan}\n` +
-                `TGL  : ${lastOrder.tanggal}\n` +
-                `JAM  : ${lastOrder.waktu}\n` +
-                `--------------------------------\n` +
-                `NAMA : ${lastOrder.namaPembeli}\n` +
-                `WA   : ${lastOrder.nohp}\n` +
-                `ALAMAT:\n${lastOrder.alamat}\n` +
-                `--------------------------------\n` +
-                `METODE : ${lastOrder.metode}\n` +
-                `TOTAL  : Rp${Number(lastOrder.total).toLocaleString()}\n` +
-                `--------------------------------\n` +
-                `   TERIMA KASIH\n\n\n\n`;
+            // Menggunakan sintaks RawBT untuk lebar 80mm
+            const teks80mm = 
+                `[C]<font size="big"><b>EJ TOBACCO EXPRESS</b></font>\n` +
+                `[C]"Pilihan Penikmat Bakau Terpercaya"\n` +
+                `[C]================================================\n` +
+                `[C]<font size="big"><b>NO. RESI : ${lastOrder.noPesanan}</b></font>\n` +
+                `[C]================================================\n` +
+                `[L]<b>PENERIMA:</b>\n` +
+                `[L]${lastOrder.namaPembeli}\n` +
+                `[L]No. HP : ${lastOrder.nohp}\n\n` +
+                `[L]<b>ALAMAT PENGIRIMAN:</b>\n` +
+                `[L]${lastOrder.alamat}\n` +
+                `[C]================================================\n` +
+                `[L]METODE PEMBAYARAN: ${lastOrder.metode}\n` +
+                `[L]TOTAL TAGIHAN    : Rp${Number(lastOrder.total).toLocaleString()}\n` +
+                `[C]================================================\n` +
+                
+                // BARCODE: Lebar diatur ke 3 (untuk kertas 80mm agar lebih terlihat proporsional)
+                `[C][b]code128,3,80,${cleanNo},yes\n\n` +
 
-            // 2. Kirim ke Aplikasi RawBT (Android)
-            const S = "rawbt:" + encodeURI(teksPrint);
+                `[C]------------------------------------------------\n` +
+                `[C]<font size="big"><b>STATUS: ${lastOrder.status.toUpperCase()}</b></font>\n` +
+                `[C]------------------------------------------------\n` +
+                `[C]Tgl Cetak: ${lastOrder.tanggal} ${lastOrder.waktu}\n` +
+                `[C]Terima kasih atas pesanan Anda!\n\n\n\n\n`;
+
+            const S = "rawbt:" + encodeURI(teks80mm);
             window.location.href = S;
 
-            // 3. Tampilkan di layar sebagai konfirmasi
-            document.getElementById('receipt-content').innerHTML = `<pre style="font-size:10px; color:black;">${teksPrint}</pre>`;
+            document.getElementById('receipt-content').innerHTML = `
+                <div style="background:#fff; color:#000; padding:20px; font-family:monospace; border:2px solid #000; width:350px; margin:auto; font-size:12px;">
+                    <div style="text-align:center; font-weight:bold; font-size:16px;">EJ TOBACCO EXPRESS</div>
+                    <div style="border-top:2px solid #000; margin:10px 0;"></div>
+                    <div style="font-weight:bold;">RESI: ${lastOrder.noPesanan}</div>
+                    <div style="margin-top:10px;"><b>PENERIMA:</b><br>${lastOrder.namaPembeli} (${lastOrder.nohp})</div>
+                    <div style="margin-top:5px;"><b>ALAMAT:</b><br>${lastOrder.alamat}</div>
+                    <div style="border-top:1px solid #000; margin:10px 0;"></div>
+                    <div style="font-weight:bold; font-size:14px;">TOTAL COD: Rp${Number(lastOrder.total).toLocaleString()}</div>
+                    <div style="background:#000; color:#fff; padding:10px; text-align:center; margin-top:15px; letter-spacing:5px;">BARCODE</div>
+                </div>
+            `;
         }
 
-        function setor() { 
-            const n = new Date();
-            const dK = formatTglDB(n).replace(/\//g, '-');
-            const j = Number(document.getElementById('jumlahSetoran').value); 
-            db.ref('setoran/' + dK).transaction(cv => (cv || 0) + j).then(() => { alert("Setoran Diterima!"); document.getElementById('jumlahSetoran').value = ""; }); 
-        }
-
+        function setor() { const n = new Date(); const dK = formatTglDB(n).replace(/\//g, '-'); const j = Number(document.getElementById('jumlahSetoran').value); db.ref('setoran/' + dK).transaction(cv => (cv || 0) + j).then(() => { alert("Setoran Diterima!"); document.getElementById('jumlahSetoran').value = ""; }); }
         function hapus(id) { if(confirm("Hapus?")) db.ref('pesanan/' + id).remove(); }
         startClock();
     </script>
