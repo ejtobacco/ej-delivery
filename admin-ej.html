@@ -14,6 +14,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: var(--text-main); padding: 15px; padding-bottom: 50px; }
         
+        /* Header Logo Tulisan */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .logo-text-container { display: flex; flex-direction: column; gap: 2px; }
         .main-logo-text { color: var(--gold); font-weight: 800; font-size: 20px; letter-spacing: 1px; text-transform: uppercase; }
@@ -26,16 +27,19 @@
         .report-box b { display: block; font-size: 14px; margin-top: 4px; }
 
         .glass-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
-        input, textarea, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; color: white; margin-bottom: 10px; outline: none; }
+        input, textarea, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; color: white; margin-bottom: 10px; outline: none; font-size: 14px; }
         .btn-main { background: linear-gradient(135deg, #F7E08C, #D4AF37); color: #000; border: none; padding: 14px; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; }
         
         .order-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; }
-        .btn-small { padding: 10px; border-radius: 8px; font-weight: 800; font-size: 10px; text-align: center; color: white; border: none; cursor: pointer; }
+        .btn-small { padding: 10px; border-radius: 8px; font-weight: 800; font-size: 10px; text-align: center; color: white; border: none; cursor: pointer; text-decoration: none; }
         
+        /* Modal Foto Bukti */
         .modal-foto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; }
         .modal-foto img { max-width: 90%; max-height: 70%; border: 2px solid var(--gold); border-radius: 15px; }
         
+        /* Prompt WA */
         #waPrompt { position:fixed; bottom:20px; left:20px; right:20px; background:var(--wa); color:white; padding:20px; border-radius:15px; text-align:center; z-index:10000; box-shadow:0 10px 30px rgba(0,0,0,0.5); display:none; }
+        #receipt-print { display: none; }
     </style>
 </head>
 <body>
@@ -75,15 +79,15 @@
         <input type="text" id="mapLink" placeholder="Link Google Maps (Opsional)">
         <select id="metodeBayar" onchange="toggleTotal()"><option value="COD">Metode: COD</option><option value="Transfer">Metode: Transfer</option></select>
         <input type="number" id="total" placeholder="Harga COD (Rp)">
-        <button class="btn-main" onclick="tambah()">SIMPAN & PRINT</button>
+        <button class="btn-main" onclick="tambah()">SIMPAN & PRINT RESI</button>
     </div>
 
     <div class="glass-card">
-        <input type="number" id="jumlahSetoran" placeholder="Input Setoran (Rp)">
+        <input type="number" id="jumlahSetoran" placeholder="Input Setoran Masuk (Rp)">
         <button class="btn-main" style="background:var(--safe); color:white" onclick="setor()">TERIMA SETORAN</button>
     </div>
 
-    <input type="text" id="searchBar" placeholder="🔍 Cari nama/resi..." oninput="renderList()" style="width:100%; padding:12px; border-radius:12px; background:var(--glass); border:1px solid var(--gold); color:white; margin-bottom:15px; outline:none;">
+    <input type="text" id="searchBar" placeholder="🔍 Cari nama atau no resi..." oninput="renderList()" style="width:100%; padding:12px; border-radius:12px; background:var(--glass); border:1px solid var(--gold); color:white; margin-bottom:15px; outline:none;">
     
     <div id="adminList" class="glass-card">Memuat data...</div>
 
@@ -93,7 +97,7 @@
     </div>
 
     <div id="waPrompt">
-        <p id="waText" style="font-size:12px; margin-bottom:10px;">✅ Data Tersimpan!</p>
+        <p id="waText" style="font-size:12px; margin-bottom:10px;">✅ Data Disimpan!</p>
         <button id="btnWAOpen" style="background:white; color:black; border:none; padding:10px 20px; border-radius:10px; font-weight:800; width:100%;">KIRIM WA SEKARANG</button>
         <p onclick="document.getElementById('waPrompt').style.display='none'" style="margin-top:10px; font-size:10px; opacity:0.7; cursor:pointer;">Nanti Saja</p>
     </div>
@@ -170,26 +174,36 @@
             });
 
             if(filtered.length === 0) {
-                html = `<p style="text-align:center; opacity:0.5; padding:20px;">Tidak ada data.</p>`;
+                html = `<p style="text-align:center; opacity:0.5; padding:20px;">Belum ada pesanan.</p>`;
             } else {
                 filtered.forEach(o => {
                     const waNum = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
                     
-                    // PENAMBAHAN TAMPILAN ALASAN TUNDA
-                    let alasanTundaHtml = o.alasanTunda ? `<div style="color:var(--warning); font-size:10px; font-weight:800; margin-top:4px;">⚠️ ALASAN: ${o.alasanTunda}</div>` : "";
+                    // FITUR KENDALA & ALASAN (SINKRON DENGAN KURIR)
+                    let infoKendala = "";
+                    const teksAlasan = o.alasanTunda || o.kendala || o.alasan || "";
+                    if (teksAlasan && (o.status === 'Tunda' || o.status === 'Gagal')) {
+                        infoKendala = `
+                            <div style="background: rgba(250, 204, 21, 0.1); border-left: 3px solid var(--warning); padding: 8px; margin: 10px 0; border-radius: 8px;">
+                                <div style="color: var(--warning); font-size: 9px; font-weight: 800; text-transform: uppercase;">⚠️ Alasan ${o.status}:</div>
+                                <div style="color: white; font-size: 11px; margin-top:2px;">${teksAlasan}</div>
+                            </div>`;
+                    }
 
                     html += `<div class="order-item">
                         <span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br>
                         <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
                         <small>${o.status} | ${o.metode} | Rp${Number(o.total).toLocaleString()}</small>
-                        ${alasanTundaHtml}
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
-                            <a href="https://wa.me/${waNum}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
-                            <button style="background:var(--gold); color:black; border:none; padding:8px; border-radius:8px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">PRINT</button>
+                        
+                        ${infoKendala}
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:10px;">
+                            <a href="https://wa.me/${waNum}" target="_blank" style="background:var(--wa); text-decoration:none; color:white; padding:10px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WHATSAPP</a>
+                            <button style="background:var(--gold); color:black; border:none; padding:10px; border-radius:8px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">PRINT RESI</button>
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:5px;">
-                            ${o.buktiFoto ? `<button class="btn-small" style="background:var(--safe);" onclick="viewFoto('${o.buktiFoto}')">LIHAT FOTO</button>` : `<div style="background:var(--glass); color:gray; padding:8px; border-radius:8px; text-align:center; font-size:10px;">BELUM ADA FOTO</div>`}
-                            <button style="background:var(--danger); color:white; border:none; padding:8px; border-radius:8px; font-size:10px; font-weight:800;" onclick="hapus('${o.id}')">HAPUS</button>
+                            ${o.buktiFoto ? `<button class="btn-small" style="background:var(--safe);" onclick="viewFoto('${o.buktiFoto}')">🖼️ BUKTI FOTO</button>` : `<div style="background:var(--glass); color:gray; padding:10px; border-radius:8px; text-align:center; font-size:9px;">FOTO BELUM ADA</div>`}
+                            <button style="background:var(--danger); color:white; border:none; padding:10px; border-radius:8px; font-size:10px; font-weight:800;" onclick="hapus('${o.id}')">HAPUS</button>
                         </div>
                     </div>`;
                 });
@@ -200,6 +214,7 @@
         function viewFoto(src) { document.getElementById('imgBukti').src = src; document.getElementById('modalFoto').style.display = 'flex'; }
         function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
 
+        // FUNGSI SIMPAN & PROSES
         function tambah() {
             const n = new Date();
             const nohpVal = document.getElementById('nohp').value;
@@ -215,7 +230,7 @@
                 tanggal: formatTglDB(n), 
                 waktu: n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) 
             };
-            if(!d.namaPembeli || !d.nohp) return alert("Nama & WA wajib!");
+            if(!d.namaPembeli || !d.nohp) return alert("Nama & WA wajib diisi!");
             
             db.ref('pesanan').push(d).then(() => { 
                 lastOrder = d; 
@@ -225,6 +240,7 @@
             });
         }
 
+        // FUNGSI PRINT 80MM (RAWBT)
         function executePrint() {
             if(!lastOrder) return;
             const cleanNo = (lastOrder.noPesanan || "").replace(/[^a-zA-Z0-9]/g, "");
@@ -245,11 +261,12 @@
                 `[C]================================================\n` +
                 `[C][b]code128,3,80,${cleanNo},yes\n\n` +
                 `[C]------------------------------------------------\n` +
-                `[C]Tgl: ${lastOrder.tanggal} ${lastOrder.waktu}\n` +
+                `[C]Tgl Cetak: ${lastOrder.tanggal} ${lastOrder.waktu}\n` +
                 `[C]Terima kasih atas pesanan Anda!\n\n\n\n\n`;
             window.location.href = "rawbt:" + encodeURI(teks80mm);
         }
 
+        // FUNGSI WA NOTIF
         function showWANotif(d) {
             const waNumber = String(d.nohp).replace(/\D/g, '').replace(/^0/, '62');
             const linkMaps = d.mapLink ? `\n📍 Map: ${d.mapLink}` : "";
@@ -263,7 +280,7 @@
 
         function reprint(id) { lastOrder = allOrders.find(o => o.id === id); if(lastOrder) executePrint(); }
         function setor() { const n = new Date(); const dK = formatTglDB(n).replace(/\//g, '-'); const j = Number(document.getElementById('jumlahSetoran').value); db.ref('setoran/' + dK).transaction(cv => (cv || 0) + j).then(() => { alert("Setoran Diterima!"); document.getElementById('jumlahSetoran').value = ""; }); }
-        function hapus(id) { if(confirm("Hapus pesanan ini?")) db.ref('pesanan/' + id).remove(); }
+        function hapus(id) { if(confirm("Hapus pesanan ini secara permanen?")) db.ref('pesanan/' + id).remove(); }
         
         startClock();
     </script>
