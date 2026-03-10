@@ -27,7 +27,7 @@
         .modal-foto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
         .modal-foto img { max-width: 90%; max-height: 70%; border: 2px solid var(--gold); border-radius: 15px; }
         
-        /* DESAIN RESI CETAK */
+        /* CETAK RESI */
         #receipt-print { display: none; }
         @media print {
             body * { visibility: hidden; background: none !important; color: #000 !important; }
@@ -52,7 +52,7 @@
 
     <div style="display: flex; gap: 5px; margin-bottom: 15px;">
         <input type="date" id="datePicker" onchange="changeDate()" style="border-color: var(--gold); background: rgba(212, 175, 55, 0.1); color: var(--gold); text-align: center; font-weight: 800; flex: 1; cursor: pointer;">
-        <button onclick="goToToday()" style="background: var(--gold); border: none; border-radius: 12px; padding: 0 15px; font-weight: 800; font-size: 10px; color: black;">HARI INI</button>
+        <button onclick="goToToday()" style="background: var(--gold); border: none; border-radius: 12px; padding: 0 15px; font-weight: 800; font-size: 10px; color: black; cursor: pointer;">HARI INI</button>
     </div>
 
     <div class="report-grid">
@@ -71,29 +71,26 @@
         <input type="text" id="pembeli" placeholder="Nama Pembeli">
         <input type="text" id="nohp" placeholder="WhatsApp">
         <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
-        <input type="text" id="mapLink" placeholder="Link Map (Opsional)">
+        <input type="text" id="mapLink" placeholder="Link Map Manual (Opsional)">
         <select id="metodeBayar" onchange="toggleTotal()"><option value="COD">COD</option><option value="Transfer">Transfer</option></select>
         <input type="number" id="total" placeholder="Harga COD (Rp)">
         <button class="btn-main" onclick="tambah()">SIMPAN & CETAK</button>
     </div>
 
     <div class="glass-card">
-        <input type="number" id="jumlahSetoran" placeholder="Input Setoran (Rp)">
+        <input type="number" id="jumlahSetoran" placeholder="Input Setoran Masuk (Rp)">
         <button class="btn-main" style="background:var(--safe); color:white" onclick="setor()">TERIMA SETORAN</button>
     </div>
 
     <input type="text" id="searchBar" placeholder="🔍 Cari nama/no pesanan..." oninput="renderList()" style="width:100%; padding:12px; border-radius:12px; background:var(--glass); border:1px solid var(--gold); color:white; margin-bottom:15px; outline:none;">
-    
     <div id="adminList" class="glass-card">Memuat...</div>
 
     <div id="modalFoto" class="modal-foto" onclick="this.style.display='none'">
         <img id="imgBukti" src="">
-        <p style="color:var(--gold); margin-top:15px; font-weight:800; font-size:12px;">KLIK DIMANA SAJA UNTUK TUTUP</p>
+        <p style="color:var(--gold); margin-top:15px; font-weight:800; font-size:12px;">KLIK MANA SAJA UNTUK TUTUP</p>
     </div>
 
-    <div id="receipt-print">
-        <div id="receipt-content"></div>
-    </div>
+    <div id="receipt-print"><div id="receipt-content"></div></div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
@@ -142,7 +139,6 @@
             const val = snap.val();
             allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
             
-            // Auto-clean 90 Hari
             const hariIni = new Date();
             allOrders.forEach(o => {
                 if (o.tanggal) {
@@ -179,7 +175,8 @@
             document.getElementById('countSukses').innerText = s;
             document.getElementById('countGagal').innerText = g;
             document.getElementById('countProses').innerText = p;
-            document.getElementById('dailyTunai').innerText = "Rp" + (totalCodSuksesGlobal - totalSetoranGlobal).toLocaleString();
+            const saldoKurir = totalCodSuksesGlobal - totalSetoranGlobal;
+            document.getElementById('dailyTunai').innerText = "Rp" + saldoKurir.toLocaleString();
         }
 
         function renderList(dateStr) {
@@ -193,7 +190,7 @@
 
             filtered.forEach(o => {
                 const wa = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-                const mapsUrl = `http://googleusercontent.com/maps.google.com/maps?q=${encodeURIComponent(o.alamat || "")}`;
+                const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat || "")}`;
                 html += `<div class="order-item">
                     <span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br>
                     <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
@@ -204,7 +201,7 @@
                         <a href="${mapsUrl}" target="_blank" style="background:var(--blue); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">MAPS</a>
                     </div>
                     <button style="background:var(--danger); width:100%; color:white; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="hapus('${o.id}')">HAPUS</button>
-                    <button style="background:var(--gold); width:100%; color:black; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">CETAK ULANG</button>
+                    <button style="background:var(--gold); width:100%; color:black; border:none; padding:8px; border-radius:8px; margin-top:5px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">CETAK RESI</button>
                 </div>`;
             });
             document.getElementById('adminList').innerHTML = html || `<p style="text-align:center; opacity:0.5;">Kosong.</p>`;
@@ -228,11 +225,7 @@
                 waktu: fisikDate.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) 
             };
             if(!d.namaPembeli) return alert("Nama wajib!");
-            db.ref('pesanan').push(d).then(() => { 
-                lastOrder = d; 
-                executePrint(); 
-                document.querySelectorAll('input, textarea').forEach(i => i.value = ""); 
-            });
+            db.ref('pesanan').push(d).then(() => { lastOrder = d; executePrint(); document.querySelectorAll('input, textarea').forEach(i => i.value = ""); });
         }
 
         function reprint(id) {
