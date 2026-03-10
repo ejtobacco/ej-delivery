@@ -100,23 +100,22 @@
         let allOrders = [], totalSetoranGlobal = 0, currentFilter = "Semua", lastOrder = null;
         let lastDateString = "";
 
-        // Fungsi Format Tanggal Standar Database (dd/mm/yyyy)
-        function formatDateToDB(date) {
+        // FUNGSI KUNCI: STANDAR DD/MM/YYYY
+        function formatTglDB(date) {
             const d = new Date(date);
-            const day = d.getDate().toString().padStart(2, '0');
-            const month = (d.getMonth() + 1).toString().padStart(2, '0');
-            const year = d.getFullYear();
-            return `${day}/${month}/${year}`;
+            const tgl = String(d.getDate()).padStart(2, '0');
+            const bln = String(d.getMonth() + 1).padStart(2, '0');
+            const thn = d.getFullYear();
+            return `${tgl}/${bln}/${thn}`;
         }
 
-        // Set Awal Kalender
         function initDate() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = (now.getMonth() + 1).toString().padStart(2, '0');
-            const day = now.getDate().toString().padStart(2, '0');
-            document.getElementById('datePicker').value = `${year}-${month}-${day}`;
-            lastDateString = formatDateToDB(now);
+            const n = new Date();
+            const y = n.getFullYear();
+            const m = String(n.getMonth() + 1).padStart(2, '0');
+            const d = String(n.getDate()).padStart(2, '0');
+            document.getElementById('datePicker').value = `${y}-${m}-${d}`;
+            lastDateString = formatTglDB(n);
         }
         initDate();
 
@@ -141,7 +140,7 @@
                 const opsi = { day: 'numeric', month: 'short', year: 'numeric' };
                 document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', opsi).toUpperCase();
                 
-                const checkToday = formatDateToDB(now);
+                const checkToday = formatTglDB(now);
                 if (checkToday !== lastDateString) {
                     lastDateString = checkToday;
                     initDate(); 
@@ -154,7 +153,6 @@
             const val = snap.val();
             allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
             
-            // Auto-clean 90 Hari
             const hariIni = new Date();
             allOrders.forEach(o => {
                 if (o.tanggal) {
@@ -173,54 +171,48 @@
 
         function updateAll() {
             const pickerVal = document.getElementById('datePicker').value;
-            // Ubah format input kalender (yyyy-mm-dd) jadi (dd/mm/yyyy)
             const parts = pickerVal.split('-');
-            const targetTanggal = `${parts[2]}/${parts[1]}/${parts[0]}`;
-            
-            updateDashboard(targetTanggal);
-            renderList(targetTanggal);
+            const tglTarget = `${parts[2]}/${parts[1]}/${parts[0]}`;
+            updateDashboard(tglTarget);
+            renderList(tglTarget);
         }
 
-        function updateDashboard(targetTanggal) {
-            let s = 0, g = 0, p = 0, totalCodSuksesGlobal = 0;
+        function updateDashboard(tglTarget) {
+            let s = 0, g = 0, p = 0, codSukses = 0;
             allOrders.forEach(o => {
-                if (o.tanggal === targetTanggal) {
+                if (o.tanggal === tglTarget) {
                     if (o.status === 'Terkirim') s++;
                     else if (o.status === 'Gagal') g++;
                 }
                 if (o.status !== 'Terkirim' && o.status !== 'Gagal') p++;
-                if (o.status === 'Terkirim' && o.metode === 'COD') totalCodSuksesGlobal += Number(o.total || 0);
+                if (o.status === 'Terkirim' && o.metode === 'COD') codSukses += Number(o.total || 0);
             });
             document.getElementById('countSukses').innerText = s;
             document.getElementById('countGagal').innerText = g;
             document.getElementById('countProses').innerText = p;
-            const saldoKurir = totalCodSuksesGlobal - totalSetoranGlobal;
-            document.getElementById('dailyTunai').innerText = "Rp" + (saldoKurir).toLocaleString();
+            document.getElementById('dailyTunai').innerText = "Rp" + (codSukses - totalSetoranGlobal).toLocaleString();
         }
 
-        function renderList(targetTanggal) {
+        function renderList(tglTarget) {
             const keyword = document.getElementById('searchBar').value.toLowerCase();
             let html = "";
             const filtered = allOrders.filter(o => {
                 const matchSearch = (o.namaPembeli || "").toLowerCase().includes(keyword) || (o.noPesanan || "").toLowerCase().includes(keyword);
-                let matchStatus = (currentFilter === "Semua") ? (o.status !== 'Terkirim' && o.status !== 'Gagal') : (o.status === currentFilter && o.tanggal === targetTanggal);
+                let matchStatus = (currentFilter === "Semua") ? (o.status !== 'Terkirim' && o.status !== 'Gagal') : (o.status === currentFilter && o.tanggal === tglTarget);
                 return matchSearch && matchStatus;
             });
 
             if(filtered.length === 0) {
-                html = `<p style="text-align:center; opacity:0.5; padding:20px;">Belum ada data ${currentFilter} untuk tanggal ${targetTanggal}</p>`;
+                html = `<p style="text-align:center; opacity:0.5; padding:20px;">Belum ada data ${currentFilter} untuk tanggal ${tglTarget}</p>`;
             } else {
                 filtered.forEach(o => {
                     const wa = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-                    const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.alamat || "")}`;
-                    
+                    const mapsUrl = (o.mapLink && o.mapLink.includes('http')) ? o.mapLink : `https://www.google.com/maps/search/${encodeURIComponent(o.alamat || "")}`;
                     html += `<div class="order-item">
                         <span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br>
                         <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
                         <small>${o.status} | Rp${Number(o.total).toLocaleString()}</small>
-                        
                         ${o.catatan ? `<div style="background:rgba(212, 175, 55, 0.1); padding:6px; border-radius:8px; margin-top:8px; border-left:3px solid var(--gold);"><p style="font-size:10px; color:var(--gold); font-weight:800;">📝 ${o.catatan}</p></div>` : ''}
-
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
                             <a href="https://wa.me/${wa}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
                             <a href="${mapsUrl}" target="_blank" style="background:var(--blue); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">MAPS</a>
@@ -238,19 +230,8 @@
         function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
 
         function tambah() {
-            const fisikDate = new Date();
-            const d = { 
-                noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), 
-                namaPembeli: document.getElementById('pembeli').value, 
-                nohp: document.getElementById('nohp').value, 
-                alamat: document.getElementById('alamat').value, 
-                mapLink: document.getElementById('mapLink').value, 
-                total: document.getElementById('total').value || 0, 
-                metode: document.getElementById('metodeBayar').value, 
-                status: 'Menunggu', 
-                tanggal: formatDateToDB(fisikDate), 
-                waktu: fisikDate.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) 
-            };
+            const n = new Date();
+            const d = { noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), namaPembeli: document.getElementById('pembeli').value, nohp: document.getElementById('nohp').value, alamat: document.getElementById('alamat').value, mapLink: document.getElementById('mapLink').value, total: document.getElementById('total').value || 0, metode: document.getElementById('metodeBayar').value, status: 'Menunggu', tanggal: formatTglDB(n), waktu: n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) };
             if(!d.namaPembeli) return alert("Nama wajib!");
             db.ref('pesanan').push(d).then(() => { lastOrder = d; executePrint(); document.querySelectorAll('input, textarea').forEach(i => i.value = ""); });
         }
@@ -262,29 +243,13 @@
 
         function executePrint() {
             if(!lastOrder) return;
-            document.getElementById('receipt-content').innerHTML = `
-                <div style="text-align:center; font-weight:bold; font-size:20px;">EJ TOBACCO</div>
-                <div style="text-align:center; font-size:12px;">Delivery Express Service</div>
-                <div class="line"></div>
-                <div style="font-size:14px;">
-                    <b>ID: ${lastOrder.noPesanan}</b><br>
-                    TGL: ${lastOrder.tanggal} | ${lastOrder.waktu}<br>
-                    <div class="line"></div>
-                    PELANGGAN: ${lastOrder.namaPembeli}<br>
-                    WA: ${lastOrder.nohp}<br>
-                    ALAMAT: ${lastOrder.alamat}<br>
-                    <div class="line"></div>
-                    METODE: ${lastOrder.metode}<br>
-                    <span style="font-size:18px; font-weight:bold;">TOTAL: Rp${Number(lastOrder.total).toLocaleString()}</span>
-                </div>
-                <div class="line"></div>
-                <div style="text-align:center; font-size:11px;">Simpan resi ini sebagai bukti.<br>Terima kasih!</div>
-            `;
+            document.getElementById('receipt-content').innerHTML = `<div style="text-align:center; font-weight:bold; font-size:20px;">EJ TOBACCO</div><div style="text-align:center; font-size:12px;">Delivery Express</div><div class="line"></div><div style="font-size:14px;"><b>ID: ${lastOrder.noPesanan}</b><br>TGL: ${lastOrder.tanggal} | ${lastOrder.waktu}<br><div class="line"></div>PELANGGAN: ${lastOrder.namaPembeli}<br>WA: ${lastOrder.nohp}<br>ALAMAT: ${lastOrder.alamat}<br><div class="line"></div>METODE: ${lastOrder.metode}<br><span style="font-size:18px; font-weight:bold;">TOTAL: Rp${Number(lastOrder.total).toLocaleString()}</span></div><div class="line"></div><div style="text-align:center; font-size:11px;">Terima kasih!</div>`;
             setTimeout(() => { window.print(); }, 500);
         }
 
         function setor() { 
-            const dayKey = formatDateToDB(new Date()).replace(/\/| /g, '-');
+            const n = new Date();
+            const dayKey = formatTglDB(n).replace(/\/| /g, '-');
             const j = Number(document.getElementById('jumlahSetoran').value); 
             db.ref('setoran/' + dayKey).transaction(cv => (cv || 0) + j).then(() => { alert("Setoran Diterima!"); document.getElementById('jumlahSetoran').value = ""; }); 
         }
