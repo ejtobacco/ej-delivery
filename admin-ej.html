@@ -227,7 +227,6 @@
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:5px;">
                             ${o.buktiFoto ? `<button class="btn-small" style="background:var(--safe);" onclick="viewFoto('${o.buktiFoto}')">LIHAT FOTO</button>` : `<div style="background:var(--glass); color:gray; padding:8px; border-radius:8px; text-align:center; font-size:10px;">BELUM ADA FOTO</div>`}
-                    
 ${o.status === 'Terkirim' ? 
     `<div style="background:rgba(255,255,255,0.05); color:#666; padding:10px; border-radius:10px; text-align:center; font-size:10px; font-weight:800; border:1px solid rgba(255,255,255,0.1); cursor:not-allowed;">🔒 DATA TERKUNCI</div>` : 
     `<button onclick="hapus('${o.id}')" style="background:rgba(239,68,68,0.1); color:#EF4444; border:1px solid #EF4444; padding:10px; border-radius:10px; font-size:10px; font-weight:800; cursor:pointer; width:100%;">HAPUS PESANAN</button>`
@@ -351,6 +350,7 @@ function pressPin(val) {
     </script>
 </body>
 </html>
+
 
 
 
