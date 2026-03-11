@@ -57,6 +57,14 @@
         <b id="totalCOD">Rp 0</b>
     </div>
 
+    <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+<div id="notifBanner" onclick="aktifkanSuara()" style="background: rgba(212, 175, 55, 0.1); border: 2px dashed var(--gold); color: var(--gold); padding: 18px; text-align: center; border-radius: 20px; margin: 10px 0 20px 0; cursor: pointer; transition: 0.3s;">
+    <div style="font-size: 24px; margin-bottom: 5px;">🔔</div>
+    <div style="font-weight: 800; font-size: 12px; letter-spacing: 1px;">AKTIFKAN SUARA NOTIFIKASI</div>
+    <div style="font-size: 9px; opacity: 0.6; margin-top: 5px;">(Klik agar HP berbunyi saat ada pesanan baru)</div>
+</div>
+
     <input type="text" id="searchOrder" class="search-box" placeholder="🔍 Cari nama pembeli..." oninput="renderOrders()">
 
     <div class="tab-menu">
@@ -219,6 +227,55 @@
             document.getElementById('imgPreview').src = src;
             document.getElementById('modalView').style.display = 'flex';
         }
+
+        // --- SISTEM DETEKSI PESANAN BARU ---
+let jumlahPesananTerakhir = 0;
+let izinSuara = false;
+
+// Fungsi untuk memberi izin ke browser agar boleh bunyi
+function aktifkanSuara() {
+    const audio = document.getElementById('notifSound');
+    audio.play().then(() => {
+        audio.pause(); // Tes putar sebentar lalu matikan
+        izinSuara = true;
+        
+        // Ubah tampilan tombol jadi hijau sukses
+        const banner = document.getElementById('notifBanner');
+        banner.style.background = "rgba(0, 255, 136, 0.1)";
+        banner.style.borderColor = "var(--safe)";
+        banner.style.color = "var(--safe)";
+        banner.innerHTML = "✅ NOTIFIKASI SUARA AKTIF";
+        
+        // Biarkan 2 detik lalu hilangkan tombolnya agar tidak menuhi layar
+        setTimeout(() => { banner.style.display = 'none'; }, 2000);
+    }).catch(err => {
+        alert("Gagal mengaktifkan suara. Pastikan volume HP menyala.");
+    });
+}
+
+// Pantau database pesanan secara real-time
+db.ref('pesanan').on('value', (snapshot) => {
+    const data = snapshot.val();
+    const jumlahSekarang = data ? Object.keys(data).length : 0;
+
+    // Logika: Jika jumlah pesanan di database bertambah (artinya Admin baru klik SIMPAN)
+    if (jumlahPesananTerakhir > 0 && jumlahSekarang > jumlahPesananTerakhir) {
+        if (izinSuara) {
+            const notif = document.getElementById('notifSound');
+            notif.currentTime = 0; // Mulai dari awal suara
+            notif.play(); // BUNYIKAN "TING!"
+            
+            // Getarkan HP kurir (2 kali getar pendek)
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200]);
+            }
+        }
+    }
+    
+    // Update angka patokan jumlah terakhir
+    jumlahPesananTerakhir = jumlahSekarang;
+});
     </script>
 </body>
 </html>
+
