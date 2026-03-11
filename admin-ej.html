@@ -10,7 +10,7 @@
     <link rel="apple-touch-icon" href="logo-baru.png">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); --text-main: #FFFFFF; --safe: #22C55E; --danger: #EF4444; --blue: #2563eb; --wa: #25D366; --warning: #FACC15; }
+        :root { --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); --text-main: #FFFFFF; --safe: #22C55E; --danger: #EF4444; --blue: #2563eb; --wa: #25D366; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: var(--text-main); padding: 15px; padding-bottom: 50px; }
         
@@ -35,6 +35,7 @@
         .modal-foto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; }
         .modal-foto img { max-width: 90%; max-height: 70%; border: 2px solid var(--gold); border-radius: 15px; }
         
+        #receipt-print { display: none; }
         #waPrompt { position:fixed; bottom:20px; left:20px; right:20px; background:var(--wa); color:white; padding:20px; border-radius:15px; text-align:center; z-index:10000; box-shadow:0 10px 30px rgba(0,0,0,0.5); display:none; }
     </style>
 </head>
@@ -174,18 +175,13 @@
             } else {
                 filtered.forEach(o => {
                     const waNum = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-                    
-                    // PENAMBAHAN TAMPILAN ALASAN TUNDA
-                    let alasanTundaHtml = o.alasanTunda ? `<div style="color:var(--warning); font-size:10px; font-weight:800; margin-top:4px;">⚠️ ALASAN: ${o.alasanTunda}</div>` : "";
-
                     html += `<div class="order-item">
                         <span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br>
                         <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
                         <small>${o.status} | ${o.metode} | Rp${Number(o.total).toLocaleString()}</small>
-                        ${alasanTundaHtml}
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
                             <a href="https://wa.me/${waNum}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
-                            <button style="background:var(--gold); color:black; border:none; padding:8px; border-radius:8px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">PRINT</button>
+                            <button style="background:var(--gold); color:black; border:none; padding:8px; border-radius:8px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">REPRINT</button>
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:5px;">
                             ${o.buktiFoto ? `<button class="btn-small" style="background:var(--safe);" onclick="viewFoto('${o.buktiFoto}')">LIHAT FOTO</button>` : `<div style="background:var(--glass); color:gray; padding:8px; border-radius:8px; text-align:center; font-size:10px;">BELUM ADA FOTO</div>`}
