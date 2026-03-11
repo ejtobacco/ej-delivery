@@ -105,6 +105,12 @@
         <span style="font-size: 18px;">📊</span> LIHAT REKAPITULASI BULANAN
     </button>
 </div>
+
+    <div style="padding: 0 0 15px 0;">
+    <button onclick="bukaRadar()" style="background: rgba(37, 99, 235, 0.1); border: 1px solid var(--blue); color: var(--blue); padding: 16px; border-radius: 20px; font-weight: 800; font-size: 11px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; letter-spacing: 1px;">
+        <span style="font-size: 18px;">📡</span> BUKA RADAR SEBARAN PELANGGAN
+    </button>
+</div>
     
     <div class="report-grid">
         <div class="report-box active" id="f-Semua" onclick="setFilter('Semua')"><span>Sisa</span><b id="countProses">0</b></div>
@@ -416,6 +422,61 @@ const template = `
     document.getElementById('isiLaporan').innerHTML = template;
     document.getElementById('laporanOverlay').style.display = 'flex';
 }
+
+        // --- SISTEM RADAR SEBARAN EJ TOBACCO ---
+function bukaRadar() {
+    document.getElementById('petaOverlay').style.display = 'flex';
+    
+    // Inisialisasi Peta (Titik Tengah Brebes)
+    const map = new google.maps.Map(document.getElementById("mapRadar"), {
+        zoom: 12,
+        center: { lat: -6.87, lng: 109.03 }, 
+        styles: [
+            { "elementType": "geometry", "stylers": [{ "color": "#212121" }] },
+            { "elementType": "labels.text.fill", "stylers": [{ "color": "#757575" }] },
+            { "featureType": "road", "elementType": "geometry", "stylers": [{ "color": "#2c2c2c" }] },
+            { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#000000" }] }
+        ]
+    });
+
+    // Ambil data dan taruh titik emas
+    allOrders.forEach(o => {
+        if (o.status === 'Terkirim' && o.mapLink) {
+            let koordinat = extractCoords(o.mapLink);
+            if (koordinat) {
+                new google.maps.Marker({
+                    position: koordinat,
+                    map: map,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        fillColor: '#D4AF37', // Warna Emas
+                        fillOpacity: 0.8,
+                        scale: 7,
+                        strokeColor: '#FFFFFF',
+                        strokeWeight: 1
+                    }
+                });
+            }
+        }
+    });
+}
+
+// Fungsi Ekstrak Koordinat dari Link Google Maps
+function extractCoords(url) {
+    try {
+        // Deteksi link format @-6.xxx,109.xxx
+        const reg = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+        const match = url.match(reg);
+        if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+        
+        // Deteksi link format q=-6.xxx,109.xxx
+        if (url.includes('q=')) {
+            const p = url.split('q=')[1].split('&')[0].split(',');
+            return { lat: parseFloat(p[0]), lng: parseFloat(p[1]) };
+        }
+    } catch(e) { return null; }
+}
+        
     </script>
 
     <div id="laporanOverlay" class="modal-foto" style="padding: 20px; overflow-y: auto; backdrop-filter: blur(15px); display: none;">
@@ -431,8 +492,22 @@ const template = `
         </button>
     </div>
 </div>
+
+    <div id="petaOverlay" class="modal-foto" style="padding: 15px; display: none; flex-direction: column; backdrop-filter: blur(10px);">
+    <div style="background: #000; width: 100%; height: 85%; border-radius: 25px; overflow: hidden; position: relative; border: 2px solid var(--gold); box-shadow: 0 0 30px rgba(212,175,55,0.3);">
+        <div id="mapRadar" style="width: 100%; height: 100%;"></div>
+        
+        <button onclick="document.getElementById('petaOverlay').style.display='none'" style="position: absolute; top: 15px; right: 15px; background: var(--danger); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 800; z-index: 10001; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">TUTUP RADAR</button>
+        
+        <div style="position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 10px; border: 1px solid var(--gold); pointer-events: none;">
+            <small style="color:var(--gold); font-size:10px; font-weight:800;">✨ TITIK EMAS = LOKASI PELANGGAN</small>
+        </div>
+    </div>
+</div>
+    
 </body>
 </html>
+
 
 
 
