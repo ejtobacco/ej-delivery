@@ -278,7 +278,7 @@ ${o.status === 'Terkirim' ?
             const cleanNo = (lastOrder.noPesanan || "").replace(/[^a-zA-Z0-9]/g, "");
             const teks80mm = 
                 `[C]<font size="big"><b>EJ TOBACCO DELIVERY</b></font>\n` +
-                `[C]"belanja semakin nyamang menggunakan aplikasi toko ej"\n` +
+                `[C]"belanja semakin nyaman menggunakan aplikasi toko ej"\n` +
                 `[C]================================================\n` +
                 `[C]<font size="big"><b>NO. RESI : ${lastOrder.noPesanan}</b></font>\n` +
                 `[C]================================================\n` +
@@ -294,7 +294,7 @@ ${o.status === 'Terkirim' ?
                 `[C][b]code128,3,80,${cleanNo},yes\n\n` +
                 `[C]------------------------------------------------\n` +
                 `[C]Tgl: ${lastOrder.tanggal} ${lastOrder.waktu}\n` +
-                `[C]Terima kasih atas pesanan Anda!\n\n\n\n\n`;
+                `[C]HARAP VIDIO WAKTU UNBOXING PAKET\n\n\n\n\n`;
             window.location.href = "rawbt:" + encodeURI(teks80mm);
         }
 
@@ -433,6 +433,7 @@ const template = `
 </div>
 </body>
 </html>
+
 
 
 
