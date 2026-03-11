@@ -88,9 +88,7 @@
             <div class="main-logo-text">EJ TOBACCO</div>
             <div class="sub-logo-text">DELIVERY</div>
         </div>
-        <button onclick="bukaLaporan()" style="background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); color: var(--gold); padding: 12px; border-radius: 15px; font-weight: 800; font-size: 11px; cursor: pointer; margin-top: 15px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;">
-    <span>📊</span> LIHAT REKAP BULAN INI
-</button>
+
         <div style="text-align: right;">
             <div id="runningClock" style="font-size: 14px; font-weight: 800; color: var(--safe);">00:00:00</div>
             <div id="currentDay" style="font-size: 9px; color: var(--gold); font-weight: 800;">TGL LOADING...</div>
@@ -102,6 +100,12 @@
         <button onclick="goToToday()" style="background: var(--gold); border: none; border-radius: 12px; padding: 0 15px; font-weight: 800; font-size: 10px; color: black; cursor: pointer;">HARI INI</button>
     </div>
 
+    <div style="padding: 5px 0 15px 0;">
+    <button onclick="bukaLaporan()" style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.3); color: var(--gold); padding: 16px; border-radius: 20px; font-weight: 800; font-size: 11px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        <span style="font-size: 18px;">📊</span> LIHAT REKAPITULASI BULANAN
+    </button>
+</div>
+    
     <div class="report-grid">
         <div class="report-box active" id="f-Semua" onclick="setFilter('Semua')"><span>Sisa</span><b id="countProses">0</b></div>
         <div class="report-box" id="f-Terkirim" onclick="setFilter('Terkirim')" style="border-color: var(--safe);"><span>Sukses</span><b id="countSukses">0</b></div>
@@ -381,32 +385,32 @@ function bukaLaporan() {
         }
     });
 
-    // Susun template laporannya
-    const template = `
-        <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:10px 0;">
-            <span style="opacity:0.7">💰 Omzet Terkirim:</span>
-            <b style="color:var(--safe); font-size:18px;">Rp ${totalOmzet.toLocaleString()}</b>
-        </div>
-        <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:10px 0;">
-            <span style="opacity:0.7">📦 Paket Berhasil:</span>
-            <b>${suksesCount} Item</b>
-        </div>
-        <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:10px 0;">
-            <span style="opacity:0.7">❌ Paket Gagal:</span>
-            <b style="color:var(--danger)">${gagalCount} Item</b>
-        </div>
-        <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:10px 0;">
-            <span style="opacity:0.7">🤝 Metode COD:</span>
-            <b>${codCount}</b>
-        </div>
-        <div style="display:flex; justify-content:space-between; padding:10px 0;">
-            <span style="opacity:0.7">💳 Metode Transfer:</span>
-            <b>${transferCount}</b>
-        </div>
-        <div style="margin-top:20px; padding:10px; background:rgba(212,175,55,0.05); border-radius:10px; text-align:center;">
-            <small style="color:var(--gold)">Periode: ${n.toLocaleString('id-ID', {month:'long', year:'numeric'})}</small>
-        </div>
-    `;
+ // Template dengan padding yang lebih lega (18px)
+const template = `
+    <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:18px 0; align-items:center;">
+        <span style="opacity:0.6; font-size:13px;">💰 Omzet Terkirim:</span>
+        <b style="color:var(--safe); font-size:18px;">Rp ${totalOmzet.toLocaleString()}</b>
+    </div>
+    <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:18px 0; align-items:center;">
+        <span style="opacity:0.6; font-size:13px;">📦 Paket Berhasil:</span>
+        <b style="font-size:16px;">${suksesCount} Item</b>
+    </div>
+    <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:18px 0; align-items:center;">
+        <span style="opacity:0.6; font-size:13px;">❌ Paket Gagal:</span>
+        <b style="color:var(--danger); font-size:16px;">${gagalCount} Item</b>
+    </div>
+    <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:18px 0; align-items:center;">
+        <span style="opacity:0.6; font-size:13px;">🤝 Metode COD:</span>
+        <b style="font-size:16px;">${codCount}</b>
+    </div>
+    <div style="display:flex; justify-content:space-between; padding:18px 0; align-items:center;">
+        <span style="opacity:0.6; font-size:13px;">💳 Metode Transfer:</span>
+        <b style="font-size:16px;">${transferCount}</b>
+    </div>
+    <div style="margin-top:25px; padding:15px; background:rgba(212,175,55,0.08); border-radius:15px; text-align:center; border:1px dashed rgba(212,175,55,0.2);">
+        <small style="color:var(--gold); font-weight:800; text-transform:uppercase; letter-spacing:1px;">Periode: ${n.toLocaleString('id-ID', {month:'long', year:'numeric'})}</small>
+    </div>
+`;
 
     // Tembakkan ke layar
     document.getElementById('isiLaporan').innerHTML = template;
@@ -429,6 +433,7 @@ function bukaLaporan() {
 </div>
 </body>
 </html>
+
 
 
 
