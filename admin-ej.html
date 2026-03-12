@@ -181,7 +181,10 @@
 
     <div id="laporanOverlay" class="modal-foto" style="padding: 20px; overflow-y: auto; backdrop-filter: blur(15px);">
         <div class="glass-card" style="width: 100%; max-width: 450px; background: #0A0A0A; border: 1px solid var(--gold);">
-            <h2 style="color: var(--gold); text-align: center; margin-bottom: 25px; font-weight: 800;">REKAPITULASI BULANAN</h2>
+            <h2 style="color: var(--gold); text-align: center; margin-bottom: 15px; font-weight: 800;">REKAPITULASI BULANAN</h2>
+            
+            <input type="month" id="bulanLaporan" onchange="hitungLaporan()" style="width: 100%; background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); color: var(--gold); padding: 12px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 20px; outline: none; cursor: pointer;">
+
             <div id="isiLaporan" style="line-height: 2.5; font-size: 14px;">Memuat data...</div>
             <button class="btn-main" onclick="document.getElementById('laporanOverlay').style.display='none'" style="margin-top: 30px;">TUTUP LAPORAN</button>
         </div>
@@ -409,20 +412,37 @@
             }
         }
 
-        // --- LAPORAN BULANAN ---
+        // --- LAPORAN BULANAN (BISA PILIH BULAN) ---
         function bukaLaporan() {
+            document.getElementById('laporanOverlay').style.display = 'flex';
             const n = new Date();
             const bln = (n.getMonth() + 1).toString().padStart(2, '0'); 
             const thn = n.getFullYear().toString(); 
+            document.getElementById('bulanLaporan').value = `${thn}-${bln}`;
+            hitungLaporan(); 
+        }
+
+        function hitungLaporan() {
+            const inputVal = document.getElementById('bulanLaporan').value;
+            if (!inputVal) return;
+            
+            const pInput = inputVal.split('-');
+            const thn = pInput[0];
+            const bln = pInput[1];
+            
             let totalOmzet = 0, suksesCount = 0, gagalCount = 0, codCount = 0, transferCount = 0;
 
             allOrders.forEach(o => {
-                const p = o.tanggal.split('/');
-                if (p[1] === bln && p[2] === thn) {
-                    if (o.status === 'Terkirim') { suksesCount++; totalOmzet += Number(o.total || 0); if (o.metode === 'COD') codCount++; else transferCount++; } 
-                    else if (o.status === 'Gagal') gagalCount++;
+                if (o.tanggal) {
+                    const p = o.tanggal.split('/'); 
+                    if (p[1] === bln && p[2] === thn) {
+                        if (o.status === 'Terkirim') { suksesCount++; totalOmzet += Number(o.total || 0); if (o.metode === 'COD') codCount++; else transferCount++; } 
+                        else if (o.status === 'Gagal') gagalCount++;
+                    }
                 }
             });
+
+            const namaBulan = new Date(`${thn}-${bln}-01`).toLocaleString('id-ID', {month:'long', year:'numeric'});
 
             document.getElementById('isiLaporan').innerHTML = `
                 <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:18px 0; align-items:center;"><span style="opacity:0.6; font-size:13px;">💰 Omzet Terkirim:</span><b style="color:var(--safe); font-size:18px;">Rp ${totalOmzet.toLocaleString()}</b></div>
@@ -430,9 +450,8 @@
                 <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:18px 0; align-items:center;"><span style="opacity:0.6; font-size:13px;">❌ Paket Gagal:</span><b style="color:var(--danger); font-size:16px;">${gagalCount} Item</b></div>
                 <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:18px 0; align-items:center;"><span style="opacity:0.6; font-size:13px;">🤝 Metode COD:</span><b style="font-size:16px;">${codCount}</b></div>
                 <div style="display:flex; justify-content:space-between; padding:18px 0; align-items:center;"><span style="opacity:0.6; font-size:13px;">💳 Metode Transfer:</span><b style="font-size:16px;">${transferCount}</b></div>
-                <div style="margin-top:25px; padding:15px; background:rgba(212,175,55,0.08); border-radius:15px; text-align:center; border:1px dashed rgba(212,175,55,0.2);"><small style="color:var(--gold); font-weight:800; text-transform:uppercase; letter-spacing:1px;">Periode: ${n.toLocaleString('id-ID', {month:'long', year:'numeric'})}</small></div>
+                <div style="margin-top:25px; padding:15px; background:rgba(212,175,55,0.08); border-radius:15px; text-align:center; border:1px dashed rgba(212,175,55,0.2);"><small style="color:var(--gold); font-weight:800; text-transform:uppercase; letter-spacing:1px;">Periode: ${namaBulan}</small></div>
             `;
-            document.getElementById('laporanOverlay').style.display = 'flex';
         }
 
         // --- PETA RADAR DENGAN MARKER LOKASI ---
@@ -478,7 +497,6 @@
             });
         }
         
-        // Jalankan auto cleaner 5 detik setelah aplikasi terbuka
         setTimeout(bersihkanDataLama, 5000);
 
     </script>
