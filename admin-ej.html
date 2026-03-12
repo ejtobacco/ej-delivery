@@ -15,6 +15,15 @@
         :root { --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); --text-main: #FFFFFF; --safe: #22C55E; --danger: #EF4444; --blue: #2563eb; --wa: #25D366; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: var(--text-main); padding: 15px; padding-bottom: 50px; }
+        * { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    
+    /* BARIS SAKTI PENGHILANG WARNA BIRU */
+    -webkit-tap-highlight-color: transparent; 
+}
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .logo-text-container { display: flex; flex-direction: column; gap: 2px; }
@@ -528,6 +537,7 @@ function updateStatusInternet() {
     
 </body>
 </html>
+
 
 
 
