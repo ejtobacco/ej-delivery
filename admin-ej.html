@@ -58,7 +58,21 @@
     img { pointer-events: none; -webkit-user-drag: none; }
 
     /* --- 3. KOMPONEN UI (FULL WIDTH) --- */
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 15px;
+    
+    /* --- KODE SAKTI BIAR NEMPEL --- */
+    position: sticky; 
+    top: 0; 
+    z-index: 9999; /* Biar tetap di atas kotak pesanan */
+    background: var(--bg); /* Agar teks di bawah tidak tembus saat discroll */
+    padding: 10px 0; /* Tambah sedikit ruang agar tidak terlalu mepet kaca */
+    border-bottom: 1px solid var(--glass-border); /* Garis halus sebagai pembatas */
+}
+
     .logo-text-container { display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
     .main-logo-text { 
     color: var(--gold); 
