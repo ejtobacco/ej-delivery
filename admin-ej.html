@@ -60,8 +60,25 @@
     /* --- 3. KOMPONEN UI (FULL WIDTH) --- */
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .logo-text-container { display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
-    .main-logo-text { color: var(--gold); font-weight: 800; font-size: 20px; letter-spacing: 1px; text-transform: uppercase; }
-    .sub-logo-text { color: var(--text-main); font-weight: 400; font-size: 11px; opacity: 0.8; letter-spacing: 2px; text-transform: uppercase; }
+    .main-logo-text { 
+    color: var(--gold); 
+    font-weight: 800; 
+    font-size: 20px; 
+    letter-spacing: 1px; 
+    text-transform: uppercase; 
+    /* Tambahkan baris di bawah ini */
+    animation: goldBreathe 3s ease-in-out infinite; 
+}
+@keyframes goldBreathe {
+    0% { opacity: 1; text-shadow: 0 0 5px var(--gold); }
+    50% { opacity: 0.7; text-shadow: 0 0 20px var(--gold); }
+    100% { opacity: 1; text-shadow: 0 0 5px var(--gold); }
+}
+
+.logo-text-container:active {
+    transform: scale(0.95);
+    transition: 0.1s;
+}
 
     .report-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
     .report-box { background: var(--glass); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; text-align: center; cursor: pointer; }
@@ -117,10 +134,10 @@
 </div>
     
     <div class="header">
-        <div class="logo-text-container">
-            <div class="main-logo-text">EJ TOBACCO</div>
-            <div class="sub-logo-text">DELIVERY</div>
-        </div>
+        <div class="logo-text-container" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+    <div class="main-logo-text">EJ TOBACCO</div>
+    <div class="sub-logo-text">DELIVERY</div>
+</div>
 
         <div id="statusKoneksi" style="display: flex; align-items: center; gap: 5px; justify-content: flex-end; margin-top: 5px;">
     <div id="lampuKoneksi" style="width: 8px; height: 8px; background: var(--safe); border-radius: 50%; box-shadow: 0 0 10px var(--safe);"></div>
@@ -255,36 +272,35 @@
         }
 
         function renderList() {
-    // 1. Ambil kata kunci pencarian
+    // Ambil inputan dari kolom cari
     const keyword = document.getElementById('searchBar').value.toLowerCase();
     
-    // 2. Ambil tanggal yang sedang aktif di datePicker
+    // Ambil tanggal aktif dari datePicker
     const pickerVal = document.getElementById('datePicker').value;
     const p = pickerVal.split('-');
     const tglAktif = `${p[2]}/${p[1]}/${p[0]}`;
 
     let html = "";
     
-    // 3. Mulai Filter Data
+    // Filter data dengan logika "Cerdas"
     const filtered = allOrders.filter(o => {
-        // Cek apakah nama atau resi cocok dengan ketikan Bos
+        // Cek Nama atau No Resi
         const matchSearch = (o.namaPembeli || "").toLowerCase().includes(keyword) || 
                             (o.noPesanan || "").toLowerCase().includes(keyword);
         
-        // Cek status filter (Sisa/Sukses/Cancel)
         let matchStatus;
         if (currentFilter === "Semua") {
-            // Jika filter "Sisa", cari semua yang belum beres tanpa peduli tanggal
+            // Jika di tab "SISA", cari di SEMUA tanggal (agar ketemu meski pesanan lama)
             matchStatus = (o.status !== 'Terkirim' && o.status !== 'Gagal');
         } else {
-            // Jika filter Sukses/Cancel, wajib cocok status DAN tanggalnya
+            // Jika di tab Sukses/Cancel, cari HANYA di tanggal terpilih
             matchStatus = (o.status === currentFilter && o.tanggal === tglAktif);
         }
         
         return matchSearch && matchStatus;
     });
 
-    // 4. Tampilkan ke layar
+    // Tampilkan hasil filter ke Admin List
     if(filtered.length === 0) {
         html = `<p style="text-align:center; opacity:0.5; padding:20px;">Data tidak ditemukan.</p>`;
     } else {
@@ -297,13 +313,6 @@
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
                     <a href="https://wa.me/${waNum}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
                     <button style="background:var(--gold); color:black; border:none; padding:8px; border-radius:8px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">REPRINT</button>
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:5px;">
-                    ${o.buktiFoto ? `<button class="btn-small" style="background:var(--safe);" onclick="viewFoto('${o.buktiFoto}')">LIHAT FOTO</button>` : `<div style="background:var(--glass); color:gray; padding:8px; border-radius:8px; text-align:center; font-size:10px;">BELUM ADA FOTO</div>`}
-                    ${o.status === 'Terkirim' ? 
-                        `<div style="background:rgba(255,255,255,0.05); color:#666; padding:10px; border-radius:10px; text-align:center; font-size:10px; font-weight:800; border:1px solid rgba(255,255,255,0.1); cursor:not-allowed;">🔒 TERKUNCI</div>` : 
-                        `<button onclick="hapus('${o.id}')" style="background:rgba(239,68,68,0.1); color:#EF4444; border:1px solid #EF4444; padding:10px; border-radius:10px; font-size:10px; font-weight:800; cursor:pointer;">HAPUS</button>`
-                    }
                 </div>
             </div>`;
         });
