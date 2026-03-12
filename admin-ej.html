@@ -707,7 +707,7 @@ function updateStatusInternet() {
     const dataLama = allOrders.find(o => o.id === id);
     if (!dataLama) return;
 
-    if (confirm(`Kirim ulang pesanan ${dataLama.namaPembeli}?`)) {
+    if (confirm(`Kirim ulang pesanan ${dataLama.namaPembeli}? (Data lama di tab Cancel akan dihapus)`)) {
         const n = new Date();
         const dataBaru = {
             ...dataLama,
@@ -715,15 +715,21 @@ function updateStatusInternet() {
             status: 'Menunggu',
             tanggal: formatTglDB(n),
             waktu: n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}),
-            buktiFoto: null // Foto gagal lama jangan dibawa
+            buktiFoto: null 
         };
         
-        delete dataBaru.id; // Biar Firebase buat ID unik baru
+        delete dataBaru.id; 
 
+        // 1. Simpan data baru ke Firebase
         db.ref('pesanan').push(dataBaru).then(() => {
-            alert("✅ Berhasil! Pesanan diduplikasi ke hari ini.");
-            setFilter('Semua'); // Pindah ke tab Sisa biar langsung kelihatan
-        });
+            
+            // 2. KUNCI UTAMA: Hapus data lama dari Firebase agar di tab Cancel hilang
+            db.ref('pesanan/' + id).remove().then(() => {
+                alert("✅ Berhasil! Pesanan sudah DIPINDAHKAN ke hari ini.");
+                setFilter('Semua'); // Balik ke tab Sisa
+            });
+
+        }).catch(err => alert("❌ Gagal pindah data: " + err.message));
     }
 }
     </script>
@@ -752,6 +758,7 @@ function updateStatusInternet() {
     
 </body>
 </html>
+
 
 
 
