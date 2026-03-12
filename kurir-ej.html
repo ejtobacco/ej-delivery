@@ -138,47 +138,44 @@
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
     <script>
-        // Fungsi Hitung Jarak (Hasilnya dalam satuan Meter)
-function hitungJarak(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // Jari-jari bumi dalam meter
-    const φ1 = lat1 * Math.PI/180;
-    const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2-lat1) * Math.PI/180;
-    const Δλ = (lon2-lon1) * Math.PI/180;
-
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c; 
-}
-        
-        const firebaseConfig = { apiKey: "AIzaSyAVQGysGRlYJ2b4PekM3vaXKtx6UFvNlCk", databaseURL: "https://ej-tobacco-express-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAVQGysGRlYJ2b4PekM3vaXKtx6UFvNlCk", 
+            databaseURL: "https://ej-tobacco-express-default-rtdb.asia-southeast1.firebasedatabase.app" 
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let currentTab = 'Proses', allData = [], totalSetoranGlobal = 0, lastCount = 0, audioIzin = false;
 
+        // --- FUNGSI TOOLS ---
         function getTgl() { const n = new Date(); return `${String(n.getDate()).padStart(2,'0')}/${String(n.getMonth()+1).padStart(2,'0')}/${n.getFullYear()}`; }
         
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
-
-        function setTab(tab) {
-            currentTab = tab;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('t-' + tab).classList.add('active');
-            renderOrders();
-            // Cek status koneksi setiap kali daftar pesanan digambar ulang
-updateStatusInternet();
+        function extractCoords(url) {
+            try {
+                const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+                const match = url.match(regex);
+                if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+                return null;
+            } catch (e) { return null; }
         }
 
+        function hitungJarak(lat1, lon1, lat2, lon2) {
+            const R = 6371e3;
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))); 
+        }
+
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
+
+        // --- DATABASE LISTENER ---
         db.ref('pesanan').limitToLast(500).on('value', snap => {
-    const val = snap.val();
-    allData = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
-    updateUI(); 
-});
+            const val = snap.val();
+            allData = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
             
-            // Logika Notifikasi Suara
             if (lastCount > 0 && allData.length > lastCount && audioIzin) {
                 const snd = document.getElementById('notifSound');
                 snd.currentTime = 0; snd.play();
@@ -193,6 +190,7 @@ updateStatusInternet();
             updateUI();
         });
 
+        // --- UI FUNCTIONS ---
         function updateUI() {
             const today = getTgl();
             let p=0, s=0, g=0, codTotal=0;
@@ -225,7 +223,7 @@ updateStatusInternet();
             });
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:50px; opacity:0.3; font-size:12px;">Data tidak ditemukan.</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:50px; opacity:0.3;">Data tidak ditemukan.</div>`;
                 return;
             }
 
@@ -237,7 +235,7 @@ updateStatusInternet();
                     <div class="glass-card">
                         <div class="status-badge" style="background:${badgeBg}">${o.status}</div>
                         <span style="font-size:10px; color:var(--gold); font-weight:800;">${o.noPesanan}</span>
-                        <h3 style="margin: 5px 0; font-size:18px;">${o.namaPembeli}</h3>
+                        <h3 style="margin: 5px 0;">${o.namaPembeli}</h3>
                         <p style="font-size:12px; opacity:0.7; margin-bottom:10px;">📍 ${o.alamat}</p>
                         <div style="font-weight:800; color:var(--safe); font-size:13px;">TAGIHAN: Rp ${Number(o.total).toLocaleString()} (${o.metode})</div>
                         
@@ -257,55 +255,49 @@ updateStatusInternet();
             });
         }
 
+        function setTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('t-' + tab).classList.add('active');
+            renderOrders();
+        }
+
         function updateStat(id, stat) {
-            const alasan = prompt("Masukkan Alasan (Wajib):");
-            if (alasan && alasan.trim() !== "") {
+            const alasan = prompt("Masukkan Alasan:");
+            if (alasan) {
                 db.ref('pesanan/' + id).update({ status: stat, alasanTunda: alasan, waktuUpdate: new Date().toLocaleTimeString() });
-            } else { alert("Alasan tidak boleh kosong!"); }
+            }
         }
 
         function upload(id, input) {
-    const o = allData.find(item => item.id === id);
-    if (!o.mapLink) { 
-        alert("Peringatan: Data pelanggan tidak punya link Maps. Izin kirim tanpa radius diberikan.");
-        gasUpload(id, input);
-        return;
-    }
+            const o = allData.find(item => item.id === id);
+            if (!o.mapLink) return gasUpload(id, input);
 
-    // Ambil Lokasi Kurir Sekarang
-    navigator.geolocation.getCurrentPosition((pos) => {
-        const kurirLat = pos.coords.latitude;
-        const kurirLng = pos.coords.longitude;
-        
-        // Ambil Koordinat Tujuan dari Link Maps
-        const kords = extractCoords(o.mapLink); // Gunakan fungsi extract yang sudah kita buat
-        if (!kords) return gasUpload(id, input);
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const kords = extractCoords(o.mapLink);
+                if (!kords) return gasUpload(id, input);
 
-        const jarak = hitungJarak(kurirLat, kurirLng, kords.lat, kords.lng);
-
-        if (jarak > 100) { // BATAS 100 METER
-            alert(`⚠️ AKSES DITOLAK!\nJarak Anda ${Math.round(jarak)}m dari lokasi. Anda harus berada maksimal 100m dari rumah pelanggan.`);
-            input.value = ""; // Reset input file
-        } else {
-            gasUpload(id, input);
+                const jarak = hitungJarak(pos.coords.latitude, pos.coords.longitude, kords.lat, kords.lng);
+                if (jarak > 100) {
+                    alert(`⚠️ Terlalu Jauh! Jarak: ${Math.round(jarak)}m. Harus < 100m.`);
+                    input.value = "";
+                } else {
+                    gasUpload(id, input);
+                }
+            }, () => alert("❌ GPS MATI!"), { enableHighAccuracy: true });
         }
-    }, () => {
-        alert("❌ GPS HP Mati! Aktifkan lokasi agar bisa klik SELESAI.");
-    });
-}
 
-// Fungsi bantu untuk proses simpan setelah lolos radius
-function gasUpload(id, input) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        db.ref('pesanan/' + id).update({
-            status: 'Terkirim',
-            buktiFoto: e.target.result,
-            waktuSelesai: new Date().toLocaleTimeString()
-        }).then(() => alert("✅ Mantap Bos! Paket Berhasil Terkirim."));
-    };
-    reader.readAsDataURL(input.files[0]);
-}
+        function gasUpload(id, input) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                db.ref('pesanan/' + id).update({
+                    status: 'Terkirim',
+                    buktiFoto: e.target.result,
+                    waktuSelesai: new Date().toLocaleTimeString()
+                }).then(() => alert("✅ Terkirim!"));
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
 
         function preview(src) { document.getElementById('imgPreview').src = src; document.getElementById('modalView').style.display = 'flex'; }
 
@@ -314,62 +306,32 @@ function gasUpload(id, input) {
             snd.play().then(() => {
                 snd.pause(); audioIzin = true;
                 const b = document.getElementById('notifBanner');
-                b.style.background = "rgba(34, 197, 94, 0.1)";
-                b.style.color = "var(--safe)";
                 b.innerHTML = "✅ NOTIFIKASI SUARA AKTIF";
                 setTimeout(() => b.style.display = 'none', 2000);
             });
         }
 
-        // --- SISTEM DETEKSI KONEKSI KURIR ---
-window.addEventListener('online', updateStatusInternet);
-window.addEventListener('offline', updateStatusInternet);
-
-function updateStatusInternet() {
-    const lampu = document.getElementById('lampuKoneksi');
-    const teks = document.getElementById('teksKoneksi');
-    const allButtons = document.querySelectorAll('.btn, .btn-main, .btn-wa, .btn-maps');
-    
-    if (navigator.onLine) {
-        // --- PROSES RECONNECT ---
-        if(lampu) {
-            lampu.style.background = "var(--safe)";
-            lampu.style.boxShadow = "0 0 10px var(--safe)";
-            lampu.classList.add('reconnecting'); // Efek kedip saat nyambung
-        }
-        if(teks) {
-            teks.innerText = "SINKRONISASI...";
-            teks.style.color = "var(--safe)";
+        function updateStatusInternet() {
+            const lampu = document.getElementById('lampuKoneksi');
+            const teks = document.getElementById('teksKoneksi');
+            const allButtons = document.querySelectorAll('.btn');
+            
+            if (navigator.onLine) {
+                db.goOnline();
+                if(lampu) { lampu.style.background = "var(--safe)"; lampu.style.boxShadow = "0 0 10px var(--safe)"; }
+                if(teks) teks.innerText = "ONLINE";
+                allButtons.forEach(btn => btn.classList.remove('btn-disabled'));
+            } else {
+                db.goOffline();
+                if(lampu) { lampu.style.background = "var(--danger)"; lampu.style.boxShadow = "0 0 10px var(--danger)"; }
+                if(teks) teks.innerText = "OFFLINE";
+                allButtons.forEach(btn => btn.classList.add('btn-disabled'));
+            }
         }
 
-        // Paksa Firebase ambil data terbaru (Reconnect)
-        db.goOnline(); 
-        
-        setTimeout(() => {
-            if(lampu) lampu.classList.remove('reconnecting');
-            if(teks) teks.innerText = "ONLINE";
-            allButtons.forEach(btn => btn.classList.remove('btn-disabled'));
-            renderOrders(); // Gambar ulang pesanan terbaru
-        }, 1500);
-
-    } else {
-        // --- MODE OFFLINE ---
-        db.goOffline(); // Putus koneksi firebase agar hemat baterai
-        if(lampu) {
-            lampu.style.background = "var(--danger)";
-            lampu.style.boxShadow = "0 0 10px var(--danger)";
-            lampu.classList.remove('reconnecting');
-        }
-        if(teks) {
-            teks.innerText = "OFFLINE";
-            teks.style.color = "var(--danger)";
-        }
-        allButtons.forEach(btn => btn.classList.add('btn-disabled'));
-    }
-}
-
-// Jalankan sekali saat baru buka aplikasi
-updateStatusInternet();
+        window.addEventListener('online', updateStatusInternet);
+        window.addEventListener('offline', updateStatusInternet);
+        updateStatusInternet();
     </script>
 </body>
 </html>
