@@ -159,6 +159,8 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('t-' + tab).classList.add('active');
             renderOrders();
+            // Cek status koneksi setiap kali daftar pesanan digambar ulang
+updateStatusInternet();
         }
 
         db.ref('pesanan').on('value', snap => {
@@ -344,6 +346,7 @@ updateStatusInternet();
     </script>
 </body>
 </html>
+
 
 
 
