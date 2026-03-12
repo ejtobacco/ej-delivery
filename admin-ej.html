@@ -499,12 +499,11 @@
             };
             if(!d.namaPembeli || !d.nohp) return alert("Nama & WA wajib!");
             
-            db.ref('pesanan').push(d).then(() => { 
-                lastOrder = d; 
-                executePrint(); 
-                showWANotif(d);
-                document.querySelectorAll('.glass-card input, .glass-card textarea').forEach(i => i.value = ""); 
-            });
+            db.ref('pesanan').limitToLast(500).on('value', snap => {
+    const val = snap.val();
+    allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
+    updateAll(); // Pastikan dashboard langsung update
+});
         }
 
         function executePrint() {
@@ -758,6 +757,7 @@ function updateStatusInternet() {
     
 </body>
 </html>
+
 
 
 
