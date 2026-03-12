@@ -284,41 +284,54 @@
     
     // Filter data dengan logika "Cerdas"
     const filtered = allOrders.filter(o => {
-        // Cek Nama atau No Resi
         const matchSearch = (o.namaPembeli || "").toLowerCase().includes(keyword) || 
                             (o.noPesanan || "").toLowerCase().includes(keyword);
         
         let matchStatus;
         if (currentFilter === "Semua") {
-            // Jika di tab "SISA", cari di SEMUA tanggal (agar ketemu meski pesanan lama)
+            // Tab SISA: Cari global (biar ketemu meski beda tanggal)
             matchStatus = (o.status !== 'Terkirim' && o.status !== 'Gagal');
         } else {
-            // Jika di tab Sukses/Cancel, cari HANYA di tanggal terpilih
+            // Tab Sukses/Cancel: Per tanggal agar rapi
             matchStatus = (o.status === currentFilter && o.tanggal === tglAktif);
         }
         
         return matchSearch && matchStatus;
     });
 
-    // Tampilkan hasil filter ke Admin List
     if(filtered.length === 0) {
         html = `<p style="text-align:center; opacity:0.5; padding:20px;">Data tidak ditemukan.</p>`;
     } else {
         filtered.forEach(o => {
             const waNum = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
+            
             html += `<div class="order-item">
                 <span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br>
                 <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
                 <small>${o.status} | ${o.metode} | Rp${Number(o.total).toLocaleString()}</small>
+                
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
                     <a href="https://wa.me/${waNum}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
                     <button style="background:var(--gold); color:black; border:none; padding:8px; border-radius:8px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">REPRINT</button>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:5px;">
+                    ${o.buktiFoto ? 
+                        `<button class="btn-small" style="background:var(--safe);" onclick="viewFoto('${o.buktiFoto}')">LIHAT FOTO</button>` : 
+                        `<div style="background:var(--glass); color:gray; padding:8px; border-radius:8px; text-align:center; font-size:10px; border:1px solid rgba(255,255,255,0.05);">TANPA FOTO</div>`
+                    }
+                    
+                    ${o.status === 'Terkirim' ? 
+                        `<div style="background:rgba(255,255,255,0.05); color:#666; padding:10px; border-radius:10px; text-align:center; font-size:10px; font-weight:800; border:1px solid rgba(255,255,255,0.1); cursor:not-allowed;">🔒 TERKUNCI</div>` : 
+                        `<button onclick="hapus('${o.id}')" style="background:rgba(239,68,68,0.1); color:#EF4444; border:1px solid #EF4444; padding:10px; border-radius:10px; font-size:10px; font-weight:800; cursor:pointer;">HAPUS</button>`
+                    }
                 </div>
             </div>`;
         });
     }
     document.getElementById('adminList').innerHTML = html;
 }
+
 
         function viewFoto(src) { document.getElementById('imgBukti').src = src; document.getElementById('modalFoto').style.display = 'flex'; }
         function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
