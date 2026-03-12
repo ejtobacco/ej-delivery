@@ -75,6 +75,14 @@
         #imgPreview { max-width: 90%; max-height: 75vh; border-radius: 15px; border: 2px solid var(--gold); object-fit: contain; }
 
         #notifBanner { background: rgba(212, 175, 55, 0.05); border: 1px dashed var(--gold); color: var(--gold); padding: 15px; text-align: center; border-radius: 15px; margin-bottom: 15px; cursor: pointer; }
+  
+        /* Efek tombol saat offline */
+.btn-disabled {
+    filter: grayscale(1) !important;
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important; /* Kunci klik total */
+}
     </style>
 </head>
 <body>
@@ -307,20 +315,27 @@ window.addEventListener('offline', updateStatusInternet);
 function updateStatusInternet() {
     const lampu = document.getElementById('lampuKoneksi');
     const teks = document.getElementById('teksKoneksi');
+    // Ambil semua tombol di layar
+    const allButtons = document.querySelectorAll('.btn, .btn-main, .btn-wa, .btn-maps');
     
     if (navigator.onLine) {
-        // Mode Online: Hijau Gacor
-        if (lampu) lampu.style.background = "var(--safe)";
-        if (lampu) lampu.style.boxShadow = "0 0 10px var(--safe)";
-        if (teks) teks.innerText = "SISTEM ONLINE";
-        if (teks) teks.style.color = "var(--safe)";
+        // --- MODE ONLINE (NORMAL) ---
+        if(lampu) { lampu.style.background = "var(--safe)"; lampu.style.boxShadow = "0 0 10px var(--safe)"; }
+        if(teks) { teks.innerText = "ONLINE"; teks.style.color = "var(--safe)"; }
+        
+        // Aktifkan kembali semua tombol
+        allButtons.forEach(btn => btn.classList.remove('btn-disabled'));
+
     } else {
-        // Mode Offline: Merah Bahaya
-        if (lampu) lampu.style.background = "var(--danger)";
-        if (lampu) lampu.style.boxShadow = "0 0 10px var(--danger)";
-        if (teks) teks.innerText = "KONEKSI TERPUTUS";
-        if (teks) teks.style.color = "var(--danger)";
-        alert("⚠️ Bos, internet mati! Pastikan sinyal kuat biar laporan lancar.");
+        // --- MODE OFFLINE (LOCK) ---
+        if(lampu) { lampu.style.background = "var(--danger)"; lampu.style.boxShadow = "0 0 10px var(--danger)"; }
+        if(teks) { teks.innerText = "OFFLINE"; teks.style.color = "var(--danger)"; }
+        
+        // BEKUKAN semua tombol
+        allButtons.forEach(btn => btn.classList.add('btn-disabled'));
+        
+        if (navigator.vibrate) navigator.vibrate(500);
+        console.log("Sistem terkunci karena offline.");
     }
 }
 
@@ -329,5 +344,6 @@ updateStatusInternet();
     </script>
 </body>
 </html>
+
 
 
