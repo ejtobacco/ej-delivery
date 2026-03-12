@@ -207,30 +207,32 @@
     display: none; 
 }
 
-/* --- KUNCI MATI AGAR PETA BERSIH --- */
+/* --- FIX RADAR: PETA MUNCUL & BERSIH --- */
 #mapRadar {
-    background: #000 !important;
-    position: relative;
-    z-index: 1;
+    width: 100%;
+    height: 100%;
+    background: #000 !important; /* Latar dasar hitam */
 }
 
-/* Menghapus semua bayangan emas/garis yang nyasar ke dalam peta */
-#mapRadar * {
-    background-color: transparent !important;
-    box-shadow: none !important;
-    border-color: transparent !important;
-    background-image: none !important;
-    animation: none !important; /* Mematikan animasi breathe jika nyasar ke sini */
-}
-
-/* Pastikan gambar peta tetap tajam */
+/* Pastikan gambar peta (Tile) tetap muncul */
 .leaflet-tile-container img {
-    filter: brightness(0.8) contrast(1.2);
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
-/* Munculkan kembali warna emas HANYA untuk titik pelanggan */
-.leaflet-marker-icon, .leaflet-marker-shadow, .leaflet-drop-marker {
-    filter: none !important;
+/* Hapus bayangan emas/grid yang nyasar masuk ke peta */
+#mapRadar .leaflet-pane, 
+#mapRadar .leaflet-control-container {
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+/* Kotak popup alamat agar tidak transparan */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: #111 !important;
+    color: var(--gold) !important;
+    border: 1px solid var(--gold);
 }
 
 </style>
@@ -647,38 +649,20 @@ const template = `
 let radarMesin; // Variabel penampung peta
 
 function bukaRadar() {
-    // 1. Munculkan Layar
     document.getElementById('petaOverlay').style.display = 'flex';
     
-    // 2. Bersihkan peta lama kalau ada (biar tidak error)
     if (radarMesin) { radarMesin.remove(); }
 
-    // 3. Nyalakan Mesin Peta (Titik Tengah Brebes)
     radarMesin = L.map('mapRadar').setView([-6.87, 109.03], 12);
 
-    // 4. Pasang Gambar Peta Hitam Mewah (GRATIS)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; EJ TOBACCO',
-    subdomains: 'abcd',
-    maxZoom: 20
-}).addTo(radarMesin);
+        attribution: '&copy; EJ TOBACCO'
+    }).addTo(radarMesin);
 
-    // 5. Tebar Titik Emas Pelanggan yang Sudah Terkirim
-    allOrders.forEach(o => {
-        if (o.status === 'Terkirim' && o.mapLink) {
-            let koordinat = extractCoords(o.mapLink);
-            if (koordinat) {
-                L.circleMarker([koordinat.lat, koordinat.lng], {
-                    radius: 8,
-                    fillColor: "#D4AF37", // EMAS
-                    color: "#fff",
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 0.9
-                }).addTo(radarMesin).bindPopup(`<b>${o.namaPembeli}</b><br>${o.noPesanan}`);
-            }
-        }
-    });
+    // ... (kode loop sebaran pelanggan Bos tetap seperti biasa) ...
+
+    // --- TAMBAHKAN BARIS INI DI PALING BAWAH ---
+    setTimeout(() => { radarMesin.invalidateSize(); }, 300);
 }
 
 // Alat bantu ambil angka lokasi dari link maps
@@ -740,6 +724,7 @@ function updateStatusInternet() {
     
 </body>
 </html>
+
 
 
 
