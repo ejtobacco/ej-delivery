@@ -472,7 +472,7 @@
     function hapus(id) { const p = allOrders.find(o => o.id === id); if (p && p.status === 'Terkirim') return alert("🔒 TERKUNCI!"); if (confirm("Hapus?")) db.ref('pesanan/' + id).remove(); }
     function startClock(); // Jalankan jam
 </script>
-
+    
     <div id="laporanOverlay" class="modal-foto" style="padding: 20px; overflow-y: auto; backdrop-filter: blur(15px); display: none;">
     <div class="glass-card" style="width: 100%; max-width: 450px; border: 1px solid var(--gold); background: #0A0A0A; box-shadow: 0 0 50px rgba(0,0,0,0.8);">
         <h2 style="color: var(--gold); text-align: center; margin-bottom: 25px; font-weight: 800; letter-spacing: 1px;">REKAPITULASI BULANAN</h2>
@@ -497,6 +497,7 @@
     
 </body>
 </html>
+
 
 
 
