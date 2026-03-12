@@ -10,28 +10,19 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     
     <style>
-        /* --- 1. IDENTITAS WARNA (SINGKRON ADMIN) --- */
         :root { 
-            --gold: #D4AF37; 
-            --gold-gradient: linear-gradient(135deg, #F7E08C, #D4AF37);
-            --bg: #050505; 
+            --gold: #D4AF37; --bg: #050505; 
             --glass: rgba(255, 255, 255, 0.03); 
             --glass-border: rgba(212, 175, 55, 0.2); 
-            --text-main: #FFFFFF; 
-            --safe: #22C55E; 
-            --danger: #EF4444; 
-            --blue: #2563eb; 
-            --wa: #25D366; 
-            --warning: #F59E0B;
+            --text-main: #FFFFFF; --safe: #22C55E; 
+            --danger: #EF4444; --blue: #2563eb; --wa: #25D366; --warning: #F59E0B;
         }
 
-        /* --- 2. RESET GLOBAL --- */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text-main); padding: 12px; padding-bottom: 100px; overflow-x: hidden; user-select: none; }
         ::-webkit-scrollbar { display: none; }
         input { -webkit-user-select: text; user-select: text; width: 100%; }
 
-        /* --- 3. KOMPONEN UI --- */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: sticky; top: 0; z-index: 9999; background: var(--bg); padding: 10px 0; border-bottom: 1px solid var(--glass-border); }
         .logo-text { color: var(--gold); font-weight: 800; font-size: 18px; letter-spacing: 1px; }
 
@@ -46,7 +37,7 @@
 
         .search-box { width: 100%; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; color: white; margin-bottom: 15px; outline: none; }
 
-        .glass-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 15px; position: relative; overflow: hidden; }
+        .glass-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 15px; position: relative; overflow: hidden; transition: 0.3s; }
         .status-badge { position: absolute; top: 0; right: 0; padding: 6px 15px; font-size: 9px; font-weight: 800; border-radius: 0 0 0 15px; text-transform: uppercase; color: #000; }
 
         .btn { border: none; padding: 15px; border-radius: 12px; font-weight: 800; font-size: 11px; cursor: pointer; color: white; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
@@ -57,7 +48,6 @@
         .btn-maps { background: var(--blue); width: 100%; margin-top: 8px; }
         .btn-scan { background: var(--gold); color: #000; width: 100%; margin-bottom: 15px; }
 
-        /* SCANNER & MODAL */
         #reader { width: 100%; border-radius: 15px; overflow: hidden; margin-bottom: 15px; display: none; border: 2px solid var(--gold); }
         .modal-view { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100000; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
         #imgPreview { max-width: 90%; max-height: 75vh; border-radius: 15px; border: 2px solid var(--gold); object-fit: contain; }
@@ -69,8 +59,8 @@
 </head>
 <body>
     
-  <audio id="beepSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
-<audio id="errorSound" src="https://assets.mixkit.co/active_storage/sfx/2180/2180-preview.mp3" preload="auto"></audio> 
+    <audio id="beepSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="errorSound" src="https://assets.mixkit.co/active_storage/sfx/2180/2180-preview.mp3" preload="auto"></audio> 
     
     <div class="header">
         <div class="logo-text" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
@@ -124,7 +114,6 @@
     function getTgl() { const n = new Date(); return `${String(n.getDate()).padStart(2,'0')}/${String(n.getMonth()+1).padStart(2,'0')}/${n.getFullYear()}`; }
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
 
-    // DATABASE LISTENER
     db.ref('pesanan').limitToLast(500).on('value', snap => {
         const val = snap.val();
         allData = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
@@ -139,16 +128,13 @@
     function updateUI() {
         const today = getTgl();
         let gd=0, p=0, s=0, g=0, codTotal=0;
-
         allData.forEach(o => {
             if (o.status === 'Gudang') gd++;
             else if (o.status === 'Proses' || o.status === 'Menunggu' || o.status === 'Tunda') p++;
             else if (o.status === 'Terkirim' && o.tanggal === today) s++;
             else if (o.status === 'Gagal' && o.tanggal === today) g++;
-            
             if (o.status === 'Terkirim' && o.metode === 'COD') codTotal += Number(o.total || 0);
         });
-
         document.getElementById('c-Gudang').innerText = gd;
         document.getElementById('c-Proses').innerText = p;
         document.getElementById('c-Terkirim').innerText = s;
@@ -162,23 +148,19 @@
         const search = document.getElementById('searchOrder').value.toLowerCase();
         const today = getTgl();
         container.innerHTML = "";
-
         const filtered = allData.filter(o => {
             const match = (o.namaPembeli || "").toLowerCase().includes(search) || (o.noPesanan || "").toLowerCase().includes(search);
             if (currentTab === 'Gudang') return match && o.status === 'Gudang';
             if (currentTab === 'Proses') return match && (o.status !== 'Terkirim' && o.status !== 'Gagal' && o.status !== 'Gudang');
             return match && (o.status === currentTab && o.tanggal === today);
         });
-
         if (filtered.length === 0) {
             container.innerHTML = `<div style="text-align:center; padding:50px; opacity:0.3;">Tidak ada data.</div>`;
             return;
         }
-
         filtered.forEach(o => {
             const badgeBg = o.status === 'Terkirim' ? 'var(--safe)' : (o.status === 'Gagal' ? 'var(--danger)' : 'var(--gold)');
             const waNum = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-            
             container.innerHTML += `
                 <div class="glass-card ${o.urgent ? 'card-urgent' : ''}">
                     <div class="status-badge" style="background:${badgeBg}">${o.status}</div>
@@ -186,7 +168,6 @@
                     <h3 style="margin: 5px 0;">${o.namaPembeli}</h3>
                     <p style="font-size:12px; opacity:0.7; margin-bottom:10px;">📍 ${o.alamat}</p>
                     <div style="font-weight:800; color:var(--safe); font-size:13px;">TAGIHAN: Rp ${Number(o.total).toLocaleString()} (${o.metode})</div>
-                    
                     ${o.status === 'Gudang' ? `
                         <button class="btn btn-success" style="width:100%; margin-top:10px;" onclick="updateStat('${o.id}', 'Proses', 'Ambil dari Gudang')">📦 AMBIL PAKET INI</button>
                     ` : (o.status !== 'Terkirim' && o.status !== 'Gagal' ? `
@@ -198,7 +179,6 @@
                         </div>
                         <button class="btn btn-danger" style="width:100%; margin-top:8px;" onclick="updateStat('${o.id}', 'Gagal')">❌ CANCEL / GAGAL</button>
                     ` : (o.buktiFoto ? `<button class="btn" style="width:100%; margin-top:10px; background:rgba(255,255,255,0.05); border:1px solid var(--gold); color:var(--gold);" onclick="preview('${o.buktiFoto}')">👁️ LIHAT FOTO BUKTI</button>` : ''))}
-                    
                     <input type="file" id="f-${o.id}" accept="image/*" capture="camera" style="display:none;" onchange="uploadSelesai('${o.id}', this)">
                 </div>
             `;
@@ -215,11 +195,7 @@
     function updateStat(id, stat, autoAlasan) {
         const alasan = autoAlasan || prompt("Masukkan Alasan/Catatan:");
         if (alasan) {
-            db.ref('pesanan/' + id).update({ 
-                status: stat, 
-                alasanTunda: alasan, 
-                waktuUpdate: new Date().toLocaleTimeString() 
-            });
+            db.ref('pesanan/' + id).update({ status: stat, alasanTunda: alasan, waktuUpdate: new Date().toLocaleTimeString() });
         }
     }
 
@@ -227,60 +203,39 @@
         const catatan = prompt("Catatan Tambahan (Contoh: Titip Satpam):") || "-";
         const reader = new FileReader();
         reader.onload = (e) => {
-            db.ref('pesanan/' + id).update({
-                status: 'Terkirim',
-                buktiFoto: e.target.result,
-                catatanKurir: catatan,
-                waktuSelesai: new Date().toLocaleTimeString()
-            }).then(() => {
-                alert("✅ Berhasil Terkirim!");
-                input.value = "";
-            });
+            db.ref('pesanan/' + id).update({ status: 'Terkirim', buktiFoto: e.target.result, catatanKurir: catatan, waktuSelesai: new Date().toLocaleTimeString() })
+            .then(() => { alert("✅ Berhasil Terkirim!"); input.value = ""; });
         };
         reader.readAsDataURL(input.files[0]);
     }
 
     function preview(src) { document.getElementById('imgPreview').src = src; document.getElementById('modalView').style.display = 'flex'; }
 
-    // --- SCANNER LOGIC ---
     function toggleScanner() {
         const r = document.getElementById('reader');
-        if (r.style.display === 'block') {
-            stopScanner();
-        } else {
-            startScanner();
-        }
+        if (r.style.display === 'block') stopScanner();
+        else startScanner();
     }
 
     function startScanner() {
         document.getElementById('reader').style.display = 'block';
         document.getElementById('btnScanMain').innerText = "🛑 BERHENTI SCAN";
         html5QrCode = new Html5Qrcode("reader");
-        
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
-        (decodedText) => {
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decodedText) => {
             const target = allData.find(o => o.noPesanan.replace(/[^a-zA-Z0-9]/g, "") === decodedText.replace(/[^a-zA-Z0-9]/g, ""));
-            
             if (target) {
-                // --- CEK JIKA PAKET SUDAH DIAMBIL (DOUBLE SCAN) ---
                 if (target.status !== 'Gudang' && currentTab === 'Gudang') {
                     const errSnd = document.getElementById('errorSound');
-                    if(errSnd) errSnd.play(); 
+                    if(errSnd) errSnd.play();
                     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                     alert("⚠️ Paket " + target.noPesanan + " SUDAH DIAMBIL sebelumnya!");
                     return;
                 }
-
-                // --- JIKA SCAN SUKSES (PERTAMA KALI) ---
                 const sound = document.getElementById('beepSound');
                 if(sound) sound.play(); 
                 if (navigator.vibrate) navigator.vibrate(100);
-                
                 if (target.status === 'Gudang') {
-                    db.ref('pesanan/' + target.id).update({ 
-                        status: 'Proses', 
-                        waktuAmbil: new Date().toLocaleTimeString() 
-                    });
+                    db.ref('pesanan/' + target.id).update({ status: 'Proses', waktuAmbil: new Date().toLocaleTimeString() });
                 } else {
                     document.getElementById('searchOrder').value = target.noPesanan;
                     renderOrders();
@@ -288,15 +243,14 @@
                 }
             }
         });
-    } // <--- KURUNG INI TADI HILANG DI KODE BOS
+    }
 
     function stopScanner() {
         if (html5QrCode) {
             html5QrCode.stop().then(() => {
                 document.getElementById('reader').style.display = 'none';
                 document.getElementById('btnScanMain').innerText = "📷 SCAN BARCODE (BORONGAN/CARI)";
-            }).catch(err => {
-                // Jika scanner tertutup paksa
+            }).catch(() => {
                 document.getElementById('reader').style.display = 'none';
                 document.getElementById('btnScanMain').innerText = "📷 SCAN BARCODE (BORONGAN/CARI)";
             });
@@ -326,5 +280,3 @@
 </script>
 </body>
 </html>
-
-
