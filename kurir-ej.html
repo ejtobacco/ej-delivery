@@ -80,10 +80,15 @@
 <body>
 
     <div class="header">
-        <div class="logo-text" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">EJ DELIVERY <span style="font-weight:400; font-size:11px; color:#fff;">| KURIR</span></div>
+        <div class="logo-text" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            EJ DELIVERY <span style="font-weight:400; font-size:11px; color:#fff;">| KURIR</span>
+        </div>
         <div style="text-align: right;">
             <div id="clock" style="font-size: 14px; font-weight: 800; color: var(--safe);">00:00:00</div>
-            <div id="statusLabel" style="font-size: 9px; color: var(--gold); font-weight: 800;">ONLINE</div>
+            <div style="display: flex; align-items: center; gap: 5px; justify-content: flex-end; margin-top: 3px;">
+                <div id="lampuKoneksi" style="width: 7px; height: 7px; background: var(--safe); border-radius: 50%; box-shadow: 0 0 8px var(--safe); transition: 0.3s;"></div>
+                <div id="teksKoneksi" style="font-size: 9px; color: var(--safe); font-weight: 800; letter-spacing: 0.5px;">ONLINE</div>
+            </div>
         </div>
     </div>
 
@@ -294,7 +299,35 @@ function gasUpload(id, input) {
                 setTimeout(() => b.style.display = 'none', 2000);
             });
         }
+
+        // --- SISTEM DETEKSI KONEKSI KURIR ---
+window.addEventListener('online', updateStatusInternet);
+window.addEventListener('offline', updateStatusInternet);
+
+function updateStatusInternet() {
+    const lampu = document.getElementById('lampuKoneksi');
+    const teks = document.getElementById('teksKoneksi');
+    
+    if (navigator.onLine) {
+        // Mode Online: Hijau Gacor
+        if (lampu) lampu.style.background = "var(--safe)";
+        if (lampu) lampu.style.boxShadow = "0 0 10px var(--safe)";
+        if (teks) teks.innerText = "SISTEM ONLINE";
+        if (teks) teks.style.color = "var(--safe)";
+    } else {
+        // Mode Offline: Merah Bahaya
+        if (lampu) lampu.style.background = "var(--danger)";
+        if (lampu) lampu.style.boxShadow = "0 0 10px var(--danger)";
+        if (teks) teks.innerText = "KONEKSI TERPUTUS";
+        if (teks) teks.style.color = "var(--danger)";
+        alert("⚠️ Bos, internet mati! Pastikan sinyal kuat biar laporan lancar.");
+    }
+}
+
+// Jalankan sekali saat baru buka aplikasi
+updateStatusInternet();
     </script>
 </body>
 </html>
+
 
