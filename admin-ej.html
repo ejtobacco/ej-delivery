@@ -370,14 +370,17 @@
             }, 1000);
         }
 
-        db.ref('pesanan').on('value', snap => {
-            const val = snap.val();
-            allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
-            db.ref('setoran').on('value', sSnap => {
-                totalSetoranGlobal = Object.values(sSnap.val() || {}).reduce((a, b) => a + b, 0);
-                updateAll();
-            });
-        });
+        // Ganti bagian ini di file ADMIN Bos
+db.ref('pesanan').limitToLast(500).on('value', snap => {
+    const val = snap.val();
+    allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
+    
+    // Tarik data setoran juga
+    db.ref('setoran').on('value', sSnap => {
+        totalSetoranGlobal = Object.values(sSnap.val() || {}).reduce((a, b) => a + b, 0);
+        updateAll();
+    });
+});
 
         function updateAll() {
             const pickerVal = document.getElementById('datePicker').value;
@@ -442,6 +445,9 @@
                 <span style="font-size:9px; color:var(--gold)">${o.tanggal} | ${o.waktu}</span><br>
                 <b>${o.noPesanan} - ${o.namaPembeli}</b><br>
                 <small>${o.status} | ${o.metode} | Rp${Number(o.total).toLocaleString()}</small>
+
+                // Tambahkan baris ini di tempat yang Bos inginkan di kartu pesanan Admin
+${o.catatanKurir ? `<div style="font-size:11px; color:var(--gold); margin-top:5px; font-style:italic;">📝 Catatan: ${o.catatanKurir}</div>` : ''}
                 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:8px;">
                     <a href="https://wa.me/${waNum}" style="background:var(--wa); text-decoration:none; color:white; padding:8px; border-radius:8px; text-align:center; font-size:10px; font-weight:800;">WA</a>
@@ -726,7 +732,7 @@ function updateStatusInternet() {
     const dataLama = allOrders.find(o => o.id === id);
     if (!dataLama) return;
 
-    if (confirm(`Kirim ulang pesanan ${dataLama.namaPembeli}? (Data lama di tab Cancel akan dihapus)`)) {
+    if (confirm(`Kirim ulang pesanan ${dataLama.namaPembeli}?`)) {
         const n = new Date();
         const dataBaru = {
             ...dataLama,
@@ -734,21 +740,19 @@ function updateStatusInternet() {
             status: 'Menunggu',
             tanggal: formatTglDB(n),
             waktu: n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}),
-            buktiFoto: null 
+            buktiFoto: null // Foto lama dihapus karena mau kirim ulang
         };
         
         delete dataBaru.id; 
 
-        // 1. Simpan data baru ke Firebase
-        db.ref('pesanan').limitToLast(500).on('value', snap => {
-            
-            // 2. KUNCI UTAMA: Hapus data lama dari Firebase agar di tab Cancel hilang
+        // 1. Simpan data baru
+        db.ref('pesanan').push(dataBaru).then(() => {
+            // 2. Hapus data lama yang Gagal tadi
             db.ref('pesanan/' + id).remove().then(() => {
-                alert("✅ Berhasil! Pesanan sudah DIPINDAHKAN ke hari ini.");
-                setFilter('Semua'); // Balik ke tab Sisa
+                alert("✅ Berhasil! Pesanan dipindahkan ke hari ini.");
+                setFilter('Semua');
             });
-
-        }).catch(err => alert("❌ Gagal pindah data: " + err.message));
+        }).catch(err => alert("❌ Gagal: " + err.message));
     }
 }
     </script>
@@ -777,6 +781,7 @@ function updateStatusInternet() {
     
 </body>
 </html>
+
 
 
 
