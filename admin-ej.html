@@ -311,15 +311,21 @@
     </div>
 
     <div class="glass-card">
-        <input type="text" id="noPesanan" placeholder="No Pesanan (#001)">
-        <input type="text" id="pembeli" placeholder="Nama Pembeli">
-        <input type="text" id="nohp" placeholder="WhatsApp (08xx)">
-        <textarea id="alamat" placeholder="Alamat Lengkap"></textarea>
-        <input type="text" id="mapLink" placeholder="Link Google Maps (Opsional)">
-        <select id="metodeBayar" onchange="toggleTotal()"><option value="COD">Metode: COD</option><option value="Transfer">Metode: Transfer</option></select>
-        <input type="number" id="total" placeholder="Harga COD (Rp)">
-        <button class="btn-main" onclick="tambah()">SIMPAN & PRINT</button>
-    </div>
+    <input type="text" id="noPesanan" placeholder="No Pesanan (#001)" autocomplete="off">
+    <input type="text" id="pembeli" placeholder="Nama Pembeli" autocomplete="off">
+    <input type="text" id="nohp" placeholder="WhatsApp (08xx)" autocomplete="off">
+    <textarea id="alamat" placeholder="Alamat Lengkap" autocomplete="off"></textarea>
+    <input type="text" id="mapLink" placeholder="Link Google Maps (Opsional)" autocomplete="off">
+    
+    <select id="metodeBayar" onchange="toggleTotal()">
+        <option value="COD">Metode: COD</option>
+        <option value="Transfer">Metode: Transfer</option>
+    </select>
+
+    <input type="number" id="total" placeholder="Harga COD (Rp)" autocomplete="off" inputmode="numeric">
+    
+    <button class="btn-main" onclick="tambah()">SIMPAN & PRINT</button>
+</div>
 
     <div class="glass-card">
         <input type="number" id="jumlahSetoran" placeholder="Input Setoran (Rp)">
@@ -779,6 +785,7 @@ function updateStatusInternet() {
     
 </body>
 </html>
+
 
 
 
