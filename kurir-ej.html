@@ -253,46 +253,50 @@
     }
 
     function startScanner() {
-    document.getElementById('reader').style.display = 'block';
-    document.getElementById('btnScanMain').innerText = "🛑 BERHENTI SCAN";
-    html5QrCode = new Html5Qrcode("reader");
-    
-    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
-(decodedText) => {
-    const target = allData.find(o => o.noPesanan.replace(/[^a-zA-Z0-9]/g, "") === decodedText.replace(/[^a-zA-Z0-9]/g, ""));
-    
-    if (target) {
-        // --- CEK JIKA PAKET SUDAH DIAMBIL (DOUBLE SCAN) ---
-        if (target.status !== 'Gudang' && currentTab === 'Gudang') {
-            const errSnd = document.getElementById('errorSound');
-            if(errSnd) errSnd.play(); // Suara Error
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Getar putus-putus
-            alert("⚠️ Paket " + target.noPesanan + " SUDAH DIAMBIL sebelumnya!");
-            return;
-        }
-
-        // --- JIKA SCAN SUKSES (PERTAMA KALI) ---
-        const sound = document.getElementById('beepSound');
-        if(sound) sound.play(); 
-        if (navigator.vibrate) navigator.vibrate(100);
+        document.getElementById('reader').style.display = 'block';
+        document.getElementById('btnScanMain').innerText = "🛑 BERHENTI SCAN";
+        html5QrCode = new Html5Qrcode("reader");
         
-        if (target.status === 'Gudang') {
-            db.ref('pesanan/' + target.id).update({ 
-                status: 'Proses', 
-                waktuAmbil: new Date().toLocaleTimeString() 
-            });
-        } else {
-            // Jika status sudah jalan, scan berfungsi sebagai pencarian
-            document.getElementById('searchOrder').value = target.noPesanan;
-            renderOrders();
-            stopScanner();
-        }
-    }
-});
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
+        (decodedText) => {
+            const target = allData.find(o => o.noPesanan.replace(/[^a-zA-Z0-9]/g, "") === decodedText.replace(/[^a-zA-Z0-9]/g, ""));
+            
+            if (target) {
+                // --- CEK JIKA PAKET SUDAH DIAMBIL (DOUBLE SCAN) ---
+                if (target.status !== 'Gudang' && currentTab === 'Gudang') {
+                    const errSnd = document.getElementById('errorSound');
+                    if(errSnd) errSnd.play(); 
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    alert("⚠️ Paket " + target.noPesanan + " SUDAH DIAMBIL sebelumnya!");
+                    return;
+                }
+
+                // --- JIKA SCAN SUKSES (PERTAMA KALI) ---
+                const sound = document.getElementById('beepSound');
+                if(sound) sound.play(); 
+                if (navigator.vibrate) navigator.vibrate(100);
+                
+                if (target.status === 'Gudang') {
+                    db.ref('pesanan/' + target.id).update({ 
+                        status: 'Proses', 
+                        waktuAmbil: new Date().toLocaleTimeString() 
+                    });
+                } else {
+                    document.getElementById('searchOrder').value = target.noPesanan;
+                    renderOrders();
+                    stopScanner();
+                }
+            }
+        });
+    } // <--- KURUNG INI TADI HILANG DI KODE BOS
 
     function stopScanner() {
         if (html5QrCode) {
             html5QrCode.stop().then(() => {
+                document.getElementById('reader').style.display = 'none';
+                document.getElementById('btnScanMain').innerText = "📷 SCAN BARCODE (BORONGAN/CARI)";
+            }).catch(err => {
+                // Jika scanner tertutup paksa
                 document.getElementById('reader').style.display = 'none';
                 document.getElementById('btnScanMain').innerText = "📷 SCAN BARCODE (BORONGAN/CARI)";
             });
@@ -322,4 +326,5 @@
 </script>
 </body>
 </html>
+
 
