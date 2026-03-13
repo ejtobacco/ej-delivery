@@ -228,7 +228,14 @@
                     ${o.status === 'Gudang' ? `
                         <button class="btn btn-success" style="width:100%; margin-top:10px;" onclick="ambilPaket('${o.id}')">📦 KLAIM & AMBIL PAKET INI</button>
                     ` : (o.status !== 'Terkirim' && o.status !== 'Gagal' ? `
-                        <button onclick="window.open('${linkWA}', '_blank')" class="btn btn-wa">💬 HUBUNGI PEMBELI (WA)</button>
+                        // Tambahkan baris ini di bawah tombol WA lama
+const pesanOTW = `*EJ TOBACCO DELIVERY* 🚀\n------------------------------------------\nHalo Kak *${o.namaPembeli.toUpperCase()}* 👋\n\nSaya kurir *${myName.toUpperCase()}* sedang meluncur ke arah Kakak. Estimasi sampai sekitar *5-15 menit* lagi.\n\nMohon siapkan uang pas *Rp${Number(o.total || 0).toLocaleString('id-ID')}* ya Kak, biar prosesnya cepat. Terima kasih! 🙏`;
+const linkOTW = `https://wa.me/${waNum}?text=${encodeURIComponent(pesanOTW)}`;
+
+// Ini kode tombolnya
+container.innerHTML += `
+    <button onclick="window.open('${linkOTW}', '_blank')" class="btn" style="background: #FF5722; width: 100%; margin-top: 8px; color: white;">🚀 SAYA MELUNCUR (OTW)</button>
+`;
                         ${btnMapsHTML}
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
                             <button class="btn btn-success" onclick="document.getElementById('f-${o.id}').click()">✅ SELESAI (FOTO)</button>
@@ -375,6 +382,7 @@
     </script>
 </body>
 </html>
+
 
 
 
