@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EJ ADMIN PRO - FULL SYSTEM</title>
+    <title>EJ ADMIN PRO - FINAL SYSTEM</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#050505">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
@@ -97,20 +97,21 @@
     </div>
 
     <div class="glass-card">
-    <input type="text" id="pembeli" placeholder="Nama Pembeli" autocomplete="off">
-    <input type="text" id="nohp" placeholder="WhatsApp (08xx)" autocomplete="off">
-    <textarea id="alamat" placeholder="Alamat Lengkap (Patokan rumah)"></textarea>
-    
-    <label style="font-size:10px; color:var(--gold); margin-bottom:5px; display:block;">📍 LOKASI (PASTIKAN MUNCUL ✅)</label>
-    <div style="display: flex; gap: 5px; margin-bottom: 5px;">
-        <input type="text" id="mapLink" placeholder="Tempel Link Maps di sini..." style="margin:0; flex:1;" oninput="cekValiditasMap()">
-        <button onclick="autoGenerateKoor()" id="btnAuto" style="background: #2563eb; color: white; border: none; border-radius: 10px; padding: 0 15px; font-weight: 800; font-size: 10px; cursor: pointer; white-space: nowrap;">⚡ AUTO-GENERATE</button>
+        <input type="text" id="pembeli" placeholder="Nama Pembeli" autocomplete="off">
+        <input type="text" id="nohp" placeholder="WhatsApp (08xx)" autocomplete="off">
+        <textarea id="alamat" placeholder="Alamat Lengkap (Patokan rumah)"></textarea>
+        
+        <label style="font-size:10px; color:var(--gold); margin-bottom:5px; display:block;">📍 LOKASI (PASTIKAN MUNCUL ✅)</label>
+        <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+            <input type="text" id="mapLink" placeholder="Tempel Link Maps di sini..." style="margin:0; flex:1;" oninput="cekValiditasMap()">
+            <button onclick="autoGenerateKoor()" id="btnAuto" style="background: #2563eb; color: white; border: none; border-radius: 10px; padding: 0 15px; font-weight: 800; font-size: 10px; cursor: pointer; white-space: nowrap;">⚡ AUTO-GENERATE</button>
+        </div>
+        <div id="mapStatus" style="font-size:10px; color: #EF4444; margin-bottom: 15px;">⚠️ Radar Belum Aktif</div>
+
+        <select id="metodeBayar"><option value="COD">COD</option><option value="Transfer">Transfer</option></select>
+        <input type="number" id="total" placeholder="Harga COD (Rp)">
+        <button class="btn-main" onclick="tambah()">SIMPAN & PRINT</button>
     </div>
-    <div id="mapStatus" style="font-size:10px; color: #EF4444; margin-bottom: 10px;">⚠️ Radar Belum Aktif</div>
-    <select id="metodeBayar"><option value="COD">COD</option><option value="Transfer">Transfer</option></select>
-    <input type="number" id="total" placeholder="Harga COD (Rp)">
-    <button class="btn-main" onclick="tambah()">SIMPAN & PRINT</button>
-</div>
 
     <div class="glass-card">
         <input type="number" id="jumlahSetoran" placeholder="Input Setoran (Rp)">
@@ -231,8 +232,6 @@
             else {
                 filtered.forEach(o => {
                     const waNum = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-                    
-                    // TAMPILAN NAMA KURIR DI ADMIN
                     const infoKurir = o.kurir && o.status !== 'Gudang' ? `<div style="font-size:10px; color:var(--blue); font-weight:800; margin-top:3px; display:inline-block; padding:2px 8px; background:rgba(37,99,235,0.1); border-radius:4px;">🛵 Dibawa oleh: ${o.kurir}</div>` : '';
 
                     html += `<div class="order-item">
@@ -259,27 +258,46 @@
             document.getElementById('adminList').innerHTML = html;
         }
 
-        // BUKU KAS
         function catatBukuKas(tanggal, jenis, operasi = 1) {
             if(!tanggal) return; const p = tanggal.split('/'); if(p.length !== 3) return;
             if (jenis === 'Gagal') db.ref(`laporanBulanan/${p[2]}-${p[1]}/gagalCount`).set(firebase.database.ServerValue.increment(operasi));
         }
 
         function viewFoto(src) { document.getElementById('modalFoto').style.display = 'flex'; document.getElementById('imgBukti').src = src; }
-        function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
 
         function tambah() {
             const n = new Date();
-            const d = { noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), namaPembeli: document.getElementById('pembeli').value, nohp: document.getElementById('nohp').value, alamat: document.getElementById('alamat').value, mapLink: document.getElementById('mapLink').value, total: document.getElementById('total').value || 0, metode: document.getElementById('metodeBayar').value, urgent: document.getElementById('isUrgent').checked, status: 'Gudang', kurir: "", tanggal: formatTglDB(n), waktu: n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) };
-            if(!d.namaPembeli || !d.nohp) return alert("Nama & WA wajib!");
+            const d = { 
+                noPesanan: "#"+Date.now().toString().slice(-4), // Otomatis unik
+                namaPembeli: document.getElementById('pembeli').value, 
+                nohp: document.getElementById('nohp').value, 
+                alamat: document.getElementById('alamat').value, 
+                mapLink: document.getElementById('mapLink').value, 
+                total: document.getElementById('total').value || 0, 
+                metode: document.getElementById('metodeBayar').value, 
+                urgent: false, 
+                status: 'Gudang', 
+                kurir: "", 
+                tanggal: formatTglDB(n), 
+                waktu: n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) 
+            };
+            
+            if(!d.namaPembeli || !d.nohp) return alert("Nama & WA wajib diisi, Bos!");
+            
             db.ref('pesanan').push(d).then(() => { 
                 lastOrder = d; executePrint(); 
-                const waNumber = String(d.nohp).replace(/\D/g, '').replace(/^0/, '62'); const linkMaps = d.mapLink ? `\n📍 Map: ${d.mapLink}` : "";
+                const waNumber = String(d.nohp).replace(/\D/g, '').replace(/^0/, '62'); 
+                const linkMaps = d.mapLink ? `\n📍 Map: ${d.mapLink}` : "";
                 const teksWA = `*EJ TOBACCO DELIVERY* 📦\n------------------------------------------\nHalo Kak *${d.namaPembeli.toUpperCase()}* 👋\n\nPesanan Anda sedang diproses kurir.\n\n*RINCIAN:* \n🆔 Resi: ${d.noPesanan}\n💰 Total: *Rp${Number(d.total).toLocaleString()}*\n💳 Bayar: *${d.metode}*\n📍 Tujuan: ${d.alamat}${linkMaps}\n\nMohon siapkan uang pas kalau COD ya. Terima kasih! 🙏`;
                 const urlWA = `https://wa.me/${waNumber}?text=${encodeURIComponent(teksWA)}`;
+                
                 document.getElementById('waPrompt').style.display = 'block';
                 document.getElementById('btnWAOpen').onclick = () => { window.open(urlWA, '_blank'); document.getElementById('waPrompt').style.display = 'none'; };
-                ['noPesanan','pembeli','nohp','alamat','mapLink','total'].forEach(id => document.getElementById(id).value = ""); document.getElementById('isUrgent').checked = false; document.getElementById('pembeli').focus();
+                
+                ['pembeli','nohp','alamat','mapLink','total'].forEach(id => document.getElementById(id).value = ""); 
+                document.getElementById('pembeli').focus();
+                document.getElementById('mapStatus').innerText = "⚠️ Radar Belum Aktif";
+                document.getElementById('mapStatus').style.color = "#EF4444";
             }).catch((err) => alert("❌ Gagal menyimpan: " + err.message));
         }
                 
@@ -342,28 +360,19 @@
 
         let radarMesin; 
         function extractCoords(text) {
-    if(!text) return null;
-    // Mencari pola angka,angka atau @angka,angka
-    const match = text.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/) || 
-                  text.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-                  
-    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-    return null;
-}
+            if(!text) return null;
+            const match = text.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/) || text.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+            if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+            return null;
+        }
 
-// Tambahan biar status teks berubah otomatis saat diketik
-function cekValiditasMap() {
-    const input = document.getElementById('mapLink');
-    const status = document.getElementById('mapStatus');
-    const koor = extractCoords(input.value);
-    if (koor) { 
-        status.innerText = "✅ RADAR AKTIF!"; 
-        status.style.color = "#22C55E"; 
-    } else { 
-        status.innerText = "⚠️ Radar Belum Aktif"; 
-        status.style.color = "#EF4444"; 
-    }
-}
+        function cekValiditasMap() {
+            const input = document.getElementById('mapLink');
+            const status = document.getElementById('mapStatus');
+            const koor = extractCoords(input.value);
+            if (koor) { status.innerText = "✅ RADAR AKTIF!"; status.style.color = "#22C55E"; } 
+            else { status.innerText = "⚠️ Radar Belum Aktif"; status.style.color = "#EF4444"; }
+        }
         
         function bukaRadar() {
             document.getElementById('petaOverlay').style.display = 'flex';
@@ -392,43 +401,39 @@ function cekValiditasMap() {
         setTimeout(bersihkanDataLama, 5000);
 
         async function autoGenerateKoor() {
-    const input = document.getElementById('mapLink');
-    const status = document.getElementById('mapStatus');
-    const btn = document.getElementById('btnAuto');
-    const url = input.value.trim();
+            const input = document.getElementById('mapLink');
+            const status = document.getElementById('mapStatus');
+            const btn = document.getElementById('btnAuto');
+            const url = input.value.trim();
 
-    if(!url.includes("http")) return alert("Tempel link Maps-nya dulu Bos!");
+            if(!url.includes("http")) return alert("Tempel link Maps-nya dulu Bos!");
 
-    btn.innerText = "⌛ PROSES...";
-    status.innerText = "🔍 Mencari koordinat rahasia...";
-    status.style.color = "#D4AF37";
+            btn.innerText = "⌛ PROSES...";
+            status.innerText = "🔍 Mencari koordinat rahasia...";
+            status.style.color = "#D4AF37";
 
-    try {
-        // Menggunakan jembatan corsproxy untuk melihat isi link pendek
-        const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(url);
-        const response = await fetch(proxyUrl);
-        const html = await response.text();
+            try {
+                const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(url);
+                const response = await fetch(proxyUrl);
+                const html = await response.text();
 
-        // Mencari angka koordinat di dalam hasil 'intipan'
-        const match = html.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/) || 
-                      html.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                const match = html.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/) || html.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
 
-        if (match) {
-            input.value = `${match[1]}, ${match[2]}`; // Mengganti link jadi angka
-            status.innerText = "✅ BERHASIL: Koordinat Terkunci!";
-            status.style.color = "#22C55E";
-        } else {
-            throw new Error("Gagal");
+                if (match) {
+                    input.value = `${match[1]}, ${match[2]}`; 
+                    status.innerText = "✅ BERHASIL: Koordinat Terkunci!";
+                    status.style.color = "#22C55E";
+                } else {
+                    throw new Error("Gagal");
+                }
+            } catch (err) {
+                status.innerText = "❌ GAGAL: Google Memblokir.";
+                status.style.color = "#EF4444";
+                alert("Gagal otomatis, Bos. Solusi: Buka linknya dulu di browser, copy link panjang di bar atas, lalu tempel balik ke sini.");
+            } finally {
+                btn.innerText = "⚡ AUTO-GENERATE";
+            }
         }
-    } catch (err) {
-        status.innerText = "❌ GAGAL: Google Memblokir.";
-        status.style.color = "#EF4444";
-        alert("Gagal otomatis, Bos. Solusi: Buka linknya dulu di browser, copy link panjang di bar atas, lalu tempel balik ke sini.");
-    } finally {
-        btn.innerText = "⚡ AUTO-GENERATE";
-    }
-}
-        
     </script>
 </body>
 </html>
