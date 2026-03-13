@@ -100,12 +100,12 @@
                 <b id="totalPengeluaran" style="display: block; font-size: 14px; color: var(--danger);">Rp 0</b>
             </div>
             <div style="text-align: right;">
-                <span style="font-size: 8px; color: var(--gold); font-weight: 800; letter-spacing: 1px;">💎 SETORAN BERSIH</span>
+                <span style="font-size: 8px; color: var(--gold); font-weight: 800; letter-spacing: 1px;">💎 WAJIB SETOR</span>
                 <b id="setoranBersih" style="display: block; font-size: 14px; color: var(--gold);">Rp 0</b>
             </div>
         </div>
         
-        <button onclick="tambahPengeluaran()" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff; width: 100%; padding: 12px; border-radius: 12px; margin-top: 15px; font-weight: 800; font-size: 10px; cursor: pointer;">✍️ CATAT PENGELUARAN</button>
+        <button onclick="tambahPengeluaran()" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff; width: 100%; padding: 12px; border-radius: 12px; margin-top: 15px; font-weight: 800; font-size: 10px; cursor: pointer;">✍️ CATAT PENGELUARAN BENSIN DLL</button>
     </div>
 
     <button class="btn btn-scan" id="btnScanMain" onclick="toggleScanner()">📷 SCAN BARCODE (AMBIL DARI GUDANG)</button>
@@ -114,7 +114,7 @@
     <input type="text" id="searchOrder" class="search-box" placeholder="🔍 Cari nama pembeli atau resi..." oninput="renderOrders()">
 
     <div class="tab-menu">
-        <div class="tab-btn" id="t-Gudang" onclick="setTab('Gudang')">GUDANG KITA <span class="count-badge" id="c-Gudang">0</span></div>
+        <div class="tab-btn" id="t-Gudang" onclick="setTab('Gudang')">GUDANG <span class="count-badge" id="c-Gudang">0</span></div>
         <div class="tab-btn active" id="t-Proses" onclick="setTab('Proses')">TAS SAYA <span class="count-badge" id="c-Proses">0</span></div>
         <div class="tab-btn" id="t-Terkirim" onclick="setTab('Terkirim')">SUKSES <span class="count-badge" id="c-Terkirim">0</span></div>
         <div class="tab-btn" id="t-Gagal" onclick="setTab('Gagal')">CANCEL <span class="count-badge" id="c-Gagal">0</span></div>
@@ -171,14 +171,12 @@
         document.getElementById('pinDisplay').innerText = inputPin.length > 0 ? "*".repeat(inputPin.length) : "****";
     }
         
-    // --- 1. AMBIL PESANAN ---
     db.ref('pesanan').limitToLast(100).on('value', snap => {
         const val = snap.val();
         allData = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
         if (myName !== "") updateUI();
     });
 
-    // --- 2. AMBIL PENGELUARAN ---
     let totalPengeluaranKu = 0;
     db.ref('pengeluaran').on('value', snap => {
         const val = snap.val();
@@ -190,19 +188,6 @@
                     totalPengeluaranKu += Number(p.nominal || 0);
                 }
             });
-        }
-        if (myName !== "") updateUI();
-    });
-
-    // --- 3. AMBIL SETORAN (Sinkron dengan Admin) ---
-    let setoranSaya = 0;
-    db.ref('setoran').on('value', snap => {
-        const allSetoran = snap.val() || {};
-        const todayKey = getTgl().replace(/\//g, '-');
-        if (allSetoran[todayKey] && allSetoran[todayKey][myName]) {
-            setoranSaya = Number(allSetoran[todayKey][myName]);
-        } else {
-            setoranSaya = 0;
         }
         if (myName !== "") updateUI();
     });
@@ -224,7 +209,6 @@
         }).catch(err => alert("Gagal mencatat: " + err.message));
     }
 
-    // --- FUNGSI UPDATE LAYAR KURIR (CUMA ADA SATU SEKARANG) ---
     function updateUI() {
         const today = getTgl();
         let gd=0, p=0, s=0, g=0, codDompetKu=0;
@@ -249,8 +233,8 @@
         document.getElementById('totalCOD').innerText = "Rp " + codDompetKu.toLocaleString('id-ID');
         document.getElementById('totalPengeluaran').innerText = "Rp " + totalPengeluaranKu.toLocaleString('id-ID');
         
-        // RUMUS SAKTI KURIR (Otomatis 0 kalau sudah diterima Admin)
-        const bersih = codDompetKu - totalPengeluaranKu - setoranSaya;
+        // RUMUS: Total Uang yg harus diserahkan ke Bos
+        const bersih = codDompetKu - totalPengeluaranKu;
         document.getElementById('setoranBersih').innerText = "Rp " + (bersih < 0 ? 0 : bersih).toLocaleString('id-ID');
         
         renderOrders();
@@ -420,7 +404,6 @@
     }
     window.addEventListener('online', updateStatusInternet); window.addEventListener('offline', updateStatusInternet); updateStatusInternet();
    
-    // === FITUR RADAR KURIR ===
     function aktifkanRadar() {
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition(
@@ -441,16 +424,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
