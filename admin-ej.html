@@ -223,7 +223,11 @@
         // HANYA MENGAMBIL 100 DATA (SUPER NGEBUT!)
         db.ref('pesanan').limitToLast(100).on('value', snap => {
             const val = snap.val(); allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
-            db.ref('setoran').on('value', sSnap => { totalSetoranGlobal = Object.values(sSnap.val() || {}).reduce((a, b) => a + b, 0); updateAll(); });
+            // Ambil Data Setoran (Biar Live)
+        let dataSetoranSemua = {};
+        db.ref('setoran').on('value', sSnap => {
+            dataSetoranSemua = sSnap.val() || {};
+            updateAll();
         });
 
         // ADMIN PANTAU PENGELUARAN LIVE
@@ -252,22 +256,35 @@
         }
 
         function updateDashboard(tglTarget) {
-            let s=0, g=0, p=0, gd=0, codSukses=0;
+            let s=0, g=0, p=0, gd=0, codSuksesHariIni=0;
+            
+            // 1. Hitung Pesanan
             allOrders.forEach(o => {
                 if (o.status === 'Gudang') gd++;
                 if (o.status !== 'Terkirim' && o.status !== 'Gagal' && o.status !== 'Gudang') p++;
-                if (o.tanggal === tglTarget) { if (o.status === 'Terkirim') s++; else if (o.status === 'Gagal') g++; }
-                if (o.status === 'Terkirim' && o.metode === 'COD') codSukses += Number(o.total || 0);
+                if (o.tanggal === tglTarget) { 
+                    if (o.status === 'Terkirim') s++; 
+                    else if (o.status === 'Gagal') g++; 
+                    if (o.status === 'Terkirim' && o.metode === 'COD') codSuksesHariIni += Number(o.total || 0);
+                }
             });
-            document.getElementById('countGudang').innerText = gd; document.getElementById('countProses').innerText = p;
-            document.getElementById('countSukses').innerText = s; document.getElementById('countGagal').innerText = g;
-            // Update Tampilan Dashboard Admin
-            document.getElementById('adminTotalCOD').innerText = "Rp" + codSukses.toLocaleString();
+
+            // 2. Ambil Setoran khusus tanggal yang dipilih
+            const keyTgl = tglTarget.replace(/\//g, '-'); // Ubah 14/03/2026 jadi 14-03-2026
+            const setoranHariIni = dataSetoranSemua[keyTgl] || 0;
+
+            // 3. Update Angka di Dashboard
+            document.getElementById('countGudang').innerText = gd; 
+            document.getElementById('countProses').innerText = p;
+            document.getElementById('countSukses').innerText = s; 
+            document.getElementById('countGagal').innerText = g;
+            
+            document.getElementById('adminTotalCOD').innerText = "Rp" + codSuksesHariIni.toLocaleString();
             document.getElementById('adminTotalKeluar').innerText = "Rp" + globalPengeluaran.toLocaleString();
             
-            // Kas Bersih = Total COD - Setoran Global yang sudah masuk - Pengeluaran Kurir di jalan
-            const kasBersih = codSukses - totalSetoranGlobal - globalPengeluaran;
-            document.getElementById('adminKasBersih').innerText = "Rp" + kasBersih.toLocaleString();
+            // RUMUS SAKTI: COD - Pengeluaran Kurir - Setoran yang sudah diterima Admin
+            const kasBersih = codSuksesHariIni - globalPengeluaran - setoranHariIni;
+            document.getElementById('adminKasBersih').innerText = "Rp" + (kasBersih < 0 ? 0 : kasBersih).toLocaleString();
         }
 
         function renderList() {
