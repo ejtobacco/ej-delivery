@@ -147,27 +147,15 @@
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
     <script>
-        // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg",
-  authDomain: "ejtobacco-v2.firebaseapp.com",
-  projectId: "ejtobacco-v2",
-  storageBucket: "ejtobacco-v2.firebasestorage.app",
-  messagingSenderId: "366973371317",
-  appId: "1:366973371317:web:c5ec32460cd9cf0f6c8ffc",
-  measurementId: "G-RG6YPPHP8D"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+        const firebaseConfig = {
+          apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg",
+          authDomain: "ejtobacco-v2.firebaseapp.com",
+          databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "ejtobacco-v2",
+          storageBucket: "ejtobacco-v2.firebasestorage.app",
+          messagingSenderId: "366973371317",
+          appId: "1:366973371317:web:c5ec32460cd9cf0f6c8ffc"
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
