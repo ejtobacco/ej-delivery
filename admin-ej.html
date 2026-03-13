@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); --text-main: #FFFFFF; --safe: #22C55E; --danger: #EF4444; --blue: #2563eb; --wa: #25D366; }
+        :root { --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); --text-main: #FFFFFF; --safe: #22C55E; --warning: #F59E0B; --danger: #EF4444; --blue: #2563eb; --wa: #25D366; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         html { scroll-behavior: smooth; }
         body { background: var(--bg); color: var(--text-main); width: 100%; margin: 0; padding: 12px; overflow-x: hidden; -webkit-user-select: none; user-select: none; }
@@ -76,10 +76,9 @@
         <button onclick="goToToday()" style="background: var(--gold); border: none; border-radius: 12px; padding: 0 15px; font-weight: 800; font-size: 10px; color: black; cursor: pointer;">HARI INI</button>
     </div>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px; margin-bottom:15px;">
-        <button onclick="bukaLaporan()" style="background:var(--glass); border:1px solid var(--gold); color:var(--gold); padding:10px; border-radius:12px; font-weight:800; font-size:9px; cursor: pointer;">📊 LAPORAN</button>
-        <button onclick="bukaSaldoKurir()" style="background:var(--glass); border:1px solid var(--safe); color:var(--safe); padding:10px; border-radius:12px; font-weight:800; font-size:9px; cursor: pointer;">💸 DOMPET KURIR</button>
-        <button onclick="bukaRadar()" style="background:var(--glass); border:1px solid var(--blue); color:var(--blue); padding:10px; border-radius:12px; font-weight:800; font-size:9px; cursor: pointer;">📡 RADAR KURIR</button>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:15px;">
+        <button onclick="bukaLaporan()" style="background:var(--glass); border:1px solid var(--gold); color:var(--gold); padding:10px; border-radius:12px; font-weight:800; font-size:9px; cursor: pointer;">📊 LAPORAN BULANAN</button>
+        <button onclick="bukaRadar()" style="background:var(--glass); border:1px solid var(--blue); color:var(--blue); padding:10px; border-radius:12px; font-weight:800; font-size:9px; cursor: pointer;">📡 RADAR KURIR LIVE</button>
     </div>
 
     <div id="radarOverlay" class="modal-foto" style="padding: 10px; flex-direction: column;">
@@ -99,24 +98,12 @@
         <div class="report-box" id="f-Gagal" onclick="setFilter('Gagal')" style="border-color: var(--danger);"><span>Cancel</span><b id="countGagal">0</b></div>
     </div>
 
-    <div class="glass-card" style="border-color: var(--safe); background: rgba(34, 197, 94, 0.05); margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="text-align: left;">
-                <span style="color: var(--safe); font-size: 9px; font-weight: 800;">💰 TOTAL COD</span>
-                <b id="adminTotalCOD" style="display: block; font-size: 16px; color: var(--safe);">Rp0</b>
-            </div>
-            <div style="text-align: center;">
-                <span style="color: var(--danger); font-size: 9px; font-weight: 800;">📉 PENGELUARAN</span>
-                <b id="adminTotalKeluar" style="display: block; font-size: 16px; color: var(--danger);">Rp0</b>
-            </div>
-            <div style="text-align: right;">
-                <span style="color: var(--gold); font-size: 9px; font-weight: 800;">💎 KAS BERSIH</span>
-                <b id="adminKasBersih" style="display: block; font-size: 16px; color: var(--gold);">Rp0</b>
-            </div>
+    <h3 style="font-size:11px; color:var(--gold); margin-top:20px; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px;">💸 KEUANGAN PER KURIR HARI INI</h3>
+    <div id="keuanganKurirContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
         </div>
-    </div>
 
     <div class="glass-card">
+        <h3 style="font-size:11px; color:#fff; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">📦 INPUT PESANAN BARU</h3>
         <input type="text" id="noPesanan" placeholder="No Pesanan (#001)" autocomplete="off">
         <input type="text" id="pembeli" placeholder="Nama Pembeli" autocomplete="off">
         <input type="text" id="nohp" placeholder="WhatsApp (08xx)" autocomplete="off">
@@ -132,8 +119,8 @@
         <button class="btn-main" onclick="tambah()">SIMPAN & PRINT</button>
     </div>
 
-    <input type="text" id="searchBar" placeholder="🔍 Cari nama/resi..." oninput="renderList()" style="width:100%; border:1px solid var(--gold);">
-    <div id="adminList" class="glass-card">Memuat data...</div>
+    <input type="text" id="searchBar" placeholder="🔍 Cari nama/resi..." oninput="renderList()" style="width:100%; border:1px solid var(--gold); margin-top:10px;">
+    <div id="adminList" class="glass-card" style="margin-top:15px;">Memuat data...</div>
 
     <div id="modalFoto" class="modal-foto" onclick="this.style.display='none'">
         <img id="imgBukti" src="">
@@ -155,15 +142,6 @@
         </div>
     </div>
 
-    <div id="saldoOverlay" class="modal-foto" style="padding: 20px; overflow-y: auto; backdrop-filter: blur(15px);">
-    <div class="glass-card" style="width: 100%; max-width: 400px; background: #0A0A0A; border: 1px solid var(--safe);">
-        <h2 style="color: var(--safe); text-align: center; margin-bottom: 5px; font-weight: 800;">DOMPET KURIR</h2>
-        <p style="text-align: center; color: gray; font-size: 10px; margin-bottom: 20px;">Terima Setoran Spesifik Dari Masing-Masing Kurir</p>
-        <div id="isiSaldoKurir" style="line-height: 1.5; font-size: 14px;">Memuat data...</div>
-        <button class="btn-main" onclick="document.getElementById('saldoOverlay').style.display='none'" style="margin-top: 30px; background: rgba(34, 197, 94, 0.1); border: 1px solid var(--safe); color: var(--safe);">TUTUP DOMPET</button>
-    </div>
-    </div>
-
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
     <script>
@@ -179,8 +157,9 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
-        let allOrders = [], globalPengeluaran = 0;
-        let dataSetoranKurir = {}; // Menyimpan data setoran per kurir
+        let allOrders = [];
+        let semuaPengeluaran = {};
+        let semuaSetoranKurir = {};
         let currentFilter = "Semua", lastOrder = null, lastDateString = "";
 
         function formatTglDB(date) { const d = new Date(date); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
@@ -208,32 +187,20 @@
             document.getElementById('pinDisplay').innerText = inputPin.length > 0 ? "*".repeat(inputPin.length) : "****";
         }
 
-        // --- AMBIL SEMUA DATA PESANAN ---
+        // --- AMBIL SEMUA DATA (REALTIME) ---
         db.ref('pesanan').limitToLast(100).on('value', snap => {
             const val = snap.val();
             allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
             updateAll();
         });
 
-        // --- AMBIL PENGELUARAN ---
         db.ref('pengeluaran').on('value', snap => {
-            const val = snap.val();
-            globalPengeluaran = 0;
-            const targetTgl = document.getElementById('datePicker').value.split('-').reverse().join('/');
-            if (val) {
-                Object.values(val).forEach(item => {
-                    if (item.tanggal === targetTgl) globalPengeluaran += Number(item.nominal || 0);
-                });
-            }
+            semuaPengeluaran = snap.val() || {};
             updateAll();
         });
 
-        // --- AMBIL DATA SETORAN PER KURIR (BARU) ---
         db.ref('setoran_kurir').on('value', snap => {
-            const val = snap.val() || {};
-            const keyTgl = document.getElementById('datePicker').value.split('-').reverse().join('-');
-            // Ambil hanya setoran di tanggal yang dipilih Admin
-            dataSetoranKurir = val[keyTgl] || {}; 
+            semuaSetoranKurir = snap.val() || {}; 
             updateAll();
         });
 
@@ -242,98 +209,92 @@
             if(!pickerVal) return;
             const tglTarget = pickerVal.split('-').reverse().join('/');
             
-            let s=0, g=0, p=0, gd=0, codSuksesHariIni=0;
+            let s=0, g=0, p=0, gd=0;
+            let dataKurir = {}; 
+
+            // Hitung Pesanan & Pisahkan per Kurir
             allOrders.forEach(o => {
                 if (o.status === 'Gudang') gd++;
                 if (o.status !== 'Terkirim' && o.status !== 'Gagal' && o.status !== 'Gudang') p++;
                 if (o.tanggal === tglTarget) { 
-                    if (o.status === 'Terkirim') { s++; if(o.metode === 'COD') codSuksesHariIni += Number(o.total || 0); }
+                    if (o.status === 'Terkirim') { 
+                        s++; 
+                        if(o.metode === 'COD' && o.kurir) {
+                            if (!dataKurir[o.kurir]) dataKurir[o.kurir] = { cod: 0, keluar: 0 };
+                            dataKurir[o.kurir].cod += Number(o.total || 0);
+                        }
+                    }
                     else if (o.status === 'Gagal') g++; 
                 }
             });
 
-            // Hitung total uang yang sudah disetor semua kurir ke Bos hari ini
-            const totalSetoranSemuaKurir = Object.values(dataSetoranKurir).reduce((a, b) => a + b, 0);
+            // Hitung Pengeluaran per Kurir
+            Object.values(semuaPengeluaran).forEach(item => {
+                if (item.tanggal === tglTarget && item.kurir) {
+                    if (!dataKurir[item.kurir]) dataKurir[item.kurir] = { cod: 0, keluar: 0 };
+                    dataKurir[item.kurir].keluar += Number(item.nominal || 0);
+                }
+            });
 
             document.getElementById('countGudang').innerText = gd; 
             document.getElementById('countProses').innerText = p;
             document.getElementById('countSukses').innerText = s; 
             document.getElementById('countGagal').innerText = g;
             
-            document.getElementById('adminTotalCOD').innerText = "Rp " + codSuksesHariIni.toLocaleString('id-ID');
-            document.getElementById('adminTotalKeluar').innerText = "Rp " + globalPengeluaran.toLocaleString('id-ID');
-            
-            // KAS BERSIH = UANG COD MASUK - BENSIN - UANG YANG SUDAH ADA DI TANGAN BOS
-            const kasBersih = codSuksesHariIni - globalPengeluaran - totalSetoranSemuaKurir;
-            document.getElementById('adminKasBersih').innerText = "Rp " + (kasBersih < 0 ? 0 : kasBersih).toLocaleString('id-ID');
-            
+            // --- RENDER KEUANGAN PER KURIR DI LAYAR UTAMA ---
+            const keyTgl = tglTarget.replace(/\//g, '-');
+            const dataSetoranHariIni = semuaSetoranKurir[keyTgl] || {};
+            let htmlKeuangan = "";
+            let adaData = false;
+
+            for (let nama in dataKurir) {
+                adaData = true;
+                const k = dataKurir[nama];
+                const sudahSetor = Number(dataSetoranHariIni[nama] || 0);
+                const sisaSetor = k.cod - k.keluar - sudahSetor;
+
+                const warnaBorder = sisaSetor > 0 ? 'var(--warning)' : 'var(--safe)';
+                const badgeStatus = sisaSetor > 0 
+                    ? `<span style="background:var(--warning); color:#000; padding:4px 8px; border-radius:6px; font-size:9px; font-weight:800;">BELUM SETOR</span>`
+                    : `<span style="background:var(--safe); color:#fff; padding:4px 8px; border-radius:6px; font-size:9px; font-weight:800;">LUNAS ✅</span>`;
+
+                htmlKeuangan += `
+                <div class="glass-card" style="padding: 15px; margin-bottom: 0; border-color: ${warnaBorder}; background: rgba(255,255,255,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <b style="color:var(--gold); font-size:15px;">🛵 ${nama.toUpperCase()}</b>
+                        ${badgeStatus}
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px; color:#ccc;">
+                        <span>💰 Total COD Masuk:</span> <b>Rp ${k.cod.toLocaleString('id-ID')}</b>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px; color:#ccc;">
+                        <span>📉 Potong Bensin/Parkir:</span> <b style="color:var(--danger)">-Rp ${k.keluar.toLocaleString('id-ID')}</b>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:12px; color:#ccc;">
+                        <span>💸 Uang Sudah Diterima:</span> <b style="color:var(--gold)">Rp ${sudahSetor.toLocaleString('id-ID')}</b>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; border:1px solid ${warnaBorder};">
+                        <span style="font-size:11px; font-weight:800; color:#fff;">SISA WAJIB SETOR:</span>
+                        <b style="font-size:15px; color:${warnaBorder};">Rp ${(sisaSetor < 0 ? 0 : sisaSetor).toLocaleString('id-ID')}</b>
+                    </div>
+                    ${sisaSetor > 0 ? `<button onclick="terimaSetoranKurir('${nama}', ${sisaSetor})" style="width:100%; margin-top:12px; background:var(--safe); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:800; font-size:11px; cursor:pointer;">✅ TERIMA UANG DARI ${nama.toUpperCase()}</button>` : ''}
+                </div>`;
+            }
+
+            if (!adaData) {
+                htmlKeuangan = `<div style="text-align:center; padding:20px; opacity:0.5; font-size:11px; border:1px dashed var(--glass-border); border-radius:12px;">Belum ada pesanan COD atau pengeluaran hari ini.</div>`;
+            }
+            document.getElementById('keuanganKurirContainer').innerHTML = htmlKeuangan;
+
             renderList();
-        }
-
-        // FUNGSI BUKA DOMPET (ADA TOMBOL TERIMA PER KURIR)
-        function bukaSaldoKurir() {
-            document.getElementById('saldoOverlay').style.display = 'flex';
-            const tglAktif = document.getElementById('datePicker').value.split('-').reverse().join('/');
-            let dataKurir = {}; 
-
-            // Hitung Uang COD Masuk Per Kurir
-            allOrders.forEach(o => {
-                if (o.tanggal === tglAktif && o.status === 'Terkirim' && o.metode === 'COD' && o.kurir) {
-                    if (!dataKurir[o.kurir]) dataKurir[o.kurir] = { cod: 0, keluar: 0 };
-                    dataKurir[o.kurir].cod += Number(o.total || 0);
-                }
-            });
-
-            // Hitung Pengeluaran Bensin Per Kurir
-            db.ref('pengeluaran').once('value', snap => {
-                const exps = snap.val();
-                if (exps) {
-                    Object.values(exps).forEach(item => {
-                        if (item.tanggal === tglAktif && dataKurir[item.kurir]) {
-                            dataKurir[item.kurir].keluar += Number(item.nominal || 0);
-                        }
-                    });
-                }
-
-                let html = "";
-                for (let nama in dataKurir) {
-                    const k = dataKurir[nama];
-                    // Cek uang yang sudah disetor kurir ini ke Bos
-                    const sudahSetor = dataSetoranKurir[nama] || 0; 
-                    
-                    // Sisa uang yang harus disetor
-                    const sisaSetor = k.cod - k.keluar - sudahSetor;
-
-                    html += `<div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0;">
-                        <b style="color:var(--gold); font-size:15px;">🛵 ${nama.toUpperCase()}</b><br>
-                        <div style="font-size:11px; margin:6px 0; color:#ccc;">
-                            Total COD: Rp ${k.cod.toLocaleString('id-ID')} <br>
-                            Pengeluaran: -Rp ${k.keluar.toLocaleString('id-ID')} <br>
-                            Sudah Disetor: <span style="color:var(--safe)">Rp ${sudahSetor.toLocaleString('id-ID')}</span>
-                        </div>
-                        
-                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(34,197,94,0.05); padding:10px; border-radius:8px; border:1px solid var(--safe);">
-                            <span style="font-weight:800; font-size:12px; color:var(--safe);">SISA: Rp ${sisaSetor.toLocaleString('id-ID')}</span>
-                            ${sisaSetor > 0 
-                                ? `<button onclick="terimaSetoranKurir('${nama}', ${sisaSetor})" style="background:var(--safe); border:none; padding:6px 12px; border-radius:6px; color:#fff; font-weight:800; font-size:10px; cursor:pointer;">TERIMA UANG</button>` 
-                                : `<span style="font-size:10px; color:var(--safe); font-weight:800;">LUNAS ✅</span>`
-                            }
-                        </div>
-                    </div>`;
-                }
-                document.getElementById('isiSaldoKurir').innerHTML = html || "Belum ada data sukses hari ini.";
-            });
         }
 
         // FUNGSI EKSEKUSI TERIMA UANG DARI KURIR
         function terimaSetoranKurir(namaKurir, jumlah) {
             const keyTgl = document.getElementById('datePicker').value.split('-').reverse().join('-');
-            
             if(confirm(`Yakin sudah menerima uang pas sebesar Rp ${jumlah.toLocaleString('id-ID')} dari ${namaKurir.toUpperCase()}?`)) {
-                // Simpan ke database dengan nama kurir
                 db.ref(`setoran_kurir/${keyTgl}/${namaKurir}`).transaction(cv => (Number(cv) || 0) + jumlah).then(() => { 
                     alert(`✅ Uang dari ${namaKurir.toUpperCase()} berhasil diterima!`); 
-                    bukaSaldoKurir(); // Refresh tampilan dompet
                 }).catch(e => alert("Gagal: " + e.message));
             }
         }
