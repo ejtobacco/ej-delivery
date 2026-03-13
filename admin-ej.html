@@ -249,7 +249,7 @@
                             <button style="background:var(--gold); color:black; border:none; padding:8px; border-radius:8px; font-size:10px; font-weight:800;" onclick="reprint('${o.id}')">REPRINT</button>
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:5px;">
-                            ${o.buktiFoto ? `<button class="btn-small" style="background:var(--safe);" onclick="viewFoto('${o.buktiFoto}')">LIHAT FOTO</button>` : `<div style="background:var(--glass); color:gray; padding:8px; border-radius:8px; text-align:center; font-size:10px; border:1px solid rgba(255,255,255,0.05);">TANPA FOTO</div>`}
+                            ${(o.adaFoto || o.buktiFoto) ? `<button class="btn-small" style="background:var(--safe);" onclick="viewFoto('${o.id}', '${o.buktiFoto || ''}')">LIHAT FOTO</button>` : `<div style="background:var(--glass); color:gray; padding:8px; border-radius:8px; text-align:center; font-size:10px; border:1px solid rgba(255,255,255,0.05);">TANPA FOTO</div>`}
                             ${o.status === 'Terkirim' ? `<div style="background:rgba(255,255,255,0.05); color:#666; padding:10px; border-radius:10px; text-align:center; font-size:10px; font-weight:800; border:1px solid rgba(255,255,255,0.1); cursor:not-allowed;">🔒 TERKUNCI</div>` : 
                                 (o.status === 'Gagal' ? `<button onclick="kirimUlang('${o.id}')" style="background:var(--blue); color:white; border:none; padding:10px; border-radius:10px; font-size:10px; font-weight:800; cursor:pointer;">KIRIM ULANG</button>` : `<button onclick="hapus('${o.id}')" style="background:rgba(239,68,68,0.1); color:#EF4444; border:1px solid #EF4444; padding:10px; border-radius:10px; font-size:10px; font-weight:800; cursor:pointer;">HAPUS</button>`)
                             }
@@ -266,7 +266,21 @@
             if (jenis === 'Gagal') db.ref(`laporanBulanan/${p[2]}-${p[1]}/gagalCount`).set(firebase.database.ServerValue.increment(operasi));
         }
 
-        function viewFoto(src) { document.getElementById('modalFoto').style.display = 'flex'; document.getElementById('imgBukti').src = src; }
+        function viewFoto(id, oldSrc) { 
+    document.getElementById('modalFoto').style.display = 'flex'; 
+    const img = document.getElementById('imgBukti');
+    img.src = ""; // Kosongkan dulu biar nggak numpuk
+    
+    // Tarik foto dari "kamar khusus" (foto_bukti)
+    if (oldSrc && oldSrc.length > 100) {
+        img.src = oldSrc; // Ini untuk nampilin foto pesanan lama
+    } else {
+        db.ref('foto_bukti/' + id).once('value').then(snap => {
+            if(snap.exists()) img.src = snap.val();
+            else alert("Maaf, Foto tidak ditemukan!");
+        });
+    }
+}
         function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
 
         function tambah() {
@@ -296,7 +310,7 @@
         function hapus(id) {
             const p = allOrders.find(o => o.id === id);
             if (p && p.status === 'Terkirim') return alert("⛔ AKSES DITOLAK!\n\nPesanan SUKSES tidak dapat dihapus.");
-            if (confirm("Apakah Anda yakin ingin menghapus pesanan ini?")) { db.ref('pesanan/' + id).remove().then(() => { if (p.status === 'Gagal') catatBukuKas(p.tanggal, 'Gagal', -1); }); }
+            if (confirm("Apakah Anda yakin ingin menghapus pesanan ini?")) { db.ref('pesanan/' + id).remove().then(() => { db.ref('foto_bukti/' + id).remove(); if (p.status === 'Gagal') catatBukuKas(p.tanggal, 'Gagal', -1); }); }
         }
 
         function kirimUlang(id) {
