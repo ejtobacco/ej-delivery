@@ -220,7 +220,7 @@
                     if (o.status === 'Terkirim') { 
                         s++; 
                         if(o.metode === 'COD' && o.kurir) {
-                            if (!dataKurir[o.kurir]) dataKurir[o.kurir] = { cod: 0, keluar: 0 };
+                            if (!dataKurir[o.kurir]) dataKurir[o.kurir] = { cod: 0, keluar: 0, rincianKeluar: [] };
                             dataKurir[o.kurir].cod += Number(o.total || 0);
                         }
                     }
@@ -228,11 +228,15 @@
                 }
             });
 
-            // Hitung Pengeluaran per Kurir
+            // Hitung Pengeluaran per Kurir & CATAT ALASANNYA
             Object.values(semuaPengeluaran).forEach(item => {
                 if (item.tanggal === tglTarget && item.kurir) {
-                    if (!dataKurir[item.kurir]) dataKurir[item.kurir] = { cod: 0, keluar: 0 };
+                    if (!dataKurir[item.kurir]) dataKurir[item.kurir] = { cod: 0, keluar: 0, rincianKeluar: [] };
+                    if (!dataKurir[item.kurir].rincianKeluar) dataKurir[item.kurir].rincianKeluar = [];
+                    
                     dataKurir[item.kurir].keluar += Number(item.nominal || 0);
+                    // Masukkan alasan dan nominal ke dalam daftar
+                    dataKurir[item.kurir].rincianKeluar.push(`- ${item.keterangan || 'Tanpa keterangan'} (Rp ${Number(item.nominal).toLocaleString('id-ID')})`);
                 }
             });
 
@@ -246,10 +250,13 @@
             const dataSetoranHariIni = semuaSetoranKurir[keyTgl] || {};
             let htmlKeuangan = "";
             let adaData = false;
+            let codSuksesHariIni = 0;
 
             for (let nama in dataKurir) {
                 adaData = true;
                 const k = dataKurir[nama];
+                codSuksesHariIni += k.cod;
+                
                 const sudahSetor = Number(dataSetoranHariIni[nama] || 0);
                 const sisaSetor = k.cod - k.keluar - sudahSetor;
 
@@ -257,6 +264,11 @@
                 const badgeStatus = sisaSetor > 0 
                     ? `<span style="background:var(--warning); color:#000; padding:4px 8px; border-radius:6px; font-size:9px; font-weight:800;">BELUM SETOR</span>`
                     : `<span style="background:var(--safe); color:#fff; padding:4px 8px; border-radius:6px; font-size:9px; font-weight:800;">LUNAS ✅</span>`;
+
+                // Tampilkan rincian alasan kalau ada
+                const tulisanRincian = (k.rincianKeluar && k.rincianKeluar.length > 0) 
+                    ? `<div style="font-size:10px; color:var(--danger); opacity:0.8; margin-top:-4px; margin-bottom:8px; padding-left:5px; border-left:2px solid var(--danger);"><i>${k.rincianKeluar.join('<br>')}</i></div>` 
+                    : '';
 
                 htmlKeuangan += `
                 <div class="glass-card" style="padding: 15px; margin-bottom: 0; border-color: ${warnaBorder}; background: rgba(255,255,255,0.02);">
@@ -267,9 +279,10 @@
                     <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px; color:#ccc;">
                         <span>💰 Total COD Masuk:</span> <b>Rp ${k.cod.toLocaleString('id-ID')}</b>
                     </div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px; color:#ccc;">
-                        <span>📉 Potong Bensin/Parkir:</span> <b style="color:var(--danger)">-Rp ${k.keluar.toLocaleString('id-ID')}</b>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; color:#ccc;">
+                        <span>📉 Potong Pengeluaran:</span> <b style="color:var(--danger)">-Rp ${k.keluar.toLocaleString('id-ID')}</b>
                     </div>
+                    ${tulisanRincian}
                     <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:12px; color:#ccc;">
                         <span>💸 Uang Sudah Diterima:</span> <b style="color:var(--gold)">Rp ${sudahSetor.toLocaleString('id-ID')}</b>
                     </div>
@@ -285,6 +298,13 @@
                 htmlKeuangan = `<div style="text-align:center; padding:20px; opacity:0.5; font-size:11px; border:1px dashed var(--glass-border); border-radius:12px;">Belum ada pesanan COD atau pengeluaran hari ini.</div>`;
             }
             document.getElementById('keuanganKurirContainer').innerHTML = htmlKeuangan;
+
+            const totalSetoranSemuaKurir = Object.values(dataSetoranHariIni).reduce((a, b) => a + b, 0);
+            document.getElementById('adminTotalCOD').innerText = "Rp " + codSuksesHariIni.toLocaleString('id-ID');
+            document.getElementById('adminTotalKeluar').innerText = "Rp " + globalPengeluaran.toLocaleString('id-ID');
+            
+            const kasBersih = codSuksesHariIni - globalPengeluaran - totalSetoranSemuaKurir;
+            document.getElementById('adminKasBersih').innerText = "Rp " + (kasBersih < 0 ? 0 : kasBersih).toLocaleString('id-ID');
 
             renderList();
         }
