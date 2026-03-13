@@ -337,8 +337,14 @@
             const badgeBg = o.status === 'Terkirim' ? 'var(--safe)' : (o.status === 'Gagal' ? 'var(--danger)' : 'var(--gold)');
             const waNum = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
             
-            const pesanOTW = `*EJ TOBACCO DELIVERY* 🚀\n------------------------------------------\nHalo Kak *${o.namaPembeli.toUpperCase()}* 👋\n\nSaya kurir *${myName.toUpperCase()}* sedang meluncur ke arah Kakak. Estimasi sampai sekitar *5-15 menit* lagi.\n\nMohon siapkan uang pas *Rp${Number(o.total || 0).toLocaleString('id-ID')}* ya Kak, biar prosesnya cepat. Terima kasih! 🙏`;
-            const linkOTW = `https://wa.me/${waNum}?text=${encodeURIComponent(pesanOTW)}`;
+            // GANTI DENGAN PUNYA BOS SENDIRI
+const username = "ahmadsaefulaziz1996"; 
+const repo = "ej-delivery";
+
+// Ini otomatis ngerakit link buat pelanggan
+const linkTracking = `https://${username}.github.io/${repo}/tracking.html?n=${myName}`; 
+
+const pesanOTW = `*EJ TOBACCO DELIVERY* 🚀\n------------------------------------------\nHalo Kak *${o.namaPembeli.toUpperCase()}* 👋\n\nSaya kurir *${myName.toUpperCase()}* sedang meluncur ke arah Kakak.\n\n*PANTAU POSISI SAYA DI SINI:* \n${linkTracking}\n\nMohon siapkan uang pas *Rp${Number(o.total || 0).toLocaleString('id-ID')}* ya Kak. Terima kasih! 🙏`;
 
             let btnMapsHTML = '';
             if (o.mapLink && o.mapLink.trim() !== "") {
