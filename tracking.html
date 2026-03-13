@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EJ LIVE TRACKING</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;800&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: #050505; color: white; overflow: hidden; }
+        #map { height: 75vh; width: 100%; background: #111; }
+        .info-card { height: 25vh; padding: 20px; background: #0A0A0A; border-top: 2px solid #D4AF37; border-radius: 25px 25px 0 0; position: relative; z-index: 1000; text-align: center; }
+        .status-pulse { display: inline-block; width: 8px; height: 8px; background: #22C55E; border-radius: 50%; margin-right: 5px; box-shadow: 0 0 10px #22C55E; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
+        .kurir-name { font-size: 22px; font-weight: 800; color: #D4AF37; margin: 10px 0; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div class="info-card">
+        <div style="font-size: 11px; font-weight: 800; color: #22C55E;"><span class="status-pulse"></span> POSISI KURIR LIVE</div>
+        <div id="namaKurir" class="kurir-name">MENCARI...</div>
+        <p style="font-size: 11px; color: gray;">Peta otomatis mengikuti pergerakan kurir.</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
+    <script>
+        // PAKAI CONFIG FIREBASE BOS EJ (JANGAN DIGANTI)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg",
+            authDomain: "ejtobacco-v2.firebaseapp.com",
+            databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "ejtobacco-v2",
+            storageBucket: "ejtobacco-v2.firebasestorage.app",
+            messagingSenderId: "366973371317",
+            appId: "1:366973371317:web:c5ec32460cd9cf0f6c8ffc"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const kurirId = urlParams.get('n') || "Unknown";
+        document.getElementById('namaKurir').innerText = "KURIR: " + kurirId;
+
+        const map = L.map('map', { zoomControl: false }).setView([-6.8694, 109.0435], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        
+        const motorIcon = L.divIcon({ html: `<div style="font-size:30px;">🛵</div>`, iconSize: [30, 30], className: 'custom-icon' });
+        let marker = L.marker([-6.8694, 109.0435], {icon: motorIcon}).addTo(map);
+
+        db.ref('tracking/' + kurirId).on('value', snap => {
+            const data = snap.val();
+            if (data) {
+                const pos = [data.lat, data.lng];
+                marker.setLatLng(pos);
+                map.panTo(pos);
+            }
+        });
+    </script>
+</body>
+</html>
