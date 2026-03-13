@@ -99,9 +99,21 @@
         <div class="report-box" id="f-Gagal" onclick="setFilter('Gagal')" style="border-color: var(--danger);"><span>Cancel</span><b id="countGagal">0</b></div>
     </div>
 
-    <div class="report-box" style="margin-bottom: 20px; border-color: var(--safe); background: rgba(34, 197, 94, 0.05); cursor: default;">
-        <span style="color: var(--safe); font-size: 10px; font-weight: 800;">TOTAL SALDO COD DI KURIR</span>
-        <b id="dailyTunai" style="font-size: 20px; color: var(--safe);">Rp0</b>
+    <div class="glass-card" style="border-color: var(--safe); background: rgba(34, 197, 94, 0.05); margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="text-align: left;">
+                <span style="color: var(--safe); font-size: 9px; font-weight: 800;">💰 TOTAL COD</span>
+                <b id="adminTotalCOD" style="display: block; font-size: 16px; color: var(--safe);">Rp0</b>
+            </div>
+            <div style="text-align: center;">
+                <span style="color: var(--danger); font-size: 9px; font-weight: 800;">📉 PENGELUARAN</span>
+                <b id="adminTotalKeluar" style="display: block; font-size: 16px; color: var(--danger);">Rp0</b>
+            </div>
+            <div style="text-align: right;">
+                <span style="color: var(--gold); font-size: 9px; font-weight: 800;">💎 KAS BERSIH</span>
+                <b id="adminKasBersih" style="display: block; font-size: 16px; color: var(--gold);">Rp0</b>
+            </div>
+        </div>
     </div>
 
     <div class="glass-card">
@@ -214,6 +226,25 @@
             db.ref('setoran').on('value', sSnap => { totalSetoranGlobal = Object.values(sSnap.val() || {}).reduce((a, b) => a + b, 0); updateAll(); });
         });
 
+        // ADMIN PANTAU PENGELUARAN LIVE
+        let globalPengeluaran = 0;
+        db.ref('pengeluaran').on('value', snap => {
+            const val = snap.val();
+            globalPengeluaran = 0;
+            const pickerVal = document.getElementById('datePicker').value;
+            const p = pickerVal.split('-');
+            const tglTarget = `${p[2]}/${p[1]}/${p[0]}`;
+
+            if (val) {
+                Object.values(val).forEach(item => {
+                    if (item.tanggal === tglTarget) {
+                        globalPengeluaran += Number(item.nominal || 0);
+                    }
+                });
+            }
+            updateAll(); // Refresh tampilan
+        });
+
         function updateAll() {
             const pickerVal = document.getElementById('datePicker').value; if(!pickerVal) return;
             const p = pickerVal.split('-'); const tglTarget = `${p[2]}/${p[1]}/${p[0]}`;
@@ -230,7 +261,13 @@
             });
             document.getElementById('countGudang').innerText = gd; document.getElementById('countProses').innerText = p;
             document.getElementById('countSukses').innerText = s; document.getElementById('countGagal').innerText = g;
-            document.getElementById('dailyTunai').innerText = "Rp" + (codSukses - totalSetoranGlobal).toLocaleString();
+            // Update Tampilan Dashboard Admin
+            document.getElementById('adminTotalCOD').innerText = "Rp" + codSukses.toLocaleString();
+            document.getElementById('adminTotalKeluar').innerText = "Rp" + globalPengeluaran.toLocaleString();
+            
+            // Kas Bersih = Total COD - Setoran Global yang sudah masuk - Pengeluaran Kurir di jalan
+            const kasBersih = codSukses - totalSetoranGlobal - globalPengeluaran;
+            document.getElementById('adminKasBersih').innerText = "Rp" + kasBersih.toLocaleString();
         }
 
         function renderList() {
