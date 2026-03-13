@@ -178,7 +178,7 @@
         if (myName !== "") updateUI();
     });
 
-        // MENGAMBIL DATA PENGELUARAN
+        // 1. MENGAMBIL DATA PENGELUARAN (BENSIN)
     let totalPengeluaranKu = 0;
     db.ref('pengeluaran').on('value', snap => {
         const val = snap.val();
@@ -190,6 +190,21 @@
                     totalPengeluaranKu += Number(p.nominal || 0);
                 }
             });
+        }
+        if (myName !== "") updateUI();
+    });
+
+    // 2. MENGAMBIL DATA SETORAN (UANG YANG SUDAH DIKASIH KE BOS)
+    let setoranSaya = 0;
+    db.ref('setoran').on('value', snap => {
+        const allSetoran = snap.val() || {};
+        const todayKey = getTgl().replace(/\//g, '-');
+        
+        // Cek apakah hari ini kurir ini sudah setor uang ke Bos
+        if (allSetoran[todayKey] && allSetoran[todayKey][myName]) {
+            setoranSaya = Number(allSetoran[todayKey][myName]);
+        } else {
+            setoranSaya = 0;
         }
         if (myName !== "") updateUI();
     });
@@ -212,6 +227,39 @@
         }).catch(err => alert("Gagal mencatat: " + err.message));
     }
 
+    // 3. FUNGSI UPDATE LAYAR HP KURIR
+    function updateUI() {
+        const today = getTgl();
+        let gd=0, p=0, s=0, g=0, codDompetKu=0;
+        
+        allData.forEach(o => {
+            if (o.status === 'Gudang') gd++;
+            if (o.kurir === myName) {
+                if (o.status === 'Proses' || o.status === 'Menunggu' || o.status === 'Tunda') p++;
+                else if (o.status === 'Terkirim' && o.tanggal === today) {
+                    s++;
+                    if (o.metode === 'COD') codDompetKu += Number(o.total || 0);
+                }
+                else if (o.status === 'Gagal' && o.tanggal === today) g++;
+            }
+        });
+        
+        document.getElementById('c-Gudang').innerText = gd;
+        document.getElementById('c-Proses').innerText = p;
+        document.getElementById('c-Terkirim').innerText = s;
+        document.getElementById('c-Gagal').innerText = g;
+        
+        // UPDATE DOMPET KURIR
+        document.getElementById('totalCOD').innerText = "Rp " + codDompetKu.toLocaleString('id-ID');
+        document.getElementById('totalPengeluaran').innerText = "Rp " + totalPengeluaranKu.toLocaleString('id-ID');
+        
+        // RUMUS SAKTI: Total COD - Pengeluaran Bensin - Uang yang sudah dikasih ke Bos EJ
+        const bersih = codDompetKu - totalPengeluaranKu - setoranSaya;
+        document.getElementById('setoranBersih').innerText = "Rp " + (bersih < 0 ? 0 : bersih).toLocaleString('id-ID');
+        
+        renderOrders();
+    }
+        
     function updateUI() {
         const today = getTgl();
         let gd=0, p=0, s=0, g=0, codDompetKu=0;
@@ -429,6 +477,7 @@
     </script>
 </body>
 </html>
+
 
 
 
