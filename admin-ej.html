@@ -436,6 +436,29 @@
             }
             setTimeout(() => { map.invalidateSize(); }, 500);
         }
+
+        // FITUR BERSIH-BERSIH DATABASE OTOMATIS (90 HARI)
+        function bersihkanDataLama() {
+            const BATAS_WAKTU_MS = 90 * 24 * 60 * 60 * 1000; 
+            const waktuSekarang = new Date().getTime();
+            db.ref('pesanan').once('value', snap => {
+                const data = snap.val(); if (!data) return;
+                for (let id in data) {
+                    const o = data[id];
+                    if (o.tanggal) { 
+                        const p = o.tanggal.split('/'); 
+                        if (p.length === 3) { 
+                            const waktuPesanan = new Date(`${p[2]}-${p[1]}-${p[0]}`).getTime(); 
+                            if (waktuSekarang - waktuPesanan > BATAS_WAKTU_MS) {
+                                db.ref('pesanan/' + id).remove(); 
+                                db.ref('foto_bukti/' + id).remove();
+                            }
+                        } 
+                    }
+                }
+            });
+        }
+        setTimeout(bersihkanDataLama, 10000); // Jalan otomatis 10 detik setelah Admin dibuka
     </script>
 </body>
 </html>
