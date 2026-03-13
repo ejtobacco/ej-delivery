@@ -37,10 +37,6 @@
         .num-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(212, 175, 55, 0.2); color: #fff; width: 75px; height: 75px; border-radius: 50%; font-size: 26px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .num-btn:active { background: var(--gold); color: #000; transform: scale(0.9); }
         #waPrompt { position: fixed; bottom: 30px; left: 20px; right: 20px; background: var(--wa); color: white; padding: 20px; border-radius: 20px; text-align: center; z-index: 2000000; box-shadow: 0 15px 40px rgba(0,0,0,0.6); display: none; }
-        #mapRadar { width: 100%; height: 100%; background: #000 !important; }
-        .leaflet-tile-container img { display: block !important; visibility: visible !important; opacity: 1 !important; }
-        #mapRadar .leaflet-pane, #mapRadar .leaflet-control-container { box-shadow: none !important; text-shadow: none !important; }
-        .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: #111 !important; color: var(--gold) !important; border: 1px solid var(--gold); }
     </style>
 </head>
 <body>
@@ -100,7 +96,7 @@
         <input type="text" id="pembeli" placeholder="Nama Pembeli" autocomplete="off">
         <input type="text" id="nohp" placeholder="WhatsApp (08xx)" autocomplete="off">
         <textarea id="alamat" placeholder="Alamat Lengkap" autocomplete="off"></textarea>
-        <input type="text" id="mapLink" placeholder="Link Google Maps (Opsional)" autocomplete="off">
+        <input type="text" id="mapLink" placeholder="Link Google Maps Asli (Opsional)" autocomplete="off">
         
         <select id="metodeBayar" onchange="toggleTotal()"><option value="COD">Metode: COD</option><option value="Transfer">Metode: Transfer</option></select>
         <input type="number" id="total" placeholder="Harga COD (Rp)" autocomplete="off" inputmode="numeric">
@@ -146,7 +142,7 @@
         <div id="isiSaldoKurir" style="line-height: 1.5; font-size: 14px;">Memuat data...</div>
         <button class="btn-main" onclick="document.getElementById('saldoOverlay').style.display='none'" style="margin-top: 30px; background: rgba(34, 197, 94, 0.1); border: 1px solid var(--safe); color: var(--safe);">TUTUP DOMPET</button>
     </div>
-</div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
@@ -191,7 +187,8 @@
             else { lampu.style.background = "var(--danger)"; teks.innerText = "KONEKSI TERPUTUS"; teks.style.color = "var(--danger)"; }
         }
 
-        db.ref('pesanan').limitToLast(500).on('value', snap => {
+        // HANYA MENGAMBIL 100 DATA (SUPER NGEBUT!)
+        db.ref('pesanan').limitToLast(100).on('value', snap => {
             const val = snap.val(); allOrders = val ? Object.keys(val).map(k => ({id:k, ...val[k]})).reverse() : [];
             db.ref('setoran').on('value', sSnap => { totalSetoranGlobal = Object.values(sSnap.val() || {}).reduce((a, b) => a + b, 0); updateAll(); });
         });
@@ -232,8 +229,6 @@
             else {
                 filtered.forEach(o => {
                     const waNum = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-                    
-                    // TAMPILAN NAMA KURIR DI ADMIN
                     const infoKurir = o.kurir && o.status !== 'Gudang' ? `<div style="font-size:10px; color:var(--blue); font-weight:800; margin-top:3px; display:inline-block; padding:2px 8px; background:rgba(37,99,235,0.1); border-radius:4px;">🛵 Dibawa oleh: ${o.kurir}</div>` : '';
 
                     html += `<div class="order-item">
@@ -260,27 +255,19 @@
             document.getElementById('adminList').innerHTML = html;
         }
 
-        // BUKU KAS
         function catatBukuKas(tanggal, jenis, operasi = 1) {
             if(!tanggal) return; const p = tanggal.split('/'); if(p.length !== 3) return;
             if (jenis === 'Gagal') db.ref(`laporanBulanan/${p[2]}-${p[1]}/gagalCount`).set(firebase.database.ServerValue.increment(operasi));
         }
 
         function viewFoto(id, oldSrc) { 
-    document.getElementById('modalFoto').style.display = 'flex'; 
-    const img = document.getElementById('imgBukti');
-    img.src = ""; // Kosongkan dulu biar nggak numpuk
-    
-    // Tarik foto dari "kamar khusus" (foto_bukti)
-    if (oldSrc && oldSrc.length > 100) {
-        img.src = oldSrc; // Ini untuk nampilin foto pesanan lama
-    } else {
-        db.ref('foto_bukti/' + id).once('value').then(snap => {
-            if(snap.exists()) img.src = snap.val();
-            else alert("Maaf, Foto tidak ditemukan!");
-        });
-    }
-}
+            document.getElementById('modalFoto').style.display = 'flex'; 
+            const img = document.getElementById('imgBukti');
+            img.src = ""; // Kosongkan dulu biar nggak numpuk
+            if (oldSrc && oldSrc.length > 100) { img.src = oldSrc; } 
+            else { db.ref('foto_bukti/' + id).once('value').then(snap => { if(snap.exists()) img.src = snap.val(); else alert("Foto tidak ditemukan!"); }); }
+        }
+
         function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
 
         function tambah() {
@@ -317,7 +304,7 @@
             const dataLama = allOrders.find(o => o.id === id); if (!dataLama) return;
             if (confirm(`Kirim ulang pesanan ${dataLama.namaPembeli}?`)) {
                 const n = new Date();
-                const dataBaru = { ...dataLama, noPesanan: dataLama.noPesanan.includes("-RE") ? dataLama.noPesanan : dataLama.noPesanan + "-RE", status: 'Gudang', kurir: "", tanggal: formatTglDB(n), waktu: n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}), buktiFoto: null, alasanTunda: null };
+                const dataBaru = { ...dataLama, noPesanan: dataLama.noPesanan.includes("-RE") ? dataLama.noPesanan : dataLama.noPesanan + "-RE", status: 'Gudang', kurir: "", tanggal: formatTglDB(n), waktu: n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}), buktiFoto: null, alasanTunda: null, adaFoto: null };
                 delete dataBaru.id; 
                 db.ref('pesanan').push(dataBaru).then(() => { db.ref('pesanan/' + id).remove().then(() => { catatBukuKas(dataLama.tanggal, 'Gagal', -1); alert("✅ Pesanan dipindahkan kembali ke GUDANG."); setFilter('Gudang'); }); });
             }
@@ -346,7 +333,7 @@
 
         function tampilUI(omzet, sukses, gagal, cod, transfer, namaBulan) {
             document.getElementById('isiLaporan').innerHTML = `
-                <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:18px 0; align-items:center;"><span style="opacity:0.6; font-size:13px;">💰 Omzet Terkirim:</span><b style="color:var(--safe); font-size:18px;">Rp ${omzet.toLocaleString()}</b></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:18px 0; align-items:center;"><span style="opacity:0.6; font-size:13px;">💰 Omzet Terkirim:</span><b style="color:var(--safe); font-size:18px;">Rp ${omzet.toLocaleString('id-ID')}</b></div>
                 <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:18px 0; align-items:center;"><span style="opacity:0.6; font-size:13px;">📦 Paket Berhasil:</span><b style="font-size:16px;">${sukses} Item</b></div>
                 <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:18px 0; align-items:center;"><span style="opacity:0.6; font-size:13px;">❌ Paket Gagal:</span><b style="color:var(--danger); font-size:16px;">${gagal} Item</b></div>
                 <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding:18px 0; align-items:center;"><span style="opacity:0.6; font-size:13px;">🤝 Metode COD:</span><b style="font-size:16px;">${cod}</b></div>
@@ -357,19 +344,14 @@
 
         function bukaSaldoKurir() {
             document.getElementById('saldoOverlay').style.display = 'flex';
-            
             const pickerVal = document.getElementById('datePicker').value; 
-            const p = pickerVal.split('-'); 
-            const tglAktif = `${p[2]}/${p[1]}/${p[0]}`;
-
-            let saldoKurir = {};
-            let totalSemua = 0;
+            const p = pickerVal.split('-'); const tglAktif = `${p[2]}/${p[1]}/${p[0]}`;
+            let saldoKurir = {}; let totalSemua = 0;
 
             allOrders.forEach(o => {
                 if (o.tanggal === tglAktif && o.status === 'Terkirim' && o.metode === 'COD' && o.kurir) {
                     if (!saldoKurir[o.kurir]) saldoKurir[o.kurir] = 0;
-                    saldoKurir[o.kurir] += Number(o.total || 0);
-                    totalSemua += Number(o.total || 0);
+                    saldoKurir[o.kurir] += Number(o.total || 0); totalSemua += Number(o.total || 0);
                 }
             });
 
@@ -382,16 +364,14 @@
                 </div>`;
             }
 
-            if (html === "") {
-                html = `<p style="text-align:center; opacity:0.5; padding:20px;">Belum ada pesanan COD yang selesai hari ini.</p>`;
-            } else {
+            if (html === "") { html = `<p style="text-align:center; opacity:0.5; padding:20px;">Belum ada pesanan COD yang selesai hari ini.</p>`; } 
+            else {
                 html += `
                 <div style="margin-top:20px; padding:15px; background:var(--safe); border-radius:12px; text-align:center; color:#000;">
                     <div style="font-size:11px; font-weight:800; margin-bottom:5px;">TOTAL UANG DI TANGAN SEMUA KURIR</div>
                     <div style="font-size:24px; font-weight:900;">Rp ${totalSemua.toLocaleString('id-ID')}</div>
                 </div>`;
             }
-
             document.getElementById('isiSaldoKurir').innerHTML = html;
         }
 
