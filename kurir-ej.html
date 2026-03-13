@@ -259,34 +259,6 @@
         
         renderOrders();
     }
-        
-    function updateUI() {
-        const today = getTgl();
-        let gd=0, p=0, s=0, g=0, codDompetKu=0;
-        allData.forEach(o => {
-            if (o.status === 'Gudang') gd++;
-            if (o.kurir === myName) {
-                if (o.status === 'Proses' || o.status === 'Menunggu' || o.status === 'Tunda') p++;
-                else if (o.status === 'Terkirim' && o.tanggal === today) {
-                    s++;
-                    if (o.metode === 'COD') codDompetKu += Number(o.total || 0);
-                }
-                else if (o.status === 'Gagal' && o.tanggal === today) g++;
-            }
-        });
-        document.getElementById('c-Gudang').innerText = gd;
-        document.getElementById('c-Proses').innerText = p;
-        document.getElementById('c-Terkirim').innerText = s;
-        document.getElementById('c-Gagal').innerText = g;
-        
-        // Update Dompet
-        document.getElementById('totalCOD').innerText = "Rp " + codDompetKu.toLocaleString('id-ID');
-        document.getElementById('totalPengeluaran').innerText = "Rp " + totalPengeluaranKu.toLocaleString('id-ID');
-        const bersih = codDompetKu - totalPengeluaranKu;
-        document.getElementById('setoranBersih').innerText = "Rp " + bersih.toLocaleString('id-ID');
-        
-        renderOrders();
-    }
 
     function renderOrders() {
         const container = document.getElementById('orderContainer');
@@ -477,6 +449,7 @@
     </script>
 </body>
 </html>
+
 
 
 
