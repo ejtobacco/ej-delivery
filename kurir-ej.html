@@ -81,6 +81,7 @@
             EJ DELIVERY <span style="font-weight:400; font-size:11px; color:#fff;">| <span id="namaKurirHeader">KURIR</span></span>
         </div>
         <div style="text-align: right;">
+            <div id="currentDate" style="font-size: 9px; color: var(--gold); font-weight: 800; margin-bottom: 2px;">LOADING...</div>
             <div id="clock" style="font-size: 14px; font-weight: 800; color: var(--safe);">00:00:00</div>
             <div style="display: flex; align-items: center; gap: 5px; justify-content: flex-end; margin-top: 3px;">
                 <div id="lampuKoneksi" style="width: 7px; height: 7px; background: var(--safe); border-radius: 50%; box-shadow: 0 0 8px var(--safe);"></div>
@@ -132,7 +133,11 @@
     let myName = ""; 
 
     function getTgl() { const n = new Date(); return `${String(n.getDate()).padStart(2,'0')}/${String(n.getMonth()+1).padStart(2,'0')}/${n.getFullYear()}`; }
-    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
+    setInterval(() => { 
+        const now = new Date();
+        document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID'); 
+        document.getElementById('currentDate').innerText = now.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'}).toUpperCase();
+    }, 1000);
 
     let inputPin = "";
     const dataPIN = { "kurirA": "1111", "kurirB": "2222", "kurirC": "3333" };
@@ -348,5 +353,6 @@
     </script>
 </body>
 </html>
+
 
 
