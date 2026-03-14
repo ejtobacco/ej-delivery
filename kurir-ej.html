@@ -240,12 +240,15 @@
     <div id="modalAlasan" class="modal-overlay">
         <div class="glass-card bottom-sheet" style="border-color:var(--warning);">
             <div class="sheet-pill"></div>
-            <h2 id="judulAlasan" style="text-align:center; color:var(--warning); font-size: 16px;"><i class="fa-solid fa-circle-exclamation"></i> ALASAN GAGAL/TUNDA</h2>
-            <textarea id="textAlasan" class="modal-input" style="height:100px; margin-top:15px;" placeholder="Tulis alasan jelas (Rumah kosong, Uang kurang, Dll)"></textarea>
+            <h2 style="text-align:center; color:var(--warning); font-size: 16px;"><i class="fa-solid fa-circle-exclamation"></i> TULIS ALASAN DULU</h2>
+            <textarea id="textAlasan" class="modal-input" style="height:100px; margin-top:15px;" placeholder="Kenapa nih Bos? (Rumah kosong, Uang kurang, Alamat palsu...)"></textarea>
+            
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-                <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalAlasan').style.display='none'">BATAL</button>
-                <button class="btn-main" style="background:var(--warning); color:black;" onclick="prosesSimpanAlasan()"><i class="fa-solid fa-check"></i> KONFIRMASI</button>
+                <button class="btn-main" style="background:var(--warning); color:black;" onclick="prosesSimpanAlasan('Tunda')"><i class="fa-solid fa-clock"></i> TUNDA</button>
+                <button class="btn-main" style="background:var(--danger); color:white;" onclick="prosesSimpanAlasan('Gagal')"><i class="fa-solid fa-xmark"></i> CANCEL/GAGAL</button>
             </div>
+            
+            <button class="action-btn" style="background:rgba(255,255,255,0.05); color:white; width:100%; margin-top:10px; border:1px solid rgba(255,255,255,0.1);" onclick="document.getElementById('modalAlasan').style.display='none'">BATAL</button>
         </div>
     </div>
 
@@ -733,15 +736,22 @@
         }); 
     }
     
-    function updateStat(id, s) { tempId = id; tempStat = s; document.getElementById('modalAlasan').style.display='flex'; }
+    function updateStat(id) { 
+        tempId = id; 
+        document.getElementById('modalAlasan').style.display='flex'; 
+    }
     
-    function prosesSimpanAlasan() { 
-        const a=document.getElementById('textAlasan').value; 
+    function prosesSimpanAlasan(statusPilihan) { 
+        const a = document.getElementById('textAlasan').value; 
         if(!a) {
-            alert("⚠️ Alasan tidak boleh kosong! Kasih tau admin kenapa paket ini ditunda/gagal.");
+            alert("⚠️ Alasan tidak boleh kosong! Kasih tau admin kenapa paket ini bermasalah.");
             return;
         }
-        db.ref('pesanan/'+tempId).update({ status:tempStat, alasanTunda:a, waktuUpdate:new Date().toLocaleTimeString() }).then(()=>{
+        db.ref('pesanan/'+tempId).update({ 
+            status: statusPilihan, // <-- Ngambil status dari tombol yang dipencet
+            alasanTunda: a, 
+            waktuUpdate: new Date().toLocaleTimeString() 
+        }).then(()=>{
             document.getElementById('modalAlasan').style.display='none';
             document.getElementById('textAlasan').value = "";
         }); 
@@ -812,7 +822,7 @@
             kartuSkg.style.transform = `translateX(-120vw)`;
             if(navigator.vibrate) navigator.vibrate(100);
             setTimeout(() => { 
-                updateStat(id, 'Tunda'); 
+                updateStat(id); // <-- Panggil lacinya aja, biar kurir yang milih di dalam laci
                 kartuSkg.style.transform = `translateX(0)`; // Balikin diam-diam ke tengah!
             }, 250);
         } else {
