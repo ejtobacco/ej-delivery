@@ -192,7 +192,7 @@
     <div id="modalInputBaru" class="modal-overlay">
         <div class="glass-card" style="width: 100%; max-width: 450px; border: 1px solid var(--gold); max-height: 90vh; overflow-y: auto;">
             <div class="dashboard-header" style="color:var(--gold); border-bottom:1px solid rgba(212,175,55,0.2); padding-bottom:10px; margin-bottom:15px; justify-content: space-between;">
-                <span><i class="fa-solid fa-file-circle-plus"></i> INPUT NOTA BARU</span>
+                <span><i class="fa-solid fa-file-circle-plus"></i> INPUT PESANAN BARU</span>
                 <button onclick="tutupModalInput()" style="background:transparent; border:none; color:white; font-size:18px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="input-group"><i class="fa-solid fa-hashtag"></i><input type="text" id="noPesanan" placeholder="Nomor Resi / Pesanan"></div>
@@ -361,8 +361,8 @@
 
                 htmlKeuangan += `<div class="glass-card" style="padding:15px; margin-bottom:0; border-color:${warna};">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b style="color:var(--gold); font-size:14px;"><i class="fa-solid fa-motorcycle"></i> ${nama.toUpperCase()}</b> <span style="font-size:9px; color:${warna}">${sisaSetor>0?'BELUM SETOR':'LUNAS'}</span></div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; color:#ccc;"><span>Dompet:</span> <b>Rp ${k.cod.toLocaleString('id-ID')}</b></div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; color:#ccc;"><span>Potong Bensin:</span> <b style="color:var(--danger)">-Rp ${k.keluar.toLocaleString('id-ID')}</b></div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; color:#ccc;"><span>Total COD Hari Ini:</span> <b>Rp ${k.cod.toLocaleString('id-ID')}</b></div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; color:#ccc;"><span>Potong Pengeluaran:</span> <b style="color:var(--danger)">-Rp ${k.keluar.toLocaleString('id-ID')}</b></div>
                     ${rincian}
                     <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; border:1px solid ${warna};"><span style="font-size:10px;">WAJIB SETOR:</span><b style="font-size:14px; color:${warna};">Rp ${Math.max(0, sisaSetor).toLocaleString('id-ID')}</b></div>
                     ${sisaSetor > 0 ? `<button onclick="bukaPopupSetoran('${nama}', ${sisaSetor})" class="btn-main" style="margin-top:10px; padding:10px; background:var(--safe); color:white;">TERIMA UANG</button>` : ''}
