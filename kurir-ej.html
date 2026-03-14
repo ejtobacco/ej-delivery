@@ -160,13 +160,13 @@
     </div>
 
     <div class="wallet-card">
-        <span style="font-size:10px; color:var(--safe); font-weight:800; letter-spacing:1px;"><i class="fa-solid fa-wallet"></i> DOMPET UANG COD</span>
+        <span style="font-size:10px; color:var(--safe); font-weight:800; letter-spacing:1px;"><i class="fa-solid fa-wallet"></i> DOMPET UANG COD HARI INI</span>
         <b id="totalCOD">Rp 0</b>
         <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1);">
             <div style="text-align: left;"><span style="font-size: 8px; color: var(--danger); font-weight: 800;"><i class="fa-solid fa-arrow-trend-down"></i> KELUAR</span><b id="totalPengeluaran" style="display: block; font-size: 14px; color: var(--danger);">Rp 0</b></div>
             <div style="text-align: right;"><span style="font-size: 8px; color: var(--gold); font-weight: 800;"><i class="fa-solid fa-sack-dollar"></i> WAJIB SETOR</span><b id="setoranBersih" style="display: block; font-size: 14px; color: var(--gold);">Rp 0</b></div>
         </div>
-        <button onclick="tambahPengeluaran()" class="btn-main" style="margin-top: 15px; background: rgba(255,255,255,0.1); color: white; box-shadow: none; font-size: 10px;"><i class="fa-solid fa-pen-to-square"></i> CATAT PENGELUARAN BENSIN</button>
+        <button onclick="tambahPengeluaran()" class="btn-main" style="margin-top: 15px; background: rgba(255,255,255,0.1); color: white; box-shadow: none; font-size: 10px;"><i class="fa-solid fa-pen-to-square"></i> CATAT PENGELUARAN</button>
     </div>
 
     <button class="btn-main" id="btnScanMain" onclick="toggleScanner()" style="margin-bottom: 15px;"><i class="fa-solid fa-barcode"></i> SCAN BARCODE (PICKUP PAKET)</button>
@@ -202,7 +202,7 @@
     <div id="modalExpense" class="modal-overlay">
         <div class="glass-card" style="width:100%; max-width:320px; border-color:var(--gold);">
             <h2 style="color:var(--gold); text-align:center; margin-bottom:20px; font-size: 16px;"><i class="fa-solid fa-gas-pump"></i> CATAT PENGELUARAN</h2>
-            <input type="text" id="expKet" class="modal-input" placeholder="Contoh: Bensin, Parkir, Makan...">
+            <input type="text" id="expKet" class="modal-input" placeholder="Tulis Untuk Apa">
             <input type="number" id="expNom" class="modal-input" placeholder="Nominal (Rp)" inputmode="numeric">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
                 <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalExpense').style.display='none'">BATAL</button>
