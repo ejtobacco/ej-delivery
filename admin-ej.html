@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EJ ADMIN V5.5 - FINAL SOP</title>
+    <title>EJ ADMIN V5.7 - MASTERPIECE</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="manifest" href="manifest.json">
@@ -87,7 +87,8 @@
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); padding: 20px; }
         
         #loginOverlay { position: fixed; inset: 0; background: #000; z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .pin-display { font-size: 40px; letter-spacing: 15px; margin: 30px 0; color: var(--gold); font-weight: 800; text-shadow: 0 0 15px rgba(212, 175, 55, 0.5); text-align: center; }
+        .pin-container { text-align: center; width: 320px; padding: 20px; }
+        .pin-display { font-size: 45px; letter-spacing: 15px; margin: 20px 0; color: var(--gold); font-weight: 800; text-shadow: 0 0 20px rgba(212, 175, 55, 0.4); text-align: center; }
         .num-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(212, 175, 55, 0.2); color: #fff; width: 75px; height: 75px; border-radius: 50%; font-size: 26px; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
         .num-btn:active { background: var(--gold); color: #000; transform: scale(0.9); }
 
@@ -102,14 +103,14 @@
 <body>
 
     <div id="loginOverlay">
-        <div style="text-align: center; width: 320px;">
-            <div style="margin-bottom: 30px;">
-                <i class="fa-solid fa-crown" style="font-size: 40px; color: var(--gold); margin-bottom: 15px;"></i>
-                <h2 style="color:#fff;">EJ ACCESS</h2>
-                <p style="color:var(--gold); font-size:10px; letter-spacing:2px;">ADMIN VERIFICATION</p>
+        <div class="pin-container">
+            <div style="margin-bottom: 20px;">
+                <i class="fa-solid fa-crown" style="font-size: 40px; color: var(--gold); margin-bottom: 10px;"></i>
+                <h2 style="color:#fff; font-size: 20px;">EJ ACCESS</h2>
+                <p style="color:var(--gold); font-size:9px; letter-spacing:2px; opacity:0.8;">ADMIN VERIFICATION</p>
             </div>
             <div class="pin-display" id="pinDisplay">****</div>
-            <div id="pinError" style="color: var(--danger); font-size: 11px; font-weight: 800; height: 20px; margin-bottom: 10px; opacity: 0;">⚠️ PIN SALAH!</div>
+            <div id="pinError" style="color: var(--danger); font-size: 11px; font-weight: 800; height: 20px; margin-bottom: 15px; opacity: 0;">⚠️ PIN SALAH!</div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; justify-items: center;">
                 <button class="num-btn" onclick="pressPin('1')">1</button><button class="num-btn" onclick="pressPin('2')">2</button><button class="num-btn" onclick="pressPin('3')">3</button>
                 <button class="num-btn" onclick="pressPin('4')">4</button><button class="num-btn" onclick="pressPin('5')">5</button><button class="num-btn" onclick="pressPin('6')">6</button>
@@ -184,9 +185,9 @@
         <input type="text" id="searchBar" placeholder="Cari nama atau resi..." oninput="renderList()" style="border-color:rgba(255,255,255,0.2);">
     </div>
     
-    <div id="adminList">Memuat data database...</div>
+    <div id="adminList" style="padding-bottom: 80px;">Memuat data database...</div>
 
-    <button class="fab" onclick="bukaModalInput()"><i class="fa-solid fa-plus"></i></button>
+    <button class="fab" id="fabButton" onclick="bukaModalInput()"><i class="fa-solid fa-plus"></i></button>
 
     <div id="modalInputBaru" class="modal-overlay">
         <div class="glass-card" style="width: 100%; max-width: 450px; border: 1px solid var(--gold); max-height: 90vh; overflow-y: auto;">
@@ -198,16 +199,27 @@
             <div class="input-group"><i class="fa-solid fa-user"></i><input type="text" id="pembeli" placeholder="Nama Lengkap Pembeli"></div>
             <div class="input-group"><i class="fa-brands fa-whatsapp"></i><input type="number" id="nohp" placeholder="Nomor WhatsApp"></div>
             <div class="input-group"><i class="fa-solid fa-location-dot"></i><textarea id="alamat" placeholder="Alamat Pengiriman Lengkap" style="height:80px;"></textarea></div>
-            <div class="input-group"><i class="fa-solid fa-map-location-dot"></i><input type="text" id="mapLink" placeholder="Link Google Maps"></div>
+            <div class="input-group"><i class="fa-solid fa-map-location-dot"></i><input type="text" id="mapLink" placeholder="Link Google Maps (Opsional)"></div>
+            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-                <div class="input-group" style="margin:0;"><i class="fa-solid fa-credit-card"></i><select id="metodeBayar" onchange="toggleTotal()"><option value="COD">Tunai (COD)</option><option value="Transfer">Transfer Bank</option></select></div>
-                <div class="input-group" style="margin:0;"><i class="fa-solid fa-money-bill-wave"></i><input type="number" id="total" placeholder="Rp Total"></div>
+                <div class="input-group" style="margin:0;">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <select id="metodeBayar" onchange="toggleTotal()">
+                        <option value="COD">Tunai (COD)</option>
+                        <option value="Transfer">Transfer Bank</option>
+                    </select>
+                </div>
+                <div class="input-group" style="margin:0;" id="containerTotal">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                    <input type="number" id="total" placeholder="Rp Total Tagihan">
+                </div>
             </div>
+
             <label style="display:flex; align-items:center; gap:10px; background:rgba(239,68,68,0.1); border:1px dashed var(--danger); padding:12px; border-radius:12px; color:#F87171; font-weight:800; font-size:11px; margin-bottom:15px;">
                 <input type="checkbox" id="isUrgent" style="width:20px; height:20px; accent-color:var(--danger);">
                 <i class="fa-solid fa-bolt"></i> TANDAI SEBAGAI URGENT
             </label>
-            <button class="btn-main" onclick="tambahDanTutup()"><i class="fa-solid fa-print"></i> SIMPAN & CETAK STRUK</button>
+            <button class="btn-main" onclick="tambah()"><i class="fa-solid fa-print"></i> SIMPAN & CETAK STRUK</button>
         </div>
     </div>
     
@@ -230,25 +242,55 @@
             <div class="input-group"><i class="fa-solid fa-user"></i><input type="text" id="editPembeli"></div>
             <div class="input-group"><i class="fa-brands fa-whatsapp"></i><input type="text" id="editNohp"></div>
             <div class="input-group"><i class="fa-solid fa-location-dot"></i><textarea id="editAlamat" style="height:70px;"></textarea></div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div class="input-group"><i class="fa-solid fa-credit-card"></i><select id="editMetode"><option value="COD">COD</option><option value="Transfer">Transfer</option></select></div>
-                <div class="input-group"><i class="fa-solid fa-money-bill"></i><input type="number" id="editTotal"></div>
+            <div class="input-group"><i class="fa-solid fa-map-location-dot"></i><input type="text" id="editMapLink" placeholder="Link Google Maps"></div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                <div class="input-group" style="margin:0;">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <select id="editMetode" onchange="toggleEditTotal()">
+                        <option value="COD">COD</option>
+                        <option value="Transfer">Transfer</option>
+                    </select>
+                </div>
+                <div class="input-group" style="margin:0;" id="containerEditTotal">
+                    <i class="fa-solid fa-money-bill"></i>
+                    <input type="number" id="editTotal" placeholder="Nominal Harga">
+                </div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                <button class="btn-main" style="background: rgba(255,255,255,0.1); color: white; box-shadow:none;" onclick="document.getElementById('modalEdit').style.display='none'">BATAL</button>
+
+            <label style="display:flex; align-items:center; gap:10px; background:rgba(239,68,68,0.1); border:1px dashed var(--danger); padding:10px; border-radius:12px; color:#F87171; font-weight:800; font-size:11px; margin-bottom:15px; cursor:pointer;">
+                <input type="checkbox" id="editUrgent" style="width:20px; height:20px; accent-color:var(--danger);">
+                <i class="fa-solid fa-bolt"></i> STATUS URGENT
+            </label>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button class="btn-main" style="background: rgba(255,255,255,0.1); color: white;" onclick="document.getElementById('modalEdit').style.display='none'">BATAL</button>
                 <button class="btn-main" style="background: var(--blue); color: white;" onclick="simpanEdit()"><i class="fa-solid fa-save"></i> UPDATE</button>
             </div>
         </div>
     </div>
 
     <div id="modalTerimaSetoran" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--safe); text-align:center;"><i class="fa-solid fa-hand-holding-dollar" style="font-size:40px; color:var(--safe); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px; margin-bottom:10px;">TERIMA SETORAN</h2><p id="teksTerimaSetoran" style="font-size:12px; color:gray; margin-bottom:20px;"></p><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalTerimaSetoran').style.display='none'">BATAL</button><button id="btnConfirmSetoran" class="btn-main" style="background:var(--safe); color:white;">TERIMA</button></div></div></div>
+    
     <div id="modalHapusPesanan" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--danger); text-align:center;"><i class="fa-solid fa-trash-can" style="font-size:40px; color:var(--danger); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px;">HAPUS DATA?</h2><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalHapusPesanan').style.display='none'">BATAL</button><button id="btnConfirmHapus" class="btn-main" style="background:var(--danger); color:white;">HAPUS</button></div></div></div>
+    
     <div id="modalKirimUlang" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--blue); text-align:center;"><i class="fa-solid fa-box-open" style="font-size:40px; color:var(--blue); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px;">KE GUDANGKAN?</h2><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalKirimUlang').style.display='none'">BATAL</button><button id="btnConfirmKirimUlang" class="btn-main" style="background:var(--blue); color:white;">PROSES</button></div></div></div>
+
     <div id="modalLogout" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--danger); text-align:center;"><i class="fa-solid fa-triangle-exclamation" style="font-size:40px; color:var(--danger); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px;">KELUAR ADMIN?</h2><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalLogout').style.display='none'">BATAL</button><button class="btn-main" style="background:var(--danger); color:white;" onclick="eksekusiLogoutAdmin()">KELUAR</button></div></div></div>
+    
     <div id="modalFoto" class="modal-overlay" onclick="this.style.display='none'"><img id="imgBukti" src="" style="max-width:90%; max-height:75vh; border:3px solid var(--gold); border-radius:20px;"><p style="color:white; margin-top:20px; font-weight:800;">TAP UNTUK TUTUP</p></div>
+    
     <div id="laporanOverlay" class="modal-overlay"><div class="glass-card" style="width: 100%; max-width: 400px; border-color: var(--gold);"><div class="dashboard-header" style="color:var(--gold); justify-content:center; font-size:14px; margin-bottom:15px;"><i class="fa-solid fa-chart-line"></i> REKAP OMZET</div><input type="month" id="bulanLaporan" onchange="hitungLaporan()" class="modal-input" style="text-align:center; color:var(--gold); font-weight:800;"><div id="isiLaporan"></div><button class="btn-main" onclick="document.getElementById('laporanOverlay').style.display='none'" style="margin-top: 20px; background:rgba(255,255,255,0.1); color:white;">TUTUP</button></div></div>
+    
     <div id="radarOverlay" class="modal-overlay" style="padding:10px;"><div style="width:100%; max-width:600px; background:#000; border:1px solid var(--blue); border-radius:20px; overflow:hidden; display:flex; flex-direction:column; height:85vh;"><div style="background:var(--blue); color:white; padding:15px; display:flex; justify-content:space-between; align-items:center; font-weight:800;"><span><i class="fa-solid fa-satellite-dish"></i> GPS RADAR</span><select id="radarFilterSelect" onchange="renderRadarMarkers()" style="padding:5px; background:rgba(0,0,0,0.5); color:white; border:1px solid white; font-size:10px;"><option value="ALL">SEMUA KURIR</option><option value="kurira">KURIR A</option><option value="kurirb">KURIR B</option><option value="kurirc">KURIR C</option></select><button onclick="document.getElementById('radarOverlay').style.display='none'" style="background:rgba(0,0,0,0.5); color:white; border:none; padding:5px 10px; border-radius:8px;"><i class="fa-solid fa-xmark"></i></button></div><div id="mapRadar" style="flex:1; width:100%; z-index:1;"></div></div></div>
-    <div id="waPrompt" style="position:fixed; bottom:20px; left:20px; right:20px; background:var(--wa); color:white; padding:20px; border-radius:20px; z-index:11000; display:none;"><b style="display:block; margin-bottom:10px;">✅ Pesanan Tersimpan!</b><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button onclick="document.getElementById('waPrompt').style.display='none'" style="background:rgba(0,0,0,0.2); color:white; border:none; padding:10px; border-radius:10px;">NANTI</button><button id="btnWAOpen" style="background:white; color:black; border:none; padding:10px; border-radius:10px; font-weight:800;">KIRIM WA</button></div></div>
+    
+    <div id="waPrompt" style="position:fixed; top:20px; left:20px; right:20px; background:var(--wa); color:white; padding:20px; border-radius:20px; z-index:11000; display:none; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+        <b style="display:block; margin-bottom:10px;">✅ Pesanan Tersimpan!</b>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <button onclick="tutupWAPrompt()" style="background:rgba(0,0,0,0.2); color:white; border:none; padding:10px; border-radius:10px; font-weight:800;">NANTI</button>
+            <button id="btnWAOpen" style="background:white; color:black; border:none; padding:10px; border-radius:10px; font-weight:800;">KIRIM WA</button>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
@@ -285,8 +327,7 @@
         setInterval(() => {
             const now = new Date();
             document.getElementById('runningClock').innerHTML = `<i class="fa-regular fa-clock"></i> ${now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'})}`;
-            const opsiTgl = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
-            if(document.getElementById('currentDay')) document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', opsiTgl).toUpperCase();
+            if(document.getElementById('currentDay')) document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
         }, 1000);
 
         db.ref('pesanan').limitToLast(150).on('value', snap => { allOrders = snap.val() ? Object.keys(snap.val()).map(k => ({id:k, ...snap.val()[k]})).reverse() : []; updateAll(); });
@@ -344,11 +385,13 @@
                     let bCls = o.status==='Gudang'?'badge-gudang':(o.status==='Terkirim'?'badge-sukses':(o.status==='Gagal'?'badge-gagal':(o.status==='Tunda'?'badge-tunda':'badge-proses')));
                     let iStat = o.status==='Terkirim'?'fa-check-double':'fa-box';
                     
+                    let payBadge = o.metode === 'COD' ? `<span style="background:var(--warning); color:black; padding:2px 5px; border-radius:4px; font-size:8px; font-weight:800;">COD</span>` : `<span style="background:var(--blue); color:white; padding:2px 5px; border-radius:4px; font-size:8px; font-weight:800;">TF</span>`;
+
                     html += `<div class="glass-card ${o.urgent ? 'card-urgent' : ''}" style="padding:0; margin-bottom:10px; overflow:hidden;">
                         <div onclick="toggleDetail('${o.id}')" style="padding:15px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
                             <div style="display:flex; align-items:center; gap:12px;">
                                 <div class="report-icon" style="width:35px; height:35px; font-size:14px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border);"><i class="fa-solid ${iStat}" style="color:${o.status==='Terkirim'?'var(--safe)':'var(--gold)'}"></i></div>
-                                <div><div style="font-size:13px; font-weight:800; color:white;">${o.namaPembeli}</div><div style="font-size:10px; color:gray;">${o.noPesanan} • Rp ${Number(o.total).toLocaleString('id-ID')}</div></div>
+                                <div><div style="font-size:13px; font-weight:800; color:white;">${o.namaPembeli}</div><div style="font-size:10px; color:gray;">${o.noPesanan} • ${payBadge} Rp ${Number(o.total).toLocaleString('id-ID')}</div></div>
                             </div>
                             <i id="icon-arrow-${o.id}" class="fa-solid fa-chevron-down" style="font-size:12px; color:var(--gold); transition:0.3s;"></i>
                         </div>
@@ -363,8 +406,8 @@
 
                             ${o.kurir ? `<div class="kurir-tag" style="margin-bottom:12px;"><i class="fa-solid fa-motorcycle"></i> KURIR: ${o.kurir.toUpperCase()}</div>` : ''}
                             
-                            ${o.catatanKurir ? `<div style="font-size:11px; color:var(--safe); margin-bottom:10px; padding:8px; background:rgba(34,197,94,0.05); border-radius:8px;"><i><i class="fa-solid fa-comment-dots"></i> ${o.catatanKurir}</i></div>` : ''}
-                            ${o.alasanTunda ? `<div style="font-size:11px; color:var(--danger); margin-bottom:10px; padding:8px; background:rgba(239,68,68,0.05); border-radius:8px;"><i><i class="fa-solid fa-circle-exclamation"></i> ${o.alasanTunda}</i></div>` : ''}
+                            ${o.catatanKurir ? `<div style="font-size:11px; color:var(--safe); margin-bottom:10px; padding:8px; background:rgba(34,197,94,0.05); border-radius:8px;"><i><i class="fa-solid fa-comment-dots"></i> Diterima: ${o.catatanKurir}</i></div>` : ''}
+                            ${o.alasanTunda ? `<div style="font-size:11px; color:var(--danger); margin-bottom:10px; padding:8px; background:rgba(239,68,68,0.05); border-radius:8px;"><i><i class="fa-solid fa-circle-exclamation"></i> Alasan: ${o.alasanTunda}</i></div>` : ''}
 
                             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
                                 <a href="https://wa.me/${waNum}" class="action-btn btn-wa" style="text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> WA</a>
@@ -380,8 +423,8 @@
                                 ${o.status === 'Terkirim' ? 
                                     `<div class="action-btn" style="background:rgba(255,255,255,0.05); color:gray; cursor:not-allowed; border:1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-shield-halved"></i> TERKUNCI</div>` : 
                                     (o.status === 'Gagal' ? 
-                                        `<button class="action-btn" style="background:var(--blue); color:white;" onclick="bukaPopupKirimUlang('${o.id}')"><i class="fa-solid fa-rotate-left"></i> KIRIM ULANG</button>` : 
-                                        `<button class="action-btn btn-delete" onclick="bukaPopupHapus('${o.id}')"><i class="fa-solid fa-trash"></i> HAPUS</button>`
+                                        `<button class="action-btn" style="background:var(--blue); color:white;" onclick="bukaPopupKirimUlang('${o.id}')"><i class="fa-solid fa-rotate-left"></i> KEMBALI KE GUDANG</button>` : 
+                                        `<button class="action-btn btn-delete" onclick="bukaPopupHapus('${o.id}')"><i class="fa-solid fa-trash"></i> HAPUS PERMANEN</button>`
                                     )
                                 }
                             </div>
@@ -393,11 +436,24 @@
         }
 
         function toggleDetail(id) { const d = document.getElementById('detail-' + id); const a = document.getElementById('icon-arrow-' + id); if (d.style.display === "none") { d.style.display = "block"; a.style.transform = "rotate(180deg)"; } else { d.style.display = "none"; a.style.transform = "rotate(0deg)"; } }
+        
         function bukaModalInput() { document.getElementById('modalInputBaru').style.display = 'flex'; if(navigator.vibrate) navigator.vibrate(50); }
         function tutupModalInput() { document.getElementById('modalInputBaru').style.display = 'none'; }
-        function tambahDanTutup() { tambah(); setTimeout(tutupModalInput, 1000); }
-        function toggleTotal() { document.getElementById('total').style.display = document.getElementById('metodeBayar').value === 'Transfer' ? 'none' : 'block'; }
         
+        function toggleTotal() { 
+            const tf = document.getElementById('metodeBayar').value === 'Transfer';
+            document.getElementById('containerTotal').style.display = tf ? 'none' : 'block';
+        }
+        function toggleEditTotal() { 
+            const tf = document.getElementById('editMetode').value === 'Transfer';
+            document.getElementById('containerEditTotal').style.display = tf ? 'none' : 'block';
+        }
+        
+        function tutupWAPrompt() {
+            document.getElementById('waPrompt').style.display = 'none';
+            document.querySelector('.fab').style.display = 'flex';
+        }
+
         function tambah() {
             const d = { 
                 noPesanan: document.getElementById('noPesanan').value || "#"+Date.now().toString().slice(-4), 
@@ -412,14 +468,19 @@
                 tanggal: formatTglDB(new Date()), 
                 waktu: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) 
             };
-            if(!d.namaPembeli || !d.nohp) return alert("Nama & WA wajib!");
+            if(!d.namaPembeli || !d.nohp) return alert("Nama & WA wajib diisi!");
+            
             db.ref('pesanan').push(d).then(() => { 
+                tutupModalInput();
                 lastOrder = d; executePrint(); 
                 const waN = String(d.nohp).replace(/\D/g, '').replace(/^0/, '62');
                 const linkMap = d.mapLink ? `\n📍 Map: ${d.mapLink}` : "";
-                const tks = `*EJ TOBACCO* 📦\nHalo Kak *${d.namaPembeli.toUpperCase()}* 👋\n\nPesanan sedang diproses.\n\n*RINCIAN:* \n🆔 Resi: ${d.noPesanan}\n💰 Total: *Rp ${Number(d.total).toLocaleString('id-ID')}*\n💳 Bayar: *${d.metode}*\n📍 Tujuan: ${d.alamat}${linkMap}\n\nTerima kasih! 🙏`;
+                const tks = `*EJ TOBACCO DELIVERY* 📦\nHalo Kak *${d.namaPembeli.toUpperCase()}* 👋\n\nPesanan sedang diproses.\n\n*RINCIAN:* \n🆔 Resi: ${d.noPesanan}\n💰 Total: *Rp ${Number(d.total).toLocaleString('id-ID')}*\n💳 Bayar: *${d.metode}*\n📍 Tujuan: ${d.alamat}${linkMap}\n\nTerima kasih! 🙏`;
+                
                 document.getElementById('waPrompt').style.display = 'block';
-                document.getElementById('btnWAOpen').onclick = () => { window.open(`https://wa.me/${waN}?text=${encodeURIComponent(tks)}`, '_blank'); document.getElementById('waPrompt').style.display = 'none'; };
+                document.querySelector('.fab').style.display = 'none'; 
+
+                document.getElementById('btnWAOpen').onclick = () => { window.open(`https://wa.me/${waN}?text=${encodeURIComponent(tks)}`, '_blank'); tutupWAPrompt(); };
                 ['noPesanan','pembeli','nohp','alamat','mapLink','total'].forEach(id => document.getElementById(id).value = "");
                 document.getElementById('isUrgent').checked = false;
             });
@@ -434,8 +495,8 @@
 
         function reprint(id) { lastOrder = allOrders.find(o => o.id === id); if(lastOrder) executePrint(); }
         function viewFoto(id, src) { document.getElementById('modalFoto').style.display='flex'; document.getElementById('imgBukti').src=src||""; if(!src) db.ref('foto_bukti/'+id).once('value', s=>document.getElementById('imgBukti').src=s.val()); }
-        function bukaPopupHapus(id) { document.getElementById('modalHapusPesanan').style.display='flex'; document.getElementById('btnConfirmHapus').onclick=()=>{ db.ref('pesanan/'+id).remove(); db.ref('foto_bukti/'+id).remove(); document.getElementById('modalHapusPesanan').style.display='none'; }; }
-        function bukaPopupKirimUlang(id) { document.getElementById('modalKirimUlang').style.display='flex'; document.getElementById('btnConfirmKirimUlang').onclick=()=>{ db.ref('pesanan/'+id).update({status:'Gudang', kurir:'', alasanTunda:null, waktuUpdate:new Date().toLocaleTimeString()}); document.getElementById('modalKirimUlang').style.display='none'; }; }
+        function bukaPopupHapus(id) { document.getElementById('modalHapusPesanan').style.display='flex'; document.getElementById('btnConfirmHapus').onclick=()=>{ db.ref('pesanan/'+id).remove(); db.ref('foto_bukti/'+id).remove(); document.getElementById('modalHapusPesanan').style.display='none'; if(navigator.vibrate) navigator.vibrate(50); }; }
+        function bukaPopupKirimUlang(id) { document.getElementById('modalKirimUlang').style.display='flex'; document.getElementById('btnConfirmKirimUlang').onclick=()=>{ db.ref('pesanan/'+id).update({status:'Gudang', kurir:'', alasanTunda:null, waktuUpdate:new Date().toLocaleTimeString()}).then(() => { document.getElementById('modalKirimUlang').style.display='none'; if(navigator.vibrate) navigator.vibrate(50); }); }; }
 
         function pilihPill(val, element) {
             document.querySelectorAll('.status-pill').forEach(p => p.classList.remove('pill-active'));
@@ -452,6 +513,12 @@
             document.getElementById('editMetode').value = o.metode||"COD";
             document.getElementById('editTotal').value = o.total||0;
             document.getElementById('editStatus').value = o.status;
+            
+            document.getElementById('editMapLink').value = o.mapLink || "";
+            document.getElementById('editUrgent').checked = o.urgent || false;
+            
+            toggleEditTotal(); // Sembunyikan harga kalau pas dibuka metodenya Transfer
+
             document.querySelectorAll('.status-pill').forEach(p => {
                 p.classList.remove('pill-active');
                 if (p.getAttribute('data-val') === o.status) p.classList.add('pill-active');
@@ -461,9 +528,22 @@
 
         function simpanEdit() {
             const stat = document.getElementById('editStatus').value;
-            let du = { status:stat, namaPembeli:document.getElementById('editPembeli').value, nohp:document.getElementById('editNohp').value, alamat:document.getElementById('editAlamat').value, metode:document.getElementById('editMetode').value, total:document.getElementById('editTotal').value, waktuUpdate:new Date().toLocaleTimeString() };
+            let du = { 
+                status: stat, 
+                namaPembeli: document.getElementById('editPembeli').value, 
+                nohp: document.getElementById('editNohp').value, 
+                alamat: document.getElementById('editAlamat').value, 
+                metode: document.getElementById('editMetode').value, 
+                total: document.getElementById('editTotal').value, 
+                mapLink: document.getElementById('editMapLink').value, 
+                urgent: document.getElementById('editUrgent').checked, 
+                waktuUpdate: new Date().toLocaleTimeString() 
+            };
             if(stat==='Gudang'){du.kurir=''; du.alasanTunda=null;}
-            db.ref('pesanan/'+editId).update(du).then(()=>document.getElementById('modalEdit').style.display='none');
+            db.ref('pesanan/'+editId).update(du).then(()=>{
+                document.getElementById('modalEdit').style.display='none';
+                if(navigator.vibrate) navigator.vibrate(100);
+            });
         }
 
         function bukaLaporan() { document.getElementById('bulanLaporan').value = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`; document.getElementById('laporanOverlay').style.display = 'flex'; hitungLaporan(); }
@@ -485,5 +565,4 @@
         window.addEventListener('online', updateStatusInternet); window.addEventListener('offline', updateStatusInternet); updateStatusInternet();
     </script>
 </body>
-</html> mantap bosku ini baru namanya aplikasi buatan dari jepang keren bener saya pamit makasih banyak waktunya see uuu 👋🏻 
-_
+</html>
