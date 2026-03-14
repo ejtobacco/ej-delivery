@@ -477,4 +477,4 @@
     function aktifkanRadar() { if (navigator.geolocation) { navigator.geolocation.watchPosition(pos => { db.ref('tracking/'+myName).set({ lat: pos.coords.latitude, lng: pos.coords.longitude, waktu: new Date().toLocaleTimeString() }); }, null, { enableHighAccuracy:true }); } }
     </script>
 </body>
-</html> di file admin fitur edit belum ditambahkan popup keren ini, sekalian kalo status tunda dll diedit jadi gudang lagi biar bisa di scan kurir lain atau dikirim besok harinya, soalnya klo status tunda itu warnanya beda, nah disini kalau tunda masuknya kuning, kalau cancel jadinya merah, kalau sukses hijau, kalo digudang biru, kalo tas kurir warna goll, dan bisa nda admin melacak 1 kurir tanpa harus melacak semuanya di fitur radar soalnya bisa bingung admin wkwkwk trus tambah fitur ganti foto untuk merubah foto bilamana admin suruh minta kurir poto ulang saat paket masih di kurir
+</html>
