@@ -74,10 +74,12 @@
                 </select>
             </div>
             
-            <div class="input-group">
+            <div class="input-group" style="margin-bottom: 5px;">
                 <i class="fa-solid fa-lock"></i>
-                <input type="password" id="inputPin" placeholder="Masukkan PIN" pattern="[0-9]*" inputmode="numeric" style="letter-spacing: 5px; font-weight: 800; font-size: 16px;">
+                <input type="password" id="inputPin" placeholder="Masukkan PIN (1234)" pattern="[0-9]*" inputmode="numeric" style="letter-spacing: 5px; font-weight: 800; font-size: 16px;">
             </div>
+            
+            <div id="pinError" style="color: var(--danger); font-size: 11px; font-weight: 800; height: 20px; margin-bottom: 10px; opacity: 0; transition: 0.3s;">⚠️ PIN SALAH!</div>
             
             <button onclick="cekPin()" class="btn-main"><i class="fa-solid fa-right-to-bracket"></i> LOGIN PIN</button>
 
@@ -189,7 +191,7 @@
 
     <div id="modalPengeluaran" class="modal-overlay">
         <div class="glass-card" style="width: 100%; max-width: 350px; border-color: var(--danger);">
-            <div class="dashboard-header" style="color:var(--danger); justify-content:space-between; margin-bottom:20px;">
+            <div style="display:flex; color:var(--danger); justify-content:space-between; margin-bottom:20px; font-weight:800;">
                 <span><i class="fa-solid fa-gas-pump"></i> CATAT PENGELUARAN</span>
                 <button onclick="document.getElementById('modalPengeluaran').style.display='none'" style="background:none; border:none; color:white; font-size:18px;"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -201,47 +203,56 @@
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-storage-compat.js"></script>
     <script>
         const firebaseConfig = { apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg", authDomain: "ejtobacco-v2.firebaseapp.com", databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "ejtobacco-v2", storageBucket: "ejtobacco-v2.firebasestorage.app", messagingSenderId: "366973371317", appId: "1:366973371317:web:c5ec32460cd9cf0f6c8ffc" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const PIN_KURIR = "1234";
+        const PIN_KURIR = "1234"; // PIN Login Kurir
         let myName = localStorage.getItem('namaKurir') || "";
         let allOrders = [];
         let idAktif = null;
 
-        // ================= FITUR AUTO-SELECT NAMA =================
+        // ================= FITUR AUTO-LOGIN & AUTO-SELECT =================
         window.onload = () => {
             if (myName) {
-                const sel = document.getElementById('selectNamaKurir');
-                for(let i=0; i<sel.options.length; i++) {
-                    if(sel.options[i].value === myName) sel.selectedIndex = i;
-                }
+                // Kalau kurir udah pernah login sebelumnya, langsung buka aplikasinya!
+                document.getElementById('loginOverlay').style.display = 'none';
+                renderKurirList();
+                jalankanGPS();
             }
         };
 
-        // ================= SISTEM LOGIN MANUAL =================
+        // ================= SISTEM LOGIN MANUAL (PIN) =================
         function cekPin() {
+            document.getElementById('pinError').style.opacity = "0"; // Reset error
             const n = document.getElementById('selectNamaKurir').value;
             const p = document.getElementById('inputPin').value;
-            if(!n) return alert("Pilih nama dulu Bos!");
+            
+            if(!n) return alert("Pilih nama kamu dulu Bos!");
+            
             if(p === PIN_KURIR) {
                 myName = n;
                 localStorage.setItem('namaKurir', myName);
                 document.getElementById('loginOverlay').style.display = 'none';
                 if(navigator.vibrate) navigator.vibrate(50);
+                
+                db.ref(`tracking/${myName}`).update({ lastActive: new Date().toLocaleTimeString(), loginMethod: "PIN", status: "Online" });
+                
                 renderKurirList();
                 jalankanGPS();
             } else {
+                // Tampilkan pesan error kalau PIN salah
                 document.getElementById('pinError').style.opacity = "1";
             }
         }
 
+        // Tombol Ganti Akun (Logout)
         function logoutKurir() {
-            localStorage.removeItem('namaKurir');
-            window.location.reload();
+            if(confirm("Yakin mau ganti akun/keluar?")) {
+                localStorage.removeItem('namaKurir');
+                window.location.reload();
+            }
         }
 
         // ================= SISTEM LOGIN BIOMETRIK =================
@@ -254,7 +265,7 @@
             }
 
             if (!window.PublicKeyCredential) {
-                alert("Waduh, HP atau Browser ini belum support Sidik Jari. Pakai PIN saja ya!");
+                alert("Waduh, HP atau Browser ini belum support Sidik Jari. Pakai PIN manual aja ya!");
                 return;
             }
 
@@ -291,7 +302,7 @@
             } catch (err) {
                 console.error("Biometrik Error:", err);
                 if(err.name !== "NotAllowedError") {
-                    alert("Sistem: Silakan gunakan PIN manual untuk saat ini.");
+                    alert("Sistem Keamanan: Silakan gunakan PIN manual untuk saat ini.");
                 }
             }
         }
@@ -304,6 +315,8 @@
             if(myName) renderKurirList(); 
         });
 
+        function renderList() { renderKurirList(); } // Buat kolom search
+
         function renderKurirList() {
             document.getElementById('dispNamaKurir').innerText = `ID: ${myName.toUpperCase()}`;
             const tglHariIni = formatTglDB(new Date());
@@ -314,7 +327,7 @@
                 (o.kurir === myName || o.status === 'Gudang') && 
                 o.tanggal === tglHariIni &&
                 o.status !== 'Terkirim' && o.status !== 'Gagal'
-            ).filter(o => (o.namaPembeli||"").toLowerCase().includes(kw) || (o.alamat||"").toLowerCase().includes(kw));
+            ).filter(o => (o.namaPembeli||"").toLowerCase().includes(kw) || (o.alamat||"").toLowerCase().includes(kw) || (o.noPesanan||"").toLowerCase().includes(kw));
 
             if(myOrders.length === 0) {
                 html = `<div style="text-align:center; padding:40px; opacity:0.3;"><i class="fa-solid fa-mug-hot" style="font-size:40px; margin-bottom:10px;"></i><br>Tugas Kosong Bos. Ngopi Dulu!</div>`;
@@ -323,10 +336,8 @@
                     let isGudang = o.status === 'Gudang';
                     let isTunda = o.status === 'Tunda';
                     
-                    // Hitung Tagihan COD
                     if (!isGudang && o.metode === 'COD') totalDuit += Number(o.total || 0);
 
-                    // Desain UI Kartu Kurir
                     html += `<div class="glass-card ${o.urgent ? 'card-urgent' : ''}" style="${isGudang ? 'border-color:gray; opacity:0.8;' : 'border-color:var(--gold);'}">
                         
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
@@ -422,11 +433,10 @@
                     document.getElementById('modalSukses').style.display='none';
                     btn.innerHTML = `<i class="fa-solid fa-check"></i> SELESAI`; btn.disabled = false;
                     
-                    // Fitur Tracking WA: Kirim WA otomatis ke pembeli
                     const o = allOrders.find(x => x.id === idAktif);
                     if(o && o.nohp) {
                         const waN = String(o.nohp).replace(/\D/g, '').replace(/^0/, '62');
-                        // Ganti username github Bos EJ di link ini
+                        // Ganti ejtobacco dengan username github Bos
                         const trackLink = `https://ejtobacco.github.io/ej-delivery/tracking.html?n=${myName}`;
                         const tks = `*EJ TOBACCO* ✅\n\nPaket Anda telah berhasil dikirim oleh Kurir *${myName.toUpperCase()}*.\n\nTerima kasih telah berbelanja!\nBeri rating pelayanan kami di sini: ${trackLink}`;
                         window.open(`https://wa.me/${waN}?text=${encodeURIComponent(tks)}`, '_blank');
@@ -452,7 +462,7 @@
                 document.getElementById('modalPengeluaran').style.display='none';
                 document.getElementById('nominalKeluar').value = "";
                 document.getElementById('ketKeluar').value = "";
-                alert("Pengeluaran berhasil dicatat dan akan dipotong dari setoran!");
+                alert("Pengeluaran dicatat & otomatis memotong setoran Admin!");
             });
         }
 
@@ -466,16 +476,20 @@
                         lastUpdate: new Date().toLocaleTimeString()
                     });
                 }, err => {
-                    console.log("GPS Mati/Ditolak", err);
                     document.getElementById('lampuKoneksi').style.background = "var(--danger)";
                     document.getElementById('teksKoneksi').innerText = "GPS MATI";
                 }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 });
             }
         }
-        if(myName) jalankanGPS(); // Jika sudah login, langsung jalankan
 
-        // Auto-refresh layar tiap 1 menit biar gak bengong
-        setInterval(() => { if(myName) renderKurirList(); }, 60000);
+        // Cek internet
+        function updateStatusInternet() { 
+            const l=document.getElementById('lampuKoneksi'), t=document.getElementById('teksKoneksi'); 
+            if(navigator.onLine) { db.goOnline(); if(l)l.style.background="var(--safe)"; if(t)t.innerText="ONLINE"; } 
+            else { db.goOffline(); if(l)l.style.background="var(--danger)"; if(t)t.innerText="OFFLINE"; } 
+        }
+        window.addEventListener('online', updateStatusInternet); window.addEventListener('offline', updateStatusInternet); updateStatusInternet();
+
     </script>
 </body>
 </html>
