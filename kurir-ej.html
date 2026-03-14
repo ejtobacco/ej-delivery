@@ -603,7 +603,13 @@
         let sortableInstance = null;
     function initSortable() {
         const container = document.getElementById('orderContainer');
-        if (sortableInstance) sortableInstance.destroy(); // Bersihkan sisa mesin lama
+        
+        // --- OBAT ANTI MACET ADA DI SINI ---
+        if (sortableInstance) {
+            sortableInstance.destroy(); // Hancurkan mesin lama
+            sortableInstance = null;    // <-- TAMBAHKAN INI! Hapus dari ingatan biar sistem nggak crash!
+        }
+        // -----------------------------------
         
         // Cuma aktif kalau lagi di tab TAS SAYA
         if (currentTab === 'Proses') {
