@@ -240,30 +240,15 @@
     }, 1000);
 
     const dataPIN = { "kurirA": "1111", "kurirB": "2222", "kurirC": "3333" };
-    let memoriPIN = ""; // Kita simpan PIN murni di otak JavaScript
-
     function pressPin(val) {
-        if (val === 'C') { 
-            memoriPIN = ""; 
-        } else if (val === 'OK') {
+        let disp = document.getElementById('pinDisplay'); let v = disp.getAttribute('data-v') || "";
+        if (val === 'C') v = "";
+        else if (val === 'OK') {
             const sel = document.getElementById('namaKurirInput').value;
-            if (memoriPIN === dataPIN[sel]) { 
-                myName = sel; 
-                document.getElementById('loginOverlay').style.display='none'; 
-                document.getElementById('namaKurirHeader').innerText=myName.toUpperCase(); 
-                updateUI(); 
-                aktifkanRadar(); 
-                memoriPIN = ""; // Bersihkan memori setelah berhasil login
-            } else { 
-                alert("⚠️ PIN SALAH! Pastikan PIN sesuai dengan nama kurir."); 
-                memoriPIN = ""; 
-            }
-        } else { 
-            if (memoriPIN.length < 4) memoriPIN += val; 
-        }
-        
-        // Tampilkan bintang-bintang di layar
-        document.getElementById('pinDisplay').innerText = memoriPIN.length > 0 ? "*".repeat(memoriPIN.length) : "****";
+            if (v === dataPIN[sel]) { myName = sel; document.getElementById('loginOverlay').style.display='none'; document.getElementById('namaKurirHeader').innerText=myName.toUpperCase(); updateUI(); aktifkanRadar(); }
+            else { alert("⚠️ PIN SALAH! Coba lagi."); v = ""; }
+        } else { if (v.length < 4) v += val; }
+        disp.setAttribute('data-v', v); disp.innerText = v.length > 0 ? "*".repeat(v.length) : "****";
     }
 
     function logoutKurir() {
@@ -356,4 +341,112 @@
 
                 ${o.status === 'Gudang' ? `<button class="btn-main" onclick="ambilPaket('${o.id}')"><i class="fa-solid fa-box-open"></i> KLAIM & MASUKKAN TAS SAYA</button>` : 
                 (o.status !== 'Terkirim' && o.status !== 'Gagal' ? `
-                <div
+                <div style="display:grid; grid-template-columns: ${btnMaps !== '' ? '1fr 1fr' : '1fr'}; gap:8px; margin-bottom:8px;">
+                    <button onclick="window.open('https://wa.me/${waNum}?text=${encodeURIComponent(msg)}', '_blank')" class="action-btn btn-wa"><i class="fa-brands fa-whatsapp" style="font-size:14px;"></i> KABARI PELANGGAN</button>
+                    ${btnMaps}
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
+                    <button class="action-btn" style="background:var(--safe);" onclick="document.getElementById('f-${o.id}').click()"><i class="fa-solid fa-camera"></i> SELESAI</button>
+                    <button class="action-btn" style="background:var(--warning); color:black;" onclick="updateStat('${o.id}', 'Tunda')"><i class="fa-solid fa-clock"></i> TUNDA</button>
+                </div>
+                <button class="action-btn" style="background:rgba(239,68,68,0.1); border: 1px solid var(--danger); color:var(--danger); width:100%; margin-top:8px;" onclick="updateStat('${o.id}', 'Gagal')"><i class="fa-solid fa-xmark"></i> CANCEL / GAGAL</button>
+                ` : `
+                <div style="font-size:11px; text-align:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:10px; color:gray;"><i class="fa-solid fa-lock"></i> PESANAN SELESAI / TERKUNCI</div>
+                `)}
+                
+                <input type="file" id="f-${o.id}" accept="image/*" capture="environment" style="display:none;" onchange="uploadSelesai('${o.id}', this)">
+            </div>`;
+        });
+        if (filtered.length === 0) container.innerHTML = `<div style="text-align:center; padding:50px 20px; opacity:0.3;"><i class="fa-solid fa-box-open" style="font-size:40px; display:block; margin-bottom:10px;"></i>Tidak ada paket di tab ini.</div>`;
+    }
+
+    function updateStatusInternet() {
+        const lampu = document.getElementById('lampuKoneksi');
+        const teks = document.getElementById('teksKoneksi');
+        if (navigator.onLine) {
+            document.body.classList.remove('is-offline');
+            if(lampu) { lampu.style.background = "var(--safe)"; lampu.style.boxShadow = "0 0 10px var(--safe)"; }
+            if(teks) { teks.innerText = "SISTEM ONLINE"; teks.style.color = "var(--safe)"; }
+        } else {
+            document.body.classList.add('is-offline');
+            if(lampu) { lampu.style.background = "var(--offline)"; lampu.style.boxShadow = "0 0 10px var(--offline)"; }
+            if(teks) { teks.innerText = "KONEKSI TERPUTUS"; teks.style.color = "var(--offline)"; }
+        }
+    }
+
+    function ambilPaket(id) { db.ref('pesanan/'+id).update({ status:'Proses', kurir:myName, waktuAmbil:new Date().toLocaleTimeString() }).then(() => { document.getElementById('searchOrder').value=""; setTab('Proses'); }); }
+    function uploadSelesai(id, input) { if (input.files[0]) { tempFileSukses = input.files[0]; tempIdSukses = id; document.getElementById('modalPenerima').style.display='flex'; input.value=""; } }
+    
+    function eksekusiUploadSelesai() {
+        let n = document.getElementById('inputNamaPenerima').value || "Keluarga/Pihak Rumah";
+        const id = tempIdSukses, file = tempFileSukses; 
+        
+        const btnUpload = document.getElementById('btnUploadFoto');
+        const teksAsli = btnUpload.innerHTML;
+        btnUpload.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> MENGIRIM...`;
+        btnUpload.disabled = true;
+
+        const reader = new FileReader(); reader.onload = function(e) {
+            const img = new Image(); img.onload = function() {
+                const canvas = document.createElement('canvas'); let w = img.width, h = img.height;
+                if (w > h) { if (w > 600) { h *= 600 / w; w = 600; } } else { if (h > 800) { w *= 800 / h; h = 800; } }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                db.ref('foto_bukti/'+id).set(canvas.toDataURL('image/jpeg', 0.5)).then(() => {
+                    db.ref('pesanan/'+id).update({ status:'Terkirim', adaFoto:true, catatanKurir:"Diterima: "+n, waktuSelesai:new Date().toLocaleTimeString() }).then(() => {
+                        document.getElementById('modalPenerima').style.display='none';
+                        btnUpload.innerHTML = teksAsli;
+                        btnUpload.disabled = false;
+                        document.getElementById('inputNamaPenerima').value = "";
+                        if(navigator.vibrate) navigator.vibrate(100);
+                    });
+                }).catch(err => {
+                    alert("❌ Gagal mengirim foto! Pastikan sinyal internet stabil.");
+                    btnUpload.innerHTML = teksAsli;
+                    btnUpload.disabled = false;
+                });
+            }; img.src = e.target.result;
+        }; reader.readAsDataURL(file);
+    }
+    
+    function batalUploadSelesai() { document.getElementById('modalPenerima').style.display='none'; tempFileSukses=null; }
+    function setTab(t) { currentTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('t-'+t).classList.add('active'); renderOrders(); }
+    function toggleScanner() { const r = document.getElementById('reader'); r.style.display = r.style.display==='block'?'none':'block'; if(r.style.display==='block') startScanner(); }
+    function startScanner() { html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode:"environment" }, { fps:10, qrbox:250 }, (txt) => {
+        const target = allData.find(o => o.noPesanan.replace(/\W/g, "") === txt.replace(/\W/g, ""));
+        if (target) { if (target.status==='Gudang') ambilPaket(target.id); else { document.getElementById('searchOrder').value=target.noPesanan; renderOrders(); } html5QrCode.stop(); document.getElementById('reader').style.display='none'; }
+    }); }
+    
+    function tambahPengeluaran() { document.getElementById('modalExpense').style.display='flex'; }
+    
+    function prosesSimpanExpense() { 
+        const k=document.getElementById('expKet').value, n=document.getElementById('expNom').value; 
+        if(!k || !n) {
+            alert("⚠️ Waduh! Keterangan dan Nominal Rp harus diisi dulu Bos!");
+            return; 
+        }
+        db.ref('pengeluaran').push({ kurir:myName, keterangan:k, nominal:Number(n), tanggal:getTgl(), waktu:new Date().toLocaleTimeString() }).then(()=>{
+            document.getElementById('modalExpense').style.display='none';
+            document.getElementById('expKet').value = "";
+            document.getElementById('expNom').value = "";
+        }); 
+    }
+    
+    function updateStat(id, s) { tempId = id; tempStat = s; document.getElementById('modalAlasan').style.display='flex'; }
+    
+    function prosesSimpanAlasan() { 
+        const a=document.getElementById('textAlasan').value; 
+        if(!a) {
+            alert("⚠️ Alasan tidak boleh kosong! Kasih tau admin kenapa paket ini ditunda/gagal.");
+            return;
+        }
+        db.ref('pesanan/'+tempId).update({ status:tempStat, alasanTunda:a, waktuUpdate:new Date().toLocaleTimeString() }).then(()=>{
+            document.getElementById('modalAlasan').style.display='none';
+            document.getElementById('textAlasan').value = "";
+        }); 
+    }
+    
+    function aktifkanRadar() { if (navigator.geolocation) { navigator.geolocation.watchPosition(pos => { db.ref('tracking/'+myName).set({ lat: pos.coords.latitude, lng: pos.coords.longitude, waktu: new Date().toLocaleTimeString() }); }, null, { enableHighAccuracy:true }); } }
+    </script>
+</body>
+</html>
