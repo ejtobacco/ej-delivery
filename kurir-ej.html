@@ -30,10 +30,12 @@
         
         body { background: var(--bg); color: var(--text-main); padding: 15px; padding-bottom: 100px; overflow-x: hidden; user-select: none; transition: 0.3s; }
         ::-webkit-scrollbar { display: none; }
-        /* EFEK DRAG & DROP */
-        .sortable-ghost { opacity: 0.4; border: 2px dashed var(--gold) !important; transform: scale(0.98); }
-        .drag-handle { cursor: grab; touch-action: none; } /* <-- INI MANTRA ANTI-MACETNYA */
+        /* EFEK DRAG & DROP PREMIUM */
+        .sortable-ghost { opacity: 0.3; background: rgba(212,175,55,0.1) !important; border: 2px dashed var(--gold) !important; transform: scale(0.98); }
+        .sortable-drag { opacity: 1 !important; box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important; transform: scale(1.02) !important; cursor: grabbing !important; z-index: 99999; }
+        .drag-handle { cursor: grab; touch-action: none; }
         .drag-handle:active { cursor: grabbing; }
+        .nomor-urut { transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); } /* Pelumas perubahan angka */
         
         /* HEADER PREMIUM */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 0; z-index: 9999; background: rgba(5,5,5,0.85); backdrop-filter: blur(15px); padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -493,24 +495,36 @@
         if (currentTab === 'Proses') {
             sortableInstance = new Sortable(container, {
                 handle: '.drag-handle', // Cuma bisa digeser lewat gagang atas
-                animation: 200,         // Kecepatan animasi meluncur
-                ghostClass: 'sortable-ghost', // Efek bayangan saat melayang
-                forceFallback: true,    // <-- TAMBAHKAN INI (Biar gesekan di layar sentuh HP super lancar)
+                animation: 350,         // WAKTU DIPERLAMBAT BIAR SMOOTH (350ms)
+                easing: "cubic-bezier(0.25, 1, 0.5, 1)", // Efek "Ngerem Halus"
+                ghostClass: 'sortable-ghost', 
+                dragClass: 'sortable-drag', // Efek pas diangkat
+                forceFallback: true,    // Wajib untuk HP
+                fallbackTolerance: 3,   // Toleransi getaran jari biar gak gampang kepencet
+                
+                // --- MESIN LIVE-UPDATE ANGKA SAAT DIGESER ---
+                onChange: function(evt) {
+                    const urutanEls = container.querySelectorAll('.nomor-urut');
+                    urutanEls.forEach((el, idx) => {
+                        el.innerText = idx + 1; // Angka langsung ganti saat kartu berpapasan!
+                    });
+                    if(navigator.vibrate) navigator.vibrate([10]); // Getar tipis banget tiap ngelewatin kartu
+                },
+
                 onEnd: function (evt) {
-                    // Kalau geser selesai, rekam urutan barunya ke Memori HP!
+                    // Kalau geser selesai, rekam urutan barunya ke Memori HP
                     const itemEls = container.querySelectorAll('.sortable-item');
                     let newOrder = [];
                     itemEls.forEach(el => newOrder.push(el.getAttribute('data-id')));
                     localStorage.setItem('rute_'+myName, JSON.stringify(newOrder));
                     
-                    // --- MESIN UBAH ANGKA OTOMATIS (TANPA LOADING) ---
+                    // Pastikan angka fix
                     const urutanEls = container.querySelectorAll('.nomor-urut');
                     urutanEls.forEach((el, idx) => {
-                        el.innerText = idx + 1; // Timpa angka lamanya dengan urutan baru
+                        el.innerText = idx + 1; 
                     });
-                    // --------------------------------------------------
 
-                    if(navigator.vibrate) navigator.vibrate([50]); // HP Getar *Ceklik*
+                    if(navigator.vibrate) navigator.vibrate([50]); // Getar konfirmasi selesai
                 }
             });
         }
