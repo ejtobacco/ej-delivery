@@ -524,27 +524,34 @@
                 // =========================================
                 // --- MESIN LIVE-UPDATE ANGKA SAAT DIGESER ---
                 onChange: function(evt) {
-                    const urutanEls = container.querySelectorAll('.nomor-urut');
-                    urutanEls.forEach((el, idx) => {
-                        el.innerText = idx + 1; // Angka langsung ganti saat kartu berpapasan!
+                    let urut = 1;
+                    const semuaKartu = container.querySelectorAll('.sortable-item');
+                    semuaKartu.forEach(el => {
+                        // Abaikan kartu kloning/bayangan yang nempel di jari
+                        if (!el.classList.contains('sortable-drag')) {
+                            const badge = el.querySelector('.nomor-urut');
+                            if (badge) { badge.innerText = urut; urut++; }
+                        }
                     });
-                    if(navigator.vibrate) navigator.vibrate([10]); // Getar tipis banget tiap ngelewatin kartu
+                    if(navigator.vibrate) navigator.vibrate([10]); 
                 },
 
                 onEnd: function (evt) {
-                    // Kalau geser selesai, rekam urutan barunya ke Memori HP
-                    const itemEls = container.querySelectorAll('.sortable-item');
                     let newOrder = [];
-                    itemEls.forEach(el => newOrder.push(el.getAttribute('data-id')));
-                    localStorage.setItem('rute_'+myName, JSON.stringify(newOrder));
+                    let urut = 1;
+                    const semuaKartu = container.querySelectorAll('.sortable-item');
                     
-                    // Pastikan angka fix
-                    const urutanEls = container.querySelectorAll('.nomor-urut');
-                    urutanEls.forEach((el, idx) => {
-                        el.innerText = idx + 1; 
+                    semuaKartu.forEach(el => {
+                        // Abaikan juga pas nyimpan ke memori rute
+                        if (!el.classList.contains('sortable-drag')) {
+                            newOrder.push(el.getAttribute('data-id'));
+                            const badge = el.querySelector('.nomor-urut');
+                            if (badge) { badge.innerText = urut; urut++; }
+                        }
                     });
-
-                    if(navigator.vibrate) navigator.vibrate([50]); // Getar konfirmasi selesai
+                    
+                    localStorage.setItem('rute_'+myName, JSON.stringify(newOrder));
+                    if(navigator.vibrate) navigator.vibrate([50]); 
                 }
             });
         }
