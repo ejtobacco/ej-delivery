@@ -196,6 +196,8 @@
                 ADMIN PRO
                 
                 <button onclick="toggleGhostMode()" style="background:transparent; border:none; cursor:pointer; padding:0; margin-left:5px; font-size:14px;"><i id="iconMata" class="fa-solid fa-eye" style="color:var(--safe); transition:0.3s;"></i></button>
+
+                <button onclick="toggleJarvis()" style="background:transparent; border:none; cursor:pointer; padding:0; margin-right:5px; font-size:14px;"><i id="iconJarvis" class="fa-solid fa-volume-high" style="color:var(--safe); transition:0.3s;"></i></button>
                 
                 <button onclick="toggleTvMode()" style="background:transparent; border:none; cursor:pointer; padding:0; font-size:14px;"><i id="iconTV" class="fa-solid fa-tv" style="color:gray; transition:0.3s;"></i></button>
                 
@@ -460,11 +462,19 @@
             const errEl = document.getElementById('pinError'); errEl.style.opacity = "0";
             if (val === 'C') { memoriPIN = ""; } 
             else if (val === 'OK') {
-                if (memoriPIN === PIN_RAHASIA) { document.getElementById('loginOverlay').style.display = 'none'; memoriPIN = ""; } 
+                if (memoriPIN === PIN_RAHASIA) { 
+                    document.getElementById('loginOverlay').style.display = 'none'; 
+                    memoriPIN = ""; 
+                    
+                    // --- SUNTIKAN SUARA LOGIN (Sekaligus mancing izin suara Browser) ---
+                    if (jarvisAktif && 'speechSynthesis' in window) {
+                        let msg = new SpeechSynthesisUtterance("Akses diterima. Selamat datang Komandan EJ.");
+                        msg.lang = 'id-ID'; window.speechSynthesis.speak(msg);
+                    }
+                    // -------------------------------------------------------------------
+                } 
                 else { errEl.style.opacity = "1"; if(navigator.vibrate) navigator.vibrate([50, 50, 50]); memoriPIN = ""; }
-            } else { if (memoriPIN.length < 4) memoriPIN += val; }
-            document.getElementById('pinDisplay').innerText = memoriPIN.length > 0 ? "*".repeat(memoriPIN.length) : "****";
-        }
+            }
 
         // ---> MESIN ANIMASI RELOAD WUS WUS <---
         function wusWusReload(btn) {
@@ -495,7 +505,36 @@
             if(document.getElementById('currentDay')) document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
         }, 1000);
 
-        db.ref('pesanan').limitToLast(150).on('value', snap => { allOrders = snap.val() ? Object.keys(snap.val()).map(k => ({id:k, ...snap.val()[k]})).reverse() : []; updateAll(); });
+        // Menarik data sekaligus jadi Mata-Mata buat ngasih tau Jarvis kalau ada kurir selesai
+        db.ref('pesanan').limitToLast(150).on('value', snap => { 
+            const data = snap.val();
+            allOrders = data ? Object.keys(data).map(k => ({id:k, ...data[k]})).reverse() : []; 
+            
+            // --- DETEKTOR PERUBAHAN UNTUK JARVIS ---
+            if (!isPertamaMasuk) {
+                allOrders.forEach(o => {
+                    const statLama = statusPaketLama[o.id];
+                    // Cek kalau statusnya beda sama ingatan sebelumnya (artinya ada kurir yg baru mencet Selesai)
+                    if (statLama && statLama !== o.status) {
+                        if (o.status === 'Terkirim') {
+                            jarvisBicara(`Lapor komandan. Paket atas nama ${o.namaPembeli}, telah sukses dikirim oleh kurir ${o.kurir}.`);
+                        } else if (o.status === 'Tunda') {
+                            jarvisBicara(`Perhatian. Paket atas nama ${o.namaPembeli}, ditunda oleh kurir.`);
+                        } else if (o.status === 'Gagal') {
+                            jarvisBicara(`Gawat komandan. Paket atas nama ${o.namaPembeli}, dibatalkan atau gagal dikirim.`);
+                        }
+                    }
+                    statusPaketLama[o.id] = o.status; // Simpan ke memori lagi
+                });
+            } else {
+                // Pertama kali web buka, catat aja semua posisinya dalam diam (biar Jarvis gak cerewet bawel)
+                allOrders.forEach(o => { statusPaketLama[o.id] = o.status; });
+                isPertamaMasuk = false; 
+            }
+            // ---------------------------------------
+            
+            updateAll(); 
+        });
         db.ref('pengeluaran').on('value', snap => { semuaPengeluaran = snap.val() || {}; updateAll(); });
         db.ref('setoran_kurir').on('value', snap => { semuaSetoranKurir = snap.val() || {}; updateAll(); });
 
@@ -1012,6 +1051,45 @@
             } else {
                 // HP DIBERDIRIKAN! -> Otomatis balik wujud normal!
                 setTvMode(false);
+            }
+        });
+
+        // ================= MESIN ASISTEN SUARA JARVIS =================
+        let jarvisAktif = localStorage.getItem('jarvisMode') !== 'off'; // Default Nyala
+        let statusPaketLama = {}; // Ingatan mesin buat ngecek paket mana yang berubah
+        let isPertamaMasuk = true; // Kunci biar pas baru buka web dia gak ngomongin semua paket
+
+        function toggleJarvis() {
+            jarvisAktif = !jarvisAktif;
+            localStorage.setItem('jarvisMode', jarvisAktif ? 'on' : 'off');
+            const icon = document.getElementById('iconJarvis');
+            if(icon) {
+                if(jarvisAktif) {
+                    icon.classList.replace('fa-volume-xmark', 'fa-volume-high');
+                    icon.style.color = 'var(--safe)';
+                    jarvisBicara("Sistem asisten suara diaktifkan.");
+                } else {
+                    icon.classList.replace('fa-volume-high', 'fa-volume-xmark');
+                    icon.style.color = 'gray';
+                }
+            }
+        }
+
+        function jarvisBicara(teks) {
+            if (!jarvisAktif || !('speechSynthesis' in window)) return;
+            const msg = new SpeechSynthesisUtterance(teks);
+            msg.lang = 'id-ID'; // Logat Bahasa Indonesia
+            msg.rate = 1.0; // Kecepatan ngomong normal
+            msg.pitch = 1.1; // Nada suara biar kedengaran elegan
+            window.speechSynthesis.speak(msg);
+        }
+
+        // Setel icon saat web baru dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            const icon = document.getElementById('iconJarvis');
+            if(!jarvisAktif && icon) {
+                icon.classList.replace('fa-volume-high', 'fa-volume-xmark');
+                icon.style.color = 'gray';
             }
         });
     </script>
