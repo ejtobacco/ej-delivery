@@ -121,35 +121,16 @@
         }
         .uang-blur { transition: filter 0.3s, opacity 0.3s; }
 
-        /* ================= FITUR MARKAS NASA (TV COMMAND CENTER) ================= */
+       /* ================= FITUR MARKAS NASA (TV COMMAND CENTER) ================= */
         body.tv-mode {
-            width: 450px !important; /* Batasi lebar aplikasi kiri cuma 450px */
-            height: 100vh !important;
-            overflow-y: auto !important; 
-            margin: 0 !important;
-            box-shadow: 15px 0 30px rgba(0,0,0,0.8); /* Efek bayangan membelah layar */
-            z-index: 10; position: relative;
-        }
-        body.tv-mode::-webkit-scrollbar { display: none; }
-        body.tv-mode .fab { display: none !important; } /* Sembunyikan tombol plus biar rapi */
-
-        #tvRadarContainer {
-            display: none; position: fixed; top: 15px; right: 15px; bottom: 15px; left: 475px; 
-            background: #000; border-radius: 30px; border: 2px solid var(--blue);
-            z-index: 5; overflow: hidden; box-shadow: inset 0 0 50px rgba(59, 130, 246, 0.2);
-        }
-        body.tv-mode #tvRadarContainer { display: flex; flex-direction: column; }
-
-        /* ================= FITUR MARKAS NASA (TV COMMAND CENTER) ================= */
-        body.tv-mode {
-            width: 350px !important; /* Pas buat ukuran HP saat miring */
+            width: 350px !important;
             height: 100vh !important;
             overflow-y: auto !important; 
             margin: 0 !important;
             box-shadow: 15px 0 30px rgba(0,0,0,0.8); 
             z-index: 10; position: relative;
         }
-        @media (min-width: 1024px) { body.tv-mode { width: 450px !important; } } /* Kalau di Laptop lebih lebar */
+        @media (min-width: 1024px) { body.tv-mode { width: 450px !important; } }
         body.tv-mode::-webkit-scrollbar { display: none; }
         body.tv-mode .fab { display: none !important; }
 
@@ -1007,29 +988,53 @@
         let isTvMode = false;
         
         function setTvMode(nyala) {
-            // ... (kode Bos yang sudah ada sebelumnya) ...
+            if (isTvMode === nyala) return; 
+            if (nyala && window.innerHeight < 250) return; 
 
-            // Tepat sebelum fungsi berakhir, tambahkan ini:
+            isTvMode = nyala;
+            const icon = document.getElementById('iconTV');
+            const mapAsli = document.getElementById('mapRadar');
+            const slotTv = document.getElementById('tvMapSlot');
+            let slotModalAsli = document.getElementById('mapRadar').parentNode; 
+
+            if (isTvMode) {
+                document.body.classList.add('tv-mode');
+                if(icon) icon.style.color = 'var(--blue)'; 
+                if(navigator.vibrate) navigator.vibrate([100, 50]); 
+                
+                if(slotTv && mapAsli) slotTv.appendChild(mapAsli);
+                
+                if(!map) { 
+                    map=L.map('mapRadar').setView([-6.8694, 109.0435], 13); 
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); 
+                    db.ref('tracking').on('value', s => { mapDataFirebase = s.val(); if(mapDataFirebase) renderRadarMarkers(); }); 
+                }
+            } else {
+                document.body.classList.remove('tv-mode');
+                if(icon) icon.style.color = 'gray';
+                
+                // Balikin ke modal awal
+                const modalBody = document.querySelector('#radarOverlay div div'); 
+                if(modalBody && mapAsli) modalBody.appendChild(mapAsli);
+            }
+
+            // --- JADWAL REFRESH PETA OTOMATIS (BIAR GAK TERPOTONG) ---
             setTimeout(() => { 
                 if(map) {
-                    map.invalidateSize(); // Paksa peta render ulang full layar
-                    autoFocusKurir(); // Biar pas miring tetep fokus ke titik kurir
+                    map.invalidateSize(); 
+                    autoFocusKurir(); // Langsung bidik kurir
                 }
-            }, 500); 
+            }, 500);
         }
 
+        // FUNGSI AUTO-BIDIK KURIR
         function autoFocusKurir() {
             if (!map || !mapDataFirebase) return;
-            
-            // Ambil semua koordinat kurir yang ada
             const koordinat = Object.values(mapDataFirebase).map(k => [k.lat, k.lng]);
-            
             if (koordinat.length > 0) {
                 if (koordinat.length === 1) {
-                    // Kalau cuma 1 kurir, langsung zoom ke orang itu
                     map.setView(koordinat[0], 16);
                 } else {
-                    // Kalau kurir banyak, zoom otomatis biar SEMUA kurir kelihatan di layar
                     const bounds = L.latLngBounds(koordinat);
                     map.fitBounds(bounds, { padding: [50, 50] });
                 }
