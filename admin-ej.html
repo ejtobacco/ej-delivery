@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EJ ADMIN V4.7 - SOP FIX</title>
+    <title>EJ ADMIN V5.0 - ULTIMATE CLEAN</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="manifest" href="manifest.json">
@@ -23,11 +23,11 @@
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        html, body { overscroll-behavior-y: none; }
+        html, body { overscroll-behavior-y: none; } 
         body { background: var(--bg); color: var(--text-main); width: 100%; margin: 0; padding: 15px; overflow-x: hidden; -webkit-user-select: none; user-select: none; }
         ::-webkit-scrollbar { display: none; }
         
-        /* INPUT MEWAH DENGAN ICON */
+        /* INPUT MEWAH */
         .input-group { position: relative; margin-bottom: 12px; }
         .input-group i { position: absolute; left: 15px; top: 15px; color: var(--gold); font-size: 14px; opacity: 0.8; }
         input, textarea, select { 
@@ -57,7 +57,7 @@
         .btn-edit { background: rgba(59,130,246,0.2); color: var(--blue); border: 1px solid var(--blue); }
         .btn-delete { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid var(--danger); }
         
-        /* REPORT DASHBOARD */
+        /* REPORT DASHBOARD ADMIN */
         .dashboard-header { font-size: 12px; color: gray; letter-spacing: 1px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
         .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .report-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 15px; transition: 0.3s; cursor: pointer; }
@@ -67,7 +67,7 @@
         .r-title { font-size: 10px; color: gray; }
         .r-value { font-size: 18px; font-weight: 800; color: white; }
         
-        /* ORDER ITEMS BADGES COLOR CODING */
+        /* BADGES */
         .order-badge { position: absolute; top: 15px; right: 15px; padding: 5px 12px; border-radius: 20px; font-size: 9px; font-weight: 800; display: flex; align-items: center; gap: 5px; }
         .badge-gudang { background: rgba(59,130,246,0.2); color: #60A5FA; border: 1px solid #3B82F6; } 
         .badge-proses { background: rgba(212,175,55,0.2); color: var(--gold); border: 1px solid var(--gold); } 
@@ -77,12 +77,11 @@
         
         .kurir-tag { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; margin-top: 8px; }
         
-        /* DATE PICKER CUSTOM */
+        /* DATE PICKER */
         .date-control { display: flex; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
         .date-control input { border: none; background: transparent; padding-left: 15px; border-radius: 0; margin: 0; }
         .date-control button { background: var(--gold); border: none; color: black; font-weight: 800; padding: 0 20px; font-size: 12px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
 
-        /* URGENT BLINK */
         @keyframes pulseUrgent { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
         .card-urgent { border: 1px solid var(--danger) !important; animation: pulseUrgent 2s infinite; }
 
@@ -121,16 +120,15 @@
     <div class="header">
         <div class="logo-text-container" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
             <div class="main-logo-text"><i class="fa-solid fa-crown" style="font-size:16px; margin-right:5px;"></i> EJ TOBACCO</div>
-            <div style="font-size:9px; letter-spacing:2px; color:gray; margin-left:25px; display:flex; align-items:center; gap:5px;">
+            <div style="font-size:9px; letter-spacing:2px; color:gray; margin-left:25px; display:flex; align-items:center; gap:8px;">
                 ADMIN DASHBOARD PRO
-                <button onclick="forceRefresh()" style="background:transparent; border:none; color:var(--blue); cursor:pointer;"><i id="iconRefresh" class="fa-solid fa-rotate-right"></i></button>
+                <button onclick="forceRefresh()" style="background:transparent; border:none; color:var(--blue); cursor:pointer; padding:0;"><i id="iconRefresh" class="fa-solid fa-rotate-right" style="font-size:12px;"></i></button>
+                <button onclick="tampilkanPopupLogout()" style="background:transparent; border:none; color:var(--danger); cursor:pointer; padding:0;"><i class="fa-solid fa-right-from-bracket" style="font-size:12px;"></i></button>
             </div>
         </div>
         <div style="text-align: right;">
             <div id="runningClock" style="font-size: 16px; font-weight: 800; color: var(--safe);"><i class="fa-regular fa-clock"></i> 00:00</div>
-            
             <div id="currentDay" style="font-size: 9px; color: var(--gold); font-weight: 800; margin-top: 3px; letter-spacing: 0.5px;">LOADING...</div>
-            
             <div id="statusKoneksi" style="display: flex; align-items: center; gap: 5px; justify-content: flex-end; margin-top: 5px; background: rgba(34,197,94,0.1); padding: 3px 8px; border-radius: 20px;">
                 <div id="lampuKoneksi" style="width: 6px; height: 6px; background: var(--safe); border-radius: 50%; box-shadow: 0 0 10px var(--safe);"></div>
                 <span id="teksKoneksi" style="font-size: 9px; font-weight: 800; color: var(--safe);">SISTEM ONLINE</span>
@@ -291,6 +289,54 @@
         </div>
     </div>
 
+    <div id="modalTerimaSetoran" class="modal-overlay">
+        <div class="glass-card" style="width:100%; max-width:320px; border-color:var(--safe); text-align:center;">
+            <i class="fa-solid fa-hand-holding-dollar" style="font-size:40px; color:var(--safe); margin-bottom:15px;"></i>
+            <h2 style="color:white; font-size: 16px; margin-bottom:10px;">TERIMA SETORAN</h2>
+            <p id="teksTerimaSetoran" style="font-size:12px; color:gray; margin-bottom:20px;">Anda akan menerima setoran.</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalTerimaSetoran').style.display='none'">BATAL</button>
+                <button id="btnConfirmSetoran" class="btn-main" style="background:var(--safe); color:white;"><i class="fa-solid fa-check"></i> TERIMA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalHapusPesanan" class="modal-overlay">
+        <div class="glass-card" style="width:100%; max-width:320px; border-color:var(--danger); text-align:center;">
+            <i class="fa-solid fa-trash-can" style="font-size:40px; color:var(--danger); margin-bottom:15px;"></i>
+            <h2 style="color:white; font-size: 16px; margin-bottom:10px;">HAPUS PERMANEN?</h2>
+            <p style="font-size:12px; color:gray; margin-bottom:20px;">Data pesanan ini dan foto buktinya (jika ada) akan dihapus secara permanen dari database. Lanjutkan?</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalHapusPesanan').style.display='none'">BATAL</button>
+                <button id="btnConfirmHapus" class="btn-main" style="background:var(--danger); color:white;"><i class="fa-solid fa-trash"></i> HAPUS</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalKirimUlang" class="modal-overlay">
+        <div class="glass-card" style="width:100%; max-width:320px; border-color:var(--blue); text-align:center;">
+            <i class="fa-solid fa-box-open" style="font-size:40px; color:var(--blue); margin-bottom:15px;"></i>
+            <h2 style="color:white; font-size: 16px; margin-bottom:10px;">KEMBALI KE GUDANG?</h2>
+            <p style="font-size:12px; color:gray; margin-bottom:20px;">Pesanan yang dibatalkan ini akan dikembalikan statusnya menjadi "Gudang" agar bisa discan ulang oleh kurir lain.</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalKirimUlang').style.display='none'">BATAL</button>
+                <button id="btnConfirmKirimUlang" class="btn-main" style="background:var(--blue); color:white;"><i class="fa-solid fa-rotate-left"></i> PROSES</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalLogout" class="modal-overlay">
+        <div class="glass-card" style="width:100%; max-width:320px; border-color:var(--danger); text-align:center;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size:40px; color:var(--danger); margin-bottom:15px;"></i>
+            <h2 style="color:white; font-size: 16px; margin-bottom:10px;">YAKIN INGIN KELUAR?</h2>
+            <p style="font-size:12px; color:gray; margin-bottom:20px;">Sesi Admin akan ditutup. Anda harus memasukkan PIN lagi untuk masuk ke Dashboard.</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalLogout').style.display='none'">BATAL</button>
+                <button class="btn-main" style="background:var(--danger); color:white;" onclick="eksekusiLogoutAdmin()"><i class="fa-solid fa-right-from-bracket"></i> KELUAR</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
     <script>
@@ -316,6 +362,18 @@
                 }
             } else { if (memoriPIN.length < 4) memoriPIN += val; }
             document.getElementById('pinDisplay').innerText = memoriPIN.length > 0 ? "*".repeat(memoriPIN.length) : "****";
+        }
+
+        // FUNGSI LOGOUT ADMIN
+        function tampilkanPopupLogout() {
+            document.getElementById('modalLogout').style.display = 'flex';
+        }
+
+        function eksekusiLogoutAdmin() {
+            memoriPIN = "";
+            document.getElementById('pinDisplay').innerText = "****";
+            document.getElementById('modalLogout').style.display = 'none';
+            document.getElementById('loginOverlay').style.display = 'flex';
         }
 
         function formatTglDB(date) { const d = new Date(date); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
@@ -401,7 +459,7 @@
                         <span style="font-size:10px; font-weight:800;">SISA WAJIB SETOR:</span>
                         <b style="font-size:14px; color:${warna};">Rp ${(sisaSetor < 0 ? 0 : sisaSetor).toLocaleString('id-ID')}</b>
                     </div>
-                    ${sisaSetor > 0 ? `<button onclick="terimaSetoranKurir('${nama}', ${sisaSetor})" class="btn-main" style="margin-top:10px; padding:10px; background:var(--safe); color:white;"><i class="fa-solid fa-hand-holding-dollar"></i> TERIMA UANG</button>` : ''}
+                    ${sisaSetor > 0 ? `<button onclick="bukaPopupSetoran('${nama}', ${sisaSetor})" class="btn-main" style="margin-top:10px; padding:10px; background:var(--safe); color:white;"><i class="fa-solid fa-hand-holding-dollar"></i> TERIMA UANG</button>` : ''}
                 </div>`;
             }
             if (!adaData) htmlKeuangan = `<div style="text-align:center; padding:20px; opacity:0.5; font-size:11px; border:1px dashed var(--glass-border); border-radius:12px;"><i class="fa-solid fa-bed" style="font-size:20px; display:block; margin-bottom:5px;"></i>Belum ada data keuangan hari ini.</div>`;
@@ -409,14 +467,26 @@
             renderList();
         }
 
-        function terimaSetoranKurir(namaKurir, jumlah) {
-            const keyTgl = document.getElementById('datePicker').value.split('-').reverse().join('-');
-            if(confirm(`Terima uang pas sejumlah Rp ${jumlah.toLocaleString('id-ID')} dari kurir ${namaKurir.toUpperCase()}?`)) {
-                db.ref(`setoran_kurir/${keyTgl}/${namaKurir}`).transaction(cv => (Number(cv) || 0) + jumlah);
-            }
+        // FUNGSI CUSTOM POPUP SETORAN
+        let tempNamaSetoran = "";
+        let tempJumlahSetoran = 0;
+        function bukaPopupSetoran(namaKurir, jumlah) {
+            tempNamaSetoran = namaKurir;
+            tempJumlahSetoran = jumlah;
+            document.getElementById('teksTerimaSetoran').innerHTML = `Terima uang pas sejumlah <b>Rp ${jumlah.toLocaleString('id-ID')}</b> dari kurir <b>${namaKurir.toUpperCase()}</b>?`;
+            document.getElementById('modalTerimaSetoran').style.display = 'flex';
+            
+            // Set aksi tombol confirm
+            document.getElementById('btnConfirmSetoran').onclick = function() {
+                const keyTgl = document.getElementById('datePicker').value.split('-').reverse().join('-');
+                db.ref(`setoran_kurir/${keyTgl}/${tempNamaSetoran}`).transaction(cv => (Number(cv) || 0) + tempJumlahSetoran).then(() => {
+                    document.getElementById('modalTerimaSetoran').style.display = 'none';
+                    if(navigator.vibrate) navigator.vibrate(50);
+                });
+            };
         }
 
-        // RENDER LIST PESANAN DENGAN KUNCI SUKSES DAN TOMBOL KIRIM ULANG
+        // RENDER LIST PESANAN
         function renderList() {
             const keyword = document.getElementById('searchBar').value.toLowerCase();
             const tglAktif = document.getElementById('datePicker').value.split('-').reverse().join('/');
@@ -481,8 +551,8 @@
                             ${o.status === 'Terkirim' ? 
                                 `<div class="action-btn" style="background:rgba(255,255,255,0.05); color:gray; cursor:not-allowed; border:1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-shield-halved"></i> TERKUNCI</div>` : 
                                 (o.status === 'Gagal' ? 
-                                    `<button class="action-btn" style="background:var(--blue); color:white;" onclick="kirimUlang('${o.id}')"><i class="fa-solid fa-rotate-left"></i> KIRIM ULANG</button>` : 
-                                    `<button class="action-btn btn-delete" onclick="hapus('${o.id}')"><i class="fa-solid fa-trash"></i> HAPUS</button>`
+                                    `<button class="action-btn" style="background:var(--blue); color:white;" onclick="bukaPopupKirimUlang('${o.id}')"><i class="fa-solid fa-rotate-left"></i> KIRIM ULANG</button>` : 
+                                    `<button class="action-btn btn-delete" onclick="bukaPopupHapus('${o.id}')"><i class="fa-solid fa-trash"></i> HAPUS</button>`
                                 )
                             }
                         </div>
@@ -533,23 +603,37 @@
 
         // AKSI TOMBOL ADMIN
         function reprint(id) { lastOrder = allOrders.find(o => o.id === id); if(lastOrder) executePrint(); }
-        function hapus(id) { if(confirm("Hapus pesanan permanen?")) { db.ref('pesanan/'+id).remove(); db.ref('foto_bukti/'+id).remove(); } }
         function viewFoto(id, src) { document.getElementById('modalFoto').style.display='flex'; document.getElementById('imgBukti').src=src||""; if(!src) db.ref('foto_bukti/'+id).once('value', s=>document.getElementById('imgBukti').src=s.val()); }
         
-        // FUNGSI KIRIM ULANG (KEMBALI KE GUDANG)
-        function kirimUlang(id) {
-            if (confirm("Kembalikan pesanan ini ke status GUDANG untuk dikirim ulang?")) {
-                db.ref('pesanan/' + id).update({
+        // CUSTOM POPUP HAPUS
+        let tempHapusId = "";
+        function bukaPopupHapus(id) {
+            tempHapusId = id;
+            document.getElementById('modalHapusPesanan').style.display = 'flex';
+            document.getElementById('btnConfirmHapus').onclick = function() {
+                db.ref('pesanan/'+tempHapusId).remove(); 
+                db.ref('foto_bukti/'+tempHapusId).remove();
+                document.getElementById('modalHapusPesanan').style.display = 'none';
+                if(navigator.vibrate) navigator.vibrate(50);
+            };
+        }
+        
+        // CUSTOM POPUP KIRIM ULANG
+        let tempKirimUlangId = "";
+        function bukaPopupKirimUlang(id) {
+            tempKirimUlangId = id;
+            document.getElementById('modalKirimUlang').style.display = 'flex';
+            document.getElementById('btnConfirmKirimUlang').onclick = function() {
+                db.ref('pesanan/' + tempKirimUlangId).update({
                     status: 'Gudang',
                     kurir: "", 
                     alasanTunda: null, 
                     waktuUpdate: new Date().toLocaleTimeString()
                 }).then(() => {
+                    document.getElementById('modalKirimUlang').style.display = 'none';
                     if(navigator.vibrate) navigator.vibrate(50);
-                }).catch((error) => {
-                    alert("❌ Gagal update: " + error.message);
                 });
-            }
+            };
         }
 
         // EDIT PESANAN
@@ -652,4 +736,4 @@
         window.addEventListener('online', updateStatusInternet); window.addEventListener('offline', updateStatusInternet); updateStatusInternet();
     </script>
 </body>
-</html>
+</html> mantap bosku ini baru namanya aplikasi buatan dari jepang keren bener saya pamit makasih banyak waktunya see uuu 👋🏻
