@@ -792,35 +792,41 @@
 
     document.addEventListener('touchend', e => {
         if (!activeSwipeEl) return;
-        activeSwipeEl.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
-        const id = activeSwipeEl.getAttribute('data-swipe-id');
+        
+        // 1. KITA KUNCI KARTUNYA DI MEMORI BIAR MESIN NGGAK PIKUN
+        const kartuSkg = activeSwipeEl; 
+        const id = kartuSkg.getAttribute('data-swipe-id');
+        
+        kartuSkg.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
         
         if (swipeCurrentX > 90) {
             // TARIK KANAN MENTOK -> BUKA KAMERA "SELESAI"
-            activeSwipeEl.style.transform = `translateX(120vw)`; // Lempar kartunya keluar layar
+            kartuSkg.style.transform = `translateX(120vw)`; // Lempar kartunya keluar layar
             if(navigator.vibrate) navigator.vibrate([50, 50, 50]); // HP Getar Tiga Kali
             setTimeout(() => { 
                 document.getElementById(`f-${id}`).click(); 
-                activeSwipeEl.style.transform = `translateX(0)`; // Balikin diam-diam
+                kartuSkg.style.transform = `translateX(0)`; // Balikin diam-diam ke tengah!
             }, 250);
         } else if (swipeCurrentX < -90) {
             // TARIK KIRI MENTOK -> BUKA LACI "GAGAL/TUNDA"
-            activeSwipeEl.style.transform = `translateX(-120vw)`;
+            kartuSkg.style.transform = `translateX(-120vw)`;
             if(navigator.vibrate) navigator.vibrate(100);
             setTimeout(() => { 
                 updateStat(id, 'Tunda'); 
-                activeSwipeEl.style.transform = `translateX(0)`; 
+                kartuSkg.style.transform = `translateX(0)`; // Balikin diam-diam ke tengah!
             }, 250);
         } else {
             // Tarikan nanggung? Balikin balik mantul kayak karet!
-            activeSwipeEl.style.transform = `translateX(0)`;
+            kartuSkg.style.transform = `translateX(0)`;
         }
 
         // Reset semua icon latar
-        const bg = activeSwipeEl.previousElementSibling;
+        const bg = kartuSkg.previousElementSibling;
         if(bg) { bg.children[0].style.transform = 'scale(1)'; bg.children[1].style.transform = 'scale(1)'; }
 
-        activeSwipeEl = null; swipeCurrentX = 0;
+        // Sekarang aman buat nghapus memori drag-nya
+        activeSwipeEl = null; 
+        swipeCurrentX = 0;
         setTimeout(() => { window.isSwipingMode = false; }, 100);
     });
     </script>
