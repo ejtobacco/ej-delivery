@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EJ ADMIN V5.4 - FINAL BOSS</title>
+    <title>EJ ADMIN V5.5 - FINAL SOP</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="manifest" href="manifest.json">
@@ -27,25 +27,29 @@
         body { background: var(--bg); color: var(--text-main); width: 100%; margin: 0; padding: 15px; overflow-x: hidden; -webkit-user-select: none; user-select: none; }
         ::-webkit-scrollbar { display: none; }
         
-        /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 0; z-index: 999; background: rgba(5,5,5,0.85); backdrop-filter: blur(15px); padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .main-logo-text { color: var(--gold); font-weight: 800; font-size: 22px; letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(212,175,55,0.3); }
-        
-        /* INPUT */
+        /* INPUT MEWAH */
         .input-group { position: relative; margin-bottom: 12px; }
         .input-group i { position: absolute; left: 15px; top: 15px; color: var(--gold); font-size: 14px; opacity: 0.8; }
-        input, textarea, select { -webkit-user-select: text; user-select: text; width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 15px 14px 45px; color: white; outline: none; font-size: 13px; transition: 0.3s; }
+        input, textarea, select { 
+            -webkit-user-select: text; user-select: text; width: 100%; 
+            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 12px; padding: 14px 15px 14px 45px; 
+            color: white; outline: none; font-size: 13px; transition: 0.3s; 
+        }
+        textarea { padding-top: 15px; }
         input:focus, textarea:focus, select:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
         
-        /* MODERN STATUS PILLS */
-        .status-pill { padding: 10px; border-radius: 12px; font-size: 10px; font-weight: 800; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.02); text-align: center; flex: 1; border: 1px solid rgba(255,255,255,0.1); }
-        .status-pill.pill-active { background: white !important; color: black !important; transform: scale(1.05); box-shadow: 0 5px 15px rgba(255,255,255,0.2); border-color: white !important; }
-
-        /* CARDS */
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 0; z-index: 999; background: rgba(5,5,5,0.85); backdrop-filter: blur(15px); padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .logo-text-container { display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
+        .main-logo-text { color: var(--gold); font-weight: 800; font-size: 22px; letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(212,175,55,0.3); }
+        
+        /* KARTU ITEM */
         .glass-card { background: var(--gradient-dark); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; margin-bottom: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
         .glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gradient-gold); opacity: 0.5; }
         
         .btn-main { background: var(--gradient-gold); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; font-size: 14px; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-main:active { transform: scale(0.98); }
         
         .action-btn { border: none; padding: 10px; border-radius: 10px; font-size: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; color: white; transition: 0.2s; }
         .btn-wa { background: var(--wa); }
@@ -53,59 +57,77 @@
         .btn-edit { background: rgba(59,130,246,0.2); color: var(--blue); border: 1px solid var(--blue); }
         .btn-delete { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid var(--danger); }
         
-        /* DASHBOARD */
+        /* DASHBOARD ADMIN */
         .dashboard-header { font-size: 12px; color: gray; letter-spacing: 1px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
         .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .report-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .report-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 15px; transition: 0.3s; cursor: pointer; }
         .report-box.active { background: rgba(212, 175, 55, 0.1); border-color: var(--gold); }
         .report-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 18px; }
         .r-info { display: flex; flex-direction: column; }
         .r-title { font-size: 10px; color: gray; }
         .r-value { font-size: 18px; font-weight: 800; color: white; }
         
-        /* BADGES & TAGS */
+        /* BADGES WARNA-WARNI */
         .order-badge { padding: 5px 12px; border-radius: 20px; font-size: 9px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; }
         .badge-gudang { background: rgba(59,130,246,0.2); color: #60A5FA; border: 1px solid #3B82F6; } 
         .badge-proses { background: rgba(212,175,55,0.2); color: var(--gold); border: 1px solid var(--gold); } 
         .badge-sukses { background: rgba(34,197,94,0.2); color: #4ADE80; border: 1px solid #22C55E; } 
         .badge-gagal { background: rgba(239,68,68,0.2); color: #F87171; border: 1px solid #EF4444; } 
         .badge-tunda { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); } 
+        
         .kurir-tag { display: inline-flex; align-items: center; gap: 5px; background: rgba(37, 130, 246, 0.1); color: #60A5FA; border: 1px solid #3B82F6; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; }
         
         .date-control { display: flex; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
-        .date-control input { border: none; background: transparent; padding-left: 15px; }
+        .date-control input { border: none; background: transparent; padding-left: 15px; border-radius: 0; margin: 0; }
         .date-control button { background: var(--gold); border: none; color: black; font-weight: 800; padding: 0 20px; font-size: 12px; cursor: pointer; }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); padding: 20px; }
-        .fab { position: fixed; bottom: 30px; right: 25px; z-index: 9998; width: 65px; height: 65px; border-radius: 50%; background: var(--gradient-gold); border: none; color: black; font-size: 28px; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; }
         @keyframes pulseUrgent { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
         .card-urgent { border: 1px solid var(--danger) !important; animation: pulseUrgent 2s infinite; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); padding: 20px; }
+        
+        #loginOverlay { position: fixed; inset: 0; background: #000; z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .pin-display { font-size: 40px; letter-spacing: 15px; margin: 30px 0; color: var(--gold); font-weight: 800; text-shadow: 0 0 15px rgba(212, 175, 55, 0.5); text-align: center; }
+        .num-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(212, 175, 55, 0.2); color: #fff; width: 75px; height: 75px; border-radius: 50%; font-size: 26px; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
+        .num-btn:active { background: var(--gold); color: #000; transform: scale(0.9); }
+
+        .fab { position: fixed; bottom: 30px; right: 25px; z-index: 9998; width: 65px; height: 65px; border-radius: 50%; background: var(--gradient-gold); border: none; color: black; font-size: 28px; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .fab:active { transform: scale(0.85); }
+        
+        /* PILIHAN STATUS PILL */
+        .status-pill { padding: 10px; border-radius: 12px; font-size: 10px; font-weight: 800; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.02); text-align: center; flex: 1; border: 1px solid rgba(255,255,255,0.1); }
+        .status-pill.pill-active { background: white !important; color: black !important; transform: scale(1.05); box-shadow: 0 5px 15px rgba(255,255,255,0.2); border-color: white !important; }
     </style>
 </head>
 <body>
 
     <div id="loginOverlay">
-        <div class="pin-container"> <div style="margin-bottom: 20px;">
-                <i class="fa-solid fa-crown" style="font-size: 40px; color: var(--gold); margin-bottom: 10px;"></i>
-                <h2 style="color:#fff; font-size: 20px;">EJ ACCESS</h2>
-                <p style="color:var(--gold); font-size:9px; letter-spacing:2px; opacity:0.8;">ADMIN VERIFICATION</p>
+        <div style="text-align: center; width: 320px;">
+            <div style="margin-bottom: 30px;">
+                <i class="fa-solid fa-crown" style="font-size: 40px; color: var(--gold); margin-bottom: 15px;"></i>
+                <h2 style="color:#fff;">EJ ACCESS</h2>
+                <p style="color:var(--gold); font-size:10px; letter-spacing:2px;">ADMIN VERIFICATION</p>
             </div>
-            
             <div class="pin-display" id="pinDisplay">****</div>
-            <div id="pinError" style="color: var(--danger); font-size: 11px; font-weight: 800; height: 20px; margin-bottom: 15px; opacity: 0;">⚠️ PIN SALAH!</div>
-
+            <div id="pinError" style="color: var(--danger); font-size: 11px; font-weight: 800; height: 20px; margin-bottom: 10px; opacity: 0;">⚠️ PIN SALAH!</div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; justify-items: center;">
-                </div>
+                <button class="num-btn" onclick="pressPin('1')">1</button><button class="num-btn" onclick="pressPin('2')">2</button><button class="num-btn" onclick="pressPin('3')">3</button>
+                <button class="num-btn" onclick="pressPin('4')">4</button><button class="num-btn" onclick="pressPin('5')">5</button><button class="num-btn" onclick="pressPin('6')">6</button>
+                <button class="num-btn" onclick="pressPin('7')">7</button><button class="num-btn" onclick="pressPin('8')">8</button><button class="num-btn" onclick="pressPin('9')">9</button>
+                <button class="num-btn" onclick="pressPin('C')" style="color:var(--danger)"><i class="fa-solid fa-delete-left"></i></button>
+                <button class="num-btn" onclick="pressPin('0')">0</button>
+                <button class="num-btn" onclick="pressPin('OK')" style="color:var(--safe)"><i class="fa-solid fa-check"></i></button>
+            </div>
         </div>
     </div>
 
     <div class="header">
-        <div class="logo-text-container" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="cursor: pointer;">
-    <div class="main-logo-text"><i class="fa-solid fa-crown" style="font-size:16px; margin-right:5px;"></i> EJ TOBACCO</div>
+        <div class="logo-text-container" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <div class="main-logo-text"><i class="fa-solid fa-crown" style="font-size:16px; margin-right:5px;"></i> EJ TOBACCO</div>
             <div style="font-size:9px; letter-spacing:2px; color:gray; margin-left:25px; display:flex; align-items:center; gap:5px;">
                 ADMIN PRO
-                <button onclick="forceRefresh()" style="background:transparent; border:none; color:var(--blue); cursor:pointer; padding:0;"><i id="iconRefresh" class="fa-solid fa-rotate-right"></i></button>
-                <button onclick="tampilkanPopupLogout()" style="background:transparent; border:none; color:var(--danger); cursor:pointer; padding:0;"><i class="fa-solid fa-right-from-bracket"></i></button>
+                <button onclick="forceRefresh()" style="background:transparent; border:none; color:var(--blue); cursor:pointer; padding:0;"><i id="iconRefresh" class="fa-solid fa-rotate-right" style="font-size:12px;"></i></button>
+                <button onclick="tampilkanPopupLogout()" style="background:transparent; border:none; color:var(--danger); cursor:pointer; padding:0;"><i class="fa-solid fa-right-from-bracket" style="font-size:12px;"></i></button>
             </div>
         </div>
         <div style="text-align: right;">
@@ -154,6 +176,7 @@
         </div>
     </div>
 
+    <div class="dashboard-header"><i class="fa-solid fa-wallet"></i> KAS & SETORAN KURIR</div>
     <div id="keuanganKurirContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom:25px;"></div>
 
     <div class="input-group">
@@ -212,13 +235,13 @@
                 <div class="input-group"><i class="fa-solid fa-money-bill"></i><input type="number" id="editTotal"></div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                <button class="btn-main" style="background: rgba(255,255,255,0.1); color: white;" onclick="document.getElementById('modalEdit').style.display='none'">BATAL</button>
+                <button class="btn-main" style="background: rgba(255,255,255,0.1); color: white; box-shadow:none;" onclick="document.getElementById('modalEdit').style.display='none'">BATAL</button>
                 <button class="btn-main" style="background: var(--blue); color: white;" onclick="simpanEdit()"><i class="fa-solid fa-save"></i> UPDATE</button>
             </div>
         </div>
     </div>
 
-    <div id="modalTerimaSetoran" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--safe); text-align:center;"><i class="fa-solid fa-hand-holding-dollar" style="font-size:40px; color:var(--safe); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px;">TERIMA SETORAN</h2><p id="teksTerimaSetoran" style="font-size:12px; color:gray; margin-bottom:20px;"></p><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalTerimaSetoran').style.display='none'">BATAL</button><button id="btnConfirmSetoran" class="btn-main" style="background:var(--safe); color:white;">TERIMA</button></div></div></div>
+    <div id="modalTerimaSetoran" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--safe); text-align:center;"><i class="fa-solid fa-hand-holding-dollar" style="font-size:40px; color:var(--safe); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px; margin-bottom:10px;">TERIMA SETORAN</h2><p id="teksTerimaSetoran" style="font-size:12px; color:gray; margin-bottom:20px;"></p><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalTerimaSetoran').style.display='none'">BATAL</button><button id="btnConfirmSetoran" class="btn-main" style="background:var(--safe); color:white;">TERIMA</button></div></div></div>
     <div id="modalHapusPesanan" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--danger); text-align:center;"><i class="fa-solid fa-trash-can" style="font-size:40px; color:var(--danger); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px;">HAPUS DATA?</h2><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalHapusPesanan').style.display='none'">BATAL</button><button id="btnConfirmHapus" class="btn-main" style="background:var(--danger); color:white;">HAPUS</button></div></div></div>
     <div id="modalKirimUlang" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--blue); text-align:center;"><i class="fa-solid fa-box-open" style="font-size:40px; color:var(--blue); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px;">KE GUDANGKAN?</h2><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalKirimUlang').style.display='none'">BATAL</button><button id="btnConfirmKirimUlang" class="btn-main" style="background:var(--blue); color:white;">PROSES</button></div></div></div>
     <div id="modalLogout" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--danger); text-align:center;"><i class="fa-solid fa-triangle-exclamation" style="font-size:40px; color:var(--danger); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px;">KELUAR ADMIN?</h2><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalLogout').style.display='none'">BATAL</button><button class="btn-main" style="background:var(--danger); color:white;" onclick="eksekusiLogoutAdmin()">KELUAR</button></div></div></div>
@@ -262,7 +285,8 @@
         setInterval(() => {
             const now = new Date();
             document.getElementById('runningClock').innerHTML = `<i class="fa-regular fa-clock"></i> ${now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'})}`;
-            if(document.getElementById('currentDay')) document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
+            const opsiTgl = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
+            if(document.getElementById('currentDay')) document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', opsiTgl).toUpperCase();
         }, 1000);
 
         db.ref('pesanan').limitToLast(150).on('value', snap => { allOrders = snap.val() ? Object.keys(snap.val()).map(k => ({id:k, ...snap.val()[k]})).reverse() : []; updateAll(); });
@@ -292,10 +316,10 @@
                 const warna = sisaSetor > 0 ? 'var(--warning)' : 'var(--safe)';
                 htmlKeuangan += `<div class="glass-card" style="padding:15px; margin-bottom:0; border-color:${warna};">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b style="color:var(--gold); font-size:14px;"><i class="fa-solid fa-motorcycle"></i> ${nama.toUpperCase()}</b> <span style="font-size:9px; color:${warna}">${sisaSetor>0?'BELUM SETOR':'LUNAS'}</span></div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; color:#ccc;"><span>Dompet:</span> <b>Rp ${k.cod.toLocaleString('id-ID')}</b></div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; color:#ccc;"><span>Bensin:</span> <b style="color:var(--danger)">-Rp ${k.keluar.toLocaleString('id-ID')}</b></div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; border:1px solid ${warna};"><span style="font-size:10px;">WAJIB SETOR:</span><b style="font-size:14px; color:${warna};">Rp ${Math.max(0, sisaSetor).toLocaleString('id-ID')}</b></div>
-                    ${sisaSetor > 0 ? `<button onclick="bukaPopupSetoran('${nama}', ${sisaSetor})" class="btn-main" style="margin-top:10px; padding:10px; background:var(--safe); color:white;">TERIMA UANG</button>` : ''}
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; color:#ccc;"><span>Dompet Kurir:</span> <b>Rp ${k.cod.toLocaleString('id-ID')}</b></div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; color:#ccc;"><span>Potong Bensin:</span> <b style="color:var(--danger)">-Rp ${k.keluar.toLocaleString('id-ID')}</b></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; border:1px solid ${warna};"><span style="font-size:10px;">SISA WAJIB SETOR:</span><b style="font-size:14px; color:${warna};">Rp ${Math.max(0, sisaSetor).toLocaleString('id-ID')}</b></div>
+                    ${sisaSetor > 0 ? `<button onclick="bukaPopupSetoran('${nama}', ${sisaSetor})" class="btn-main" style="margin-top:10px; padding:10px; background:var(--safe); color:white;"><i class="fa-solid fa-check"></i> TERIMA UANG</button>` : ''}
                 </div>`;
             }
             document.getElementById('keuanganKurirContainer').innerHTML = adaData ? htmlKeuangan : `<div style="text-align:center; padding:20px; opacity:0.3; font-size:11px;">Belum ada data keuangan.</div>`;
@@ -319,6 +343,7 @@
                     const waNum = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
                     let bCls = o.status==='Gudang'?'badge-gudang':(o.status==='Terkirim'?'badge-sukses':(o.status==='Gagal'?'badge-gagal':(o.status==='Tunda'?'badge-tunda':'badge-proses')));
                     let iStat = o.status==='Terkirim'?'fa-check-double':'fa-box';
+                    
                     html += `<div class="glass-card ${o.urgent ? 'card-urgent' : ''}" style="padding:0; margin-bottom:10px; overflow:hidden;">
                         <div onclick="toggleDetail('${o.id}')" style="padding:15px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
                             <div style="display:flex; align-items:center; gap:12px;">
@@ -328,20 +353,37 @@
                             <i id="icon-arrow-${o.id}" class="fa-solid fa-chevron-down" style="font-size:12px; color:var(--gold); transition:0.3s;"></i>
                         </div>
                         <div id="detail-${o.id}" style="display:none; padding:0 15px 15px 15px; border-top:1px dashed rgba(255,255,255,0.1); background:rgba(0,0,0,0.2);">
-                            <div class="order-badge ${bCls}" style="margin:12px 0;"><i class="fa-solid ${iStat}"></i> ${o.status.toUpperCase()}</div>
+                            <div class="order-badge ${bCls}" style="margin:12px 0;"><i class="fa-solid fa-tag"></i> ${o.status.toUpperCase()}</div>
                             <div style="font-size:11px; color:gray; margin-bottom:10px;"><i class="fa-regular fa-clock"></i> ${o.tanggal} ${o.waktu}</div>
-                            <div style="font-size:12px; color:white; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin-bottom:12px; line-height:1.4;"><b style="color:var(--danger); font-size:10px; display:block;">ALAMAT:</b>${o.alamat}</div>
-                            ${o.kurir ? `<div class="kurir-tag" style="margin-bottom:12px;"><i class="fa-solid fa-motorcycle"></i> ${o.kurir.toUpperCase()}</div>` : ''}
-                            ${o.catatanKurir ? `<div style="font-size:11px; color:var(--safe); margin-bottom:10px;"><i>Diterima: ${o.catatanKurir}</i></div>` : ''}
-                            ${o.alasanTunda ? `<div style="font-size:11px; color:var(--danger); margin-bottom:10px;"><i>Alasan: ${o.alasanTunda}</i></div>` : ''}
+                            
+                            <div style="font-size:12px; color:white; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin-bottom:12px; line-height:1.4;">
+                                <b style="color:var(--danger); font-size:10px; display:block; margin-bottom:3px;">ALAMAT PENGIRIMAN:</b>
+                                ${o.alamat}
+                            </div>
+
+                            ${o.kurir ? `<div class="kurir-tag" style="margin-bottom:12px;"><i class="fa-solid fa-motorcycle"></i> KURIR: ${o.kurir.toUpperCase()}</div>` : ''}
+                            
+                            ${o.catatanKurir ? `<div style="font-size:11px; color:var(--safe); margin-bottom:10px; padding:8px; background:rgba(34,197,94,0.05); border-radius:8px;"><i><i class="fa-solid fa-comment-dots"></i> ${o.catatanKurir}</i></div>` : ''}
+                            ${o.alasanTunda ? `<div style="font-size:11px; color:var(--danger); margin-bottom:10px; padding:8px; background:rgba(239,68,68,0.05); border-radius:8px;"><i><i class="fa-solid fa-circle-exclamation"></i> ${o.alasanTunda}</i></div>` : ''}
+
                             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
                                 <a href="https://wa.me/${waNum}" class="action-btn btn-wa" style="text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> WA</a>
                                 <button class="action-btn btn-print" onclick="reprint('${o.id}')"><i class="fa-solid fa-print"></i> PRINT</button>
-                                ${o.status === 'Terkirim' ? `<div class="action-btn" style="background:rgba(255,255,255,0.05); color:gray;"><i class="fa-solid fa-lock"></i> LOCK</div>` : `<button class="action-btn btn-edit" onclick="bukaEdit('${o.id}')"><i class="fa-solid fa-pen"></i> EDIT</button>`}
+                                ${o.status === 'Terkirim' ? `<div class="action-btn" style="background:rgba(255,255,255,0.05); color:gray; cursor:not-allowed; border:1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-lock"></i> EDIT</div>` : `<button class="action-btn btn-edit" onclick="bukaEdit('${o.id}')"><i class="fa-solid fa-pen"></i> EDIT</button>`}
                             </div>
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:6px;">
-                                ${(o.adaFoto || o.buktiFoto) ? `<button class="action-btn" style="background:var(--safe);" onclick="viewFoto('${o.id}', '${o.buktiFoto || ''}')"><i class="fa-solid fa-image"></i> FOTO</button>` : `<div class="action-btn" style="background:transparent; border:1px dashed gray; color:gray;"><i class="fa-solid fa-image-portrait"></i> KOSONG</div>`}
-                                ${o.status === 'Terkirim' ? `<div class="action-btn" style="background:rgba(255,255,255,0.05); color:gray;"><i class="fa-solid fa-shield-halved"></i> AMAN</div>` : (o.status === 'Gagal' ? `<button class="action-btn" style="background:var(--blue);" onclick="bukaPopupKirimUlang('${o.id}')"><i class="fa-solid fa-rotate-left"></i> RE-SCAN</button>` : `<button class="action-btn btn-delete" onclick="bukaPopupHapus('${o.id}')"><i class="fa-solid fa-trash"></i> HAPUS</button>`)}
+                                ${(o.adaFoto || o.buktiFoto) ? 
+                                    `<button class="action-btn" style="background:var(--safe);" onclick="viewFoto('${o.id}', '${o.buktiFoto || ''}')"><i class="fa-solid fa-image"></i> LIHAT FOTO</button>` : 
+                                    `<div class="action-btn" style="background:transparent; border:1px dashed gray; color:gray; cursor:default;"><i class="fa-solid fa-image-portrait"></i> FOTO KOSONG</div>`
+                                }
+                                
+                                ${o.status === 'Terkirim' ? 
+                                    `<div class="action-btn" style="background:rgba(255,255,255,0.05); color:gray; cursor:not-allowed; border:1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-shield-halved"></i> TERKUNCI</div>` : 
+                                    (o.status === 'Gagal' ? 
+                                        `<button class="action-btn" style="background:var(--blue); color:white;" onclick="bukaPopupKirimUlang('${o.id}')"><i class="fa-solid fa-rotate-left"></i> KIRIM ULANG</button>` : 
+                                        `<button class="action-btn btn-delete" onclick="bukaPopupHapus('${o.id}')"><i class="fa-solid fa-trash"></i> HAPUS</button>`
+                                    )
+                                }
                             </div>
                         </div>
                     </div>`;
@@ -443,4 +485,5 @@
         window.addEventListener('online', updateStatusInternet); window.addEventListener('offline', updateStatusInternet); updateStatusInternet();
     </script>
 </body>
-</html>
+</html> mantap bosku ini baru namanya aplikasi buatan dari jepang keren bener saya pamit makasih banyak waktunya see uuu 👋🏻 
+_
