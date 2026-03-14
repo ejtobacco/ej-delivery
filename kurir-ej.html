@@ -139,7 +139,10 @@
             </div>
         </div>
         <div style="text-align: right;">
-            <div id="clock" style="font-size: 14px; font-weight: 800; color: var(--safe);"><i class="fa-regular fa-clock"></i> 00:00</div>
+            <div id="clock" style="font-size: 14px; font-weight: 800; color: var(--safe);"><i class="fa-regular fa-clock"></i> 00:00:00</div>
+            
+            <div id="currentDay" style="font-size: 9px; color: var(--gold); font-weight: 800; margin-top: 3px; letter-spacing: 0.5px;">LOADING...</div>
+
             <div style="display: flex; align-items: center; gap: 5px; justify-content: flex-end; margin-top: 5px; background: rgba(34,197,94,0.1); padding: 3px 8px; border-radius: 20px;">
                 <div id="lampuKoneksi" style="width: 6px; height: 6px; background: var(--safe); border-radius: 50%; box-shadow: 0 0 10px var(--safe);"></div>
                 <div id="teksKoneksi" style="font-size: 8px; font-weight: 800; color: var(--safe);">SISTEM ONLINE</div>
@@ -248,6 +251,11 @@
     setInterval(() => { 
         const now = new Date(); 
         document.getElementById('clock').innerHTML = `<i class="fa-regular fa-clock"></i> ${now.toLocaleTimeString('id-ID')}`; 
+        
+        // UPDATE TANGGAL OTOMATIS
+        const opsiTgl = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
+        if(document.getElementById('currentDay')) document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', opsiTgl).toUpperCase();
+        
         updateStatusInternet();
     }, 1000);
 
@@ -276,7 +284,6 @@
         document.getElementById('pinDisplay').innerText = memoriPIN.length > 0 ? "*".repeat(memoriPIN.length) : "****";
     }
 
-    // FUNGSI LOGOUT MEWAH
     function tampilkanPopupLogout() {
         document.getElementById('modalLogout').style.display = 'flex';
     }
