@@ -357,6 +357,14 @@
             updateUI();
             aktifkanRadar();
         }
+            // Cek Login
+        if (myName) {
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
+            updateUI();
+            aktifkanRadar();
+            if (currentTab === 'Proses') nyalakanMesinKopi(); // <-- TAMBAHKAN BARIS INI
+        }
     };
 
     // Fungsi Saklar Matahari
@@ -780,7 +788,20 @@
     }
     
     function batalUploadSelesai() { document.getElementById('modalPenerima').style.display='none'; tempFileSukses=null; }
-    function setTab(t) { currentTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('t-'+t).classList.add('active'); renderOrders(); }
+    function setTab(t) { 
+        currentTab = t; 
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
+        document.getElementById('t-'+t).classList.add('active'); 
+        
+        // SAKLAR OTOMATIS MESIN ESPRESSO
+        if (t === 'Proses') {
+            nyalakanMesinKopi(); // Melek pas lagi nyetir!
+        } else {
+            matikanMesinKopi();  // Tidur pas lagi santai!
+        }
+        
+        renderOrders(); 
+    }
     function toggleScanner() { const r = document.getElementById('reader'); r.style.display = r.style.display==='block'?'none':'block'; if(r.style.display==='block') startScanner(); }
     function startScanner() { html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode:"environment" }, { fps:10, qrbox:250 }, (txt) => {
         const target = allData.find(o => o.noPesanan.replace(/\W/g, "") === txt.replace(/\W/g, ""));
@@ -822,6 +843,39 @@
             document.getElementById('textAlasan').value = "";
         }); 
     }
+
+        // ================= MESIN ESPRESSO (LAYAR ANTI-TIDUR) =================
+    let wakeLock = null;
+
+    async function nyalakanMesinKopi() {
+        if ('wakeLock' in navigator) {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                console.log('Layar Anti-Tidur AKTIF! 👁️👁️');
+            } catch (err) {
+                console.log('Mesin Kopi gagal nyala:', err.message);
+            }
+        }
+    }
+
+    function matikanMesinKopi() {
+        if (wakeLock !== null) {
+            wakeLock.release().then(() => {
+                wakeLock = null;
+                console.log('Layar bisa tidur normal lagi. 😴');
+            });
+        }
+    }
+
+    // Kalau kurir minimize app (buka WA dll), efek kopi ilang. 
+    // Pas balik lagi ke app kita, kita cekokin kopi lagi OTOMATIS!
+    document.addEventListener('visibilitychange', async () => {
+        if (wakeLock !== null && document.visibilityState === 'visible' && currentTab === 'Proses') {
+            nyalakanMesinKopi();
+        }
+    });
+    // =====================================================================
+        
     
     function aktifkanRadar() { if (navigator.geolocation) { navigator.geolocation.watchPosition(pos => { db.ref('tracking/'+myName).set({ lat: pos.coords.latitude, lng: pos.coords.longitude, waktu: new Date().toLocaleTimeString() }); }, null, { enableHighAccuracy:true }); } }
     
