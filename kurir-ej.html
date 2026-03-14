@@ -32,7 +32,7 @@
         
         /* HEADER PREMIUM */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 0; z-index: 9999; background: rgba(5,5,5,0.85); backdrop-filter: blur(15px); padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .logo-text-container { display: flex; flex-direction: column; gap: 2px; }
+        .logo-text-container { display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
         .main-logo-text { color: var(--gold); font-weight: 800; font-size: 20px; letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(212,175,55,0.3); }
         
         /* KARTU DOMPET */
@@ -65,12 +65,15 @@
         .btn-wa { background: var(--wa); }
         .btn-maps { background: var(--blue); }
         
-        /* OFFLINE MODE (UNGU) */
+        /* OFFLINE MODE (UNGU) & FREEZE KLIK */
         body.is-offline .glass-card { border-color: var(--offline) !important; background: rgba(168, 85, 247, 0.05) !important; }
         body.is-offline .glass-card::before { background: var(--offline) !important; }
         body.is-offline #teksKoneksi { color: var(--offline) !important; }
         body.is-offline #lampuKoneksi { background: var(--offline) !important; box-shadow: 0 0 10px var(--offline) !important; }
-
+        
+        /* MATIKAN KLIK PADA PESANAN & SCANNER SAAT OFFLINE */
+        body.is-offline #orderContainer { pointer-events: none; opacity: 0.5; filter: grayscale(0.8); }
+        body.is-offline #btnScanMain { pointer-events: none; opacity: 0.5; background: gray !important; border-color: gray !important; }
         /* BADGES */
         .order-badge { position: absolute; top: 15px; right: 15px; padding: 5px 12px; border-radius: 20px; font-size: 9px; font-weight: 800; display: flex; align-items: center; gap: 5px; }
         .badge-gudang { background: rgba(59,130,246,0.2); color: #60A5FA; border: 1px solid #3B82F6; }
@@ -130,7 +133,7 @@
     </div>
 
     <div class="header">
-        <div class="logo-text-container">
+        <div class="logo-text-container" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
             <div class="main-logo-text"><i class="fa-solid fa-crown" style="font-size:14px; margin-right:5px;"></i> EJ TOBACCO</div>
             <div style="font-size:9px; letter-spacing:1px; color:gray; margin-left:20px; display: flex; align-items: center; gap: 8px;">
                 APP KURIR | <b id="namaKurirHeader" style="color:white;">...</b>
