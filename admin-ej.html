@@ -85,7 +85,18 @@
         @keyframes pulseUrgent { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
         .card-urgent { border: 1px solid var(--danger) !important; animation: pulseUrgent 2s infinite; }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); padding: 20px; }
+        /* ANIMASI LACI BAWAH (BOTTOM SHEET) 60FPS */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100000; flex-direction: column; justify-content: flex-end; align-items: center; backdrop-filter: blur(5px); }
+        
+        @keyframes slideUpSheet { 
+            0% { transform: translateY(100%); opacity: 0; } 
+            100% { transform: translateY(0); opacity: 1; } 
+        }
+        
+        .bottom-sheet { width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 20px 20px 40px 20px; margin-bottom: 0; animation: slideUpSheet 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; border-bottom: none !important; max-height: 90vh; overflow-y: auto; }
+        
+        /* Pil Indikator khas iPhone/Gojek di atas laci */
+        .sheet-pill { width: 40px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 10px; margin: 0 auto 20px auto; flex-shrink: 0; }
         
         #loginOverlay { position: fixed; inset: 0; background: #000; z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .pin-container { text-align: center; width: 320px; padding: 20px; }
@@ -196,7 +207,8 @@
     <button class="fab" id="fabButton" onclick="bukaModalInput()"><i class="fa-solid fa-plus"></i></button>
 
     <div id="modalInputBaru" class="modal-overlay">
-        <div class="glass-card" style="width: 100%; max-width: 450px; border: 1px solid var(--gold); max-height: 90vh; overflow-y: auto;">
+        <div class="glass-card bottom-sheet" style="border-color: var(--gold);">
+            <div class="sheet-pill"></div>
             <div class="dashboard-header" style="color:var(--gold); border-bottom:1px solid rgba(212,175,55,0.2); padding-bottom:10px; margin-bottom:15px; justify-content: space-between;">
                 <span><i class="fa-solid fa-file-circle-plus"></i> INPUT PESANAN BARU</span>
                 <button onclick="tutupModalInput()" style="background:transparent; border:none; color:white; font-size:18px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
@@ -230,7 +242,8 @@
     </div>
     
     <div id="modalEdit" class="modal-overlay">
-        <div class="glass-card" style="width: 100%; max-width: 400px; border-color: var(--blue); max-height: 90vh; overflow-y: auto;">
+        <div class="glass-card bottom-sheet" style="border-color: var(--blue);">
+            <div class="sheet-pill"></div>
             <div class="dashboard-header" style="color:var(--blue); justify-content:center; font-size:14px; margin-bottom:20px;"><i class="fa-solid fa-pen-ruler"></i> UBAH DATA PESANAN</div>
             
             <div style="margin-bottom: 20px;">
@@ -276,14 +289,37 @@
         </div>
     </div>
 
-    <div id="modalTerimaSetoran" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--safe); text-align:center;"><i class="fa-solid fa-hand-holding-dollar" style="font-size:40px; color:var(--safe); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px; margin-bottom:10px;">TERIMA SETORAN</h2><p id="teksTerimaSetoran" style="font-size:12px; color:gray; margin-bottom:20px;"></p><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalTerimaSetoran').style.display='none'">BATAL</button><button id="btnConfirmSetoran" class="btn-main" style="background:var(--safe); color:white;">TERIMA</button></div></div></div>
+    <div id="modalTerimaSetoran" class="modal-overlay">
+        <div class="glass-card bottom-sheet" style="border-color:var(--safe); text-align:center;">
+            <div class="sheet-pill"></div>
+            <i class="fa-solid fa-hand-holding-dollar" style="font-size:40px; color:var(--safe); margin-bottom:15px;"></i>
+            <h2 style="color:white; font-size: 16px; margin-bottom:10px;">TERIMA SETORAN</h2>
+            <p id="teksTerimaSetoran" style="font-size:12px; color:gray; margin-bottom:20px;"></p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalTerimaSetoran').style.display='none'">BATAL</button><button id="btnConfirmSetoran" class="btn-main" style="background:var(--safe); color:white;">TERIMA</button></div>
+        </div>
+    </div>
     
-    <div id="modalHapusPesanan" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--danger); text-align:center;"><i class="fa-solid fa-trash-can" style="font-size:40px; color:var(--danger); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px;">HAPUS DATA?</h2><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalHapusPesanan').style.display='none'">BATAL</button><button id="btnConfirmHapus" class="btn-main" style="background:var(--danger); color:white;">HAPUS</button></div></div></div>
+    <div id="modalHapusPesanan" class="modal-overlay">
+        <div class="glass-card bottom-sheet" style="border-color:var(--danger); text-align:center;">
+            <div class="sheet-pill"></div>
+            <i class="fa-solid fa-trash-can" style="font-size:40px; color:var(--danger); margin-bottom:15px;"></i>
+            <h2 style="color:white; font-size: 16px;">HAPUS DATA?</h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalHapusPesanan').style.display='none'">BATAL</button><button id="btnConfirmHapus" class="btn-main" style="background:var(--danger); color:white;">HAPUS</button></div>
+        </div>
+    </div>
     
-    <div id="modalKirimUlang" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--blue); text-align:center;"><i class="fa-solid fa-box-open" style="font-size:40px; color:var(--blue); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px;">KE GUDANGKAN?</h2><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalKirimUlang').style.display='none'">BATAL</button><button id="btnConfirmKirimUlang" class="btn-main" style="background:var(--blue); color:white;">PROSES</button></div></div></div>
+    <div id="modalKirimUlang" class="modal-overlay">
+        <div class="glass-card bottom-sheet" style="border-color:var(--blue); text-align:center;">
+            <div class="sheet-pill"></div>
+            <i class="fa-solid fa-box-open" style="font-size:40px; color:var(--blue); margin-bottom:15px;"></i>
+            <h2 style="color:white; font-size: 16px;">KE GUDANGKAN?</h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalKirimUlang').style.display='none'">BATAL</button><button id="btnConfirmKirimUlang" class="btn-main" style="background:var(--blue); color:white;">PROSES</button></div>
+        </div>
+    </div>
 
-    <div id="modalScannerAdmin" class="modal-overlay" style="padding:10px;">
-        <div class="glass-card" style="width:100%; max-width:400px; border-color:var(--blue); padding:15px; display:flex; flex-direction:column; align-items:center;">
+    <div id="modalScannerAdmin" class="modal-overlay">
+        <div class="glass-card bottom-sheet" style="border-color:var(--blue); display:flex; flex-direction:column; align-items:center;">
+            <div class="sheet-pill"></div>
             <div style="width:100%; display:flex; justify-content:space-between; align-items:center; color:var(--blue); font-weight:800; margin-bottom:15px;">
                 <span><i class="fa-solid fa-qrcode"></i> SCAN RESI RETUR</span>
                 <button onclick="tutupScannerAdmin()" style="background:transparent; border:none; color:white; font-size:18px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
@@ -293,13 +329,45 @@
         </div>
     </div>
 
-    <div id="modalLogout" class="modal-overlay"><div class="glass-card" style="width:100%; max-width:320px; border-color:var(--danger); text-align:center;"><i class="fa-solid fa-triangle-exclamation" style="font-size:40px; color:var(--danger); margin-bottom:15px;"></i><h2 style="color:white; font-size: 16px;">KELUAR ADMIN?</h2><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalLogout').style.display='none'">BATAL</button><button class="btn-main" style="background:var(--danger); color:white;" onclick="eksekusiLogoutAdmin()">KELUAR</button></div></div></div>
+    <div id="modalLogout" class="modal-overlay">
+        <div class="glass-card bottom-sheet" style="border-color:var(--danger); text-align:center;">
+            <div class="sheet-pill"></div>
+            <i class="fa-solid fa-triangle-exclamation" style="font-size:40px; color:var(--danger); margin-bottom:15px;"></i>
+            <h2 style="color:white; font-size: 16px;">KELUAR ADMIN?</h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="btn-main" style="background:rgba(255,255,255,0.05); color:white;" onclick="document.getElementById('modalLogout').style.display='none'">BATAL</button><button class="btn-main" style="background:var(--danger); color:white;" onclick="eksekusiLogoutAdmin()">KELUAR</button></div>
+        </div>
+    </div>
     
-    <div id="modalFoto" class="modal-overlay" onclick="this.style.display='none'"><img id="imgBukti" src="" style="max-width:90%; max-height:75vh; border:3px solid var(--gold); border-radius:20px;"><p style="color:white; margin-top:20px; font-weight:800;">TAP UNTUK TUTUP</p></div>
+    <div id="modalFoto" class="modal-overlay" style="justify-content:center; padding:20px;" onclick="this.style.display='none'">
+        <img id="imgBukti" src="" style="max-width:90%; max-height:75vh; border:3px solid var(--gold); border-radius:20px;">
+        <p style="color:white; margin-top:20px; font-weight:800; background:rgba(0,0,0,0.5); padding:10px 20px; border-radius:20px; border:1px solid var(--gold);"><i class="fa-solid fa-xmark"></i> TUTUP FOTO</p>
+    </div>
     
-    <div id="laporanOverlay" class="modal-overlay"><div class="glass-card" style="width: 100%; max-width: 400px; border-color: var(--gold); max-height:90vh; overflow-y:auto;"><div class="dashboard-header" style="color:var(--gold); justify-content:center; font-size:14px; margin-bottom:15px;"><i class="fa-solid fa-chart-line"></i> REKAP OMZET & KINERJA</div><input type="month" id="bulanLaporan" onchange="hitungLaporan()" class="modal-input" style="text-align:center; color:var(--gold); font-weight:800; margin-bottom:15px;"><div id="isiLaporan"></div><button class="btn-main" onclick="document.getElementById('laporanOverlay').style.display='none'" style="margin-top: 20px; background:rgba(255,255,255,0.1); color:white;">TUTUP</button></div></div>
+    <div id="laporanOverlay" class="modal-overlay">
+        <div class="glass-card bottom-sheet" style="border-color: var(--gold);">
+            <div class="sheet-pill"></div>
+            <div class="dashboard-header" style="color:var(--gold); justify-content:center; font-size:14px; margin-bottom:15px;"><i class="fa-solid fa-chart-line"></i> REKAP OMZET & KINERJA</div>
+            <input type="month" id="bulanLaporan" onchange="hitungLaporan()" class="modal-input" style="text-align:center; color:var(--gold); font-weight:800; margin-bottom:15px;">
+            <div id="isiLaporan"></div>
+            <button class="btn-main" onclick="document.getElementById('laporanOverlay').style.display='none'" style="margin-top: 20px; background:rgba(255,255,255,0.1); color:white;">TUTUP</button>
+        </div>
+    </div>
     
-    <div id="radarOverlay" class="modal-overlay" style="padding:10px;"><div style="width:100%; max-width:600px; background:#000; border:1px solid var(--blue); border-radius:20px; overflow:hidden; display:flex; flex-direction:column; height:85vh;"><div style="background:var(--blue); color:white; padding:15px; display:flex; justify-content:space-between; align-items:center; font-weight:800;"><span><i class="fa-solid fa-satellite-dish"></i> GPS RADAR</span><select id="radarFilterSelect" onchange="renderRadarMarkers()" style="padding:5px; background:rgba(0,0,0,0.5); color:white; border:1px solid white; font-size:10px;"><option value="ALL">SEMUA KURIR</option><option value="kurira">KURIR A</option><option value="kurirb">KURIR B</option><option value="kurirc">KURIR C</option></select><button onclick="document.getElementById('radarOverlay').style.display='none'" style="background:rgba(0,0,0,0.5); color:white; border:none; padding:5px 10px; border-radius:8px;"><i class="fa-solid fa-xmark"></i></button></div><div id="mapRadar" style="flex:1; width:100%; z-index:1;"></div></div></div>
+    <div id="radarOverlay" class="modal-overlay" style="justify-content:center; padding:10px;">
+        <div style="width:100%; max-width:600px; background:#000; border:1px solid var(--blue); border-radius:20px; overflow:hidden; display:flex; flex-direction:column; height:85vh;">
+            <div style="background:var(--blue); color:white; padding:15px; display:flex; justify-content:space-between; align-items:center; font-weight:800;">
+                <span><i class="fa-solid fa-satellite-dish"></i> GPS RADAR</span>
+                <select id="radarFilterSelect" onchange="renderRadarMarkers()" style="padding:5px; background:rgba(0,0,0,0.5); color:white; border:1px solid white; font-size:10px;">
+                    <option value="ALL">SEMUA KURIR</option>
+                    <option value="kurira">KURIR A</option>
+                    <option value="kurirb">KURIR B</option>
+                    <option value="kurirc">KURIR C</option>
+                </select>
+                <button onclick="document.getElementById('radarOverlay').style.display='none'" style="background:rgba(0,0,0,0.5); color:white; border:none; padding:5px 10px; border-radius:8px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="mapRadar" style="flex:1; width:100%; z-index:1;"></div>
+        </div>
+    </div>
     
     <div id="waPrompt" style="position:fixed; top:20px; left:20px; right:20px; background:var(--wa); color:white; padding:20px; border-radius:20px; z-index:11000; display:none; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
         <b style="display:block; margin-bottom:10px;">✅ Pesanan Tersimpan!</b>
