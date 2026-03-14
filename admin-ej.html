@@ -883,12 +883,20 @@
             }
         }
 
-        // Ingatan Auto-Nyala Pas Web Dibuka
-        if (localStorage.getItem('ghostMode') === 'on') {
+        // ================= INGATAN GHOST MODE (DEFAULT OTOMATIS BLUR) =================
+        // Kalau di memori statusnya BUKAN 'off' (artinya baru pertama buka, atau emang diset 'on'), NYALAKAN BLUR!
+        if (localStorage.getItem('ghostMode') !== 'off') {
             document.body.classList.add('ghost-mode');
+            localStorage.setItem('ghostMode', 'on'); // Kunci paksa di memori biar aman
+            
+            // Tunggu sampai icon matanya beres dimuat (dirender) sama HTML
             window.addEventListener('DOMContentLoaded', () => {
                 const icon = document.getElementById('iconMata');
-                if(icon) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); icon.style.color = 'gray'; }
+                if(icon) { 
+                    icon.classList.remove('fa-eye'); 
+                    icon.classList.add('fa-eye-slash'); // Ganti jadi mata tercoret
+                    icon.style.color = 'gray'; 
+                }
             });
         }
     </script>
