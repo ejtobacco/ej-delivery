@@ -457,6 +457,18 @@
         }
     }
 
+        function toggleDetail(id) { 
+        const d = document.getElementById('detail-' + id); 
+        const a = document.getElementById('icon-arrow-' + id); 
+        if (d.style.display === "none") { 
+            d.style.display = "block"; 
+            if(a) a.style.transform = "rotate(180deg)"; 
+        } else { 
+            d.style.display = "none"; 
+            if(a) a.style.transform = "rotate(0deg)"; 
+        } 
+    }
+
     function ambilPaket(id) { db.ref('pesanan/'+id).update({ status:'Proses', kurir:myName, waktuAmbil:new Date().toLocaleTimeString() }).then(() => { document.getElementById('searchOrder').value=""; setTab('Proses'); }); }
         
     let tempMetodeSukses = "", tempTotalSukses = 0;
