@@ -123,14 +123,14 @@
 
        /* ================= FITUR MARKAS NASA (TV COMMAND CENTER) ================= */
         body.tv-mode {
-            width: 350px !important;
+            width: 350px !important; /* Pas buat ukuran HP saat miring */
             height: 100vh !important;
             overflow-y: auto !important; 
             margin: 0 !important;
             box-shadow: 15px 0 30px rgba(0,0,0,0.8); 
             z-index: 10; position: relative;
         }
-        @media (min-width: 1024px) { body.tv-mode { width: 450px !important; } }
+        @media (min-width: 1024px) { body.tv-mode { width: 450px !important; } } /* Lebar kalau di Laptop */
         body.tv-mode::-webkit-scrollbar { display: none; }
         body.tv-mode .fab { display: none !important; }
 
@@ -138,9 +138,10 @@
             display: none; position: fixed; top: 10px; right: 10px; bottom: 10px; left: 360px; 
             background: #000; border-radius: 20px; border: 2px solid var(--blue);
             z-index: 5; overflow: hidden; box-shadow: inset 0 0 50px rgba(59, 130, 246, 0.2);
+            flex-direction: column;
         }
         @media (min-width: 1024px) { #tvRadarContainer { left: 470px; top: 15px; right: 15px; bottom: 15px; border-radius: 30px; } }
-        body.tv-mode #tvRadarContainer { display: flex; flex-direction: column; }
+        body.tv-mode #tvRadarContainer { display: flex; }
     </style>
 </head>
 <body>
