@@ -383,7 +383,7 @@ firebase.auth().signInWithEmailAndPassword("tokoej2020@gmail.com", "ejtbk2020")
     
     // Pindahkan 3 baris penarik data ke DALAM sini
     db.ref('pesanan').limitToLast(200).on('value', snap => { allData = snap.val() ? Object.keys(snap.val()).map(k => ({id:k, ...snap.val()[k]})).reverse() : []; if(myName) updateUI(); });
-    db.ref('pengeluaran').on('value', snap => { allPengeluaranData = snap.val() || {}; if(myName) updateUI(); });
+    db.ref('pengeluaran').limitToLast(150).on('value', snap => { allPengeluaranData = snap.val() || {}; if(myName) updateUI(); });
     db.ref('setoran_kurir').on('value', snap => { allSetoranData = snap.val() || {}; if(myName) updateUI(); });
 })
 .catch((error) => {
