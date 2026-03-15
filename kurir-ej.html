@@ -418,8 +418,13 @@
         let filtered = allData.filter(o => {
             const match = (o.namaPembeli || "").toLowerCase().includes(search) || (o.noPesanan || "").toLowerCase().includes(search);
             const ok = String(o.kurir || "").toLowerCase();
+            
+            // PERBAIKAN GUDANG: Lihat semua yang statusnya Gudang!
             if (currentTab === 'Gudang') return match && o.status === 'Gudang';
+            
+            // JIKA BUKAN TAB GUDANG, BARU COCOKKAN NAMA KURIR
             if (ok !== me) return false;
+            
             if (currentTab === 'Proses') return match && (o.status !== 'Terkirim' && o.status !== 'Gagal' && o.status !== 'Gudang');
             return match && (o.status === currentTab && o.tanggal === today);
         });
