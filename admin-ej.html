@@ -684,7 +684,11 @@
             if(!lastOrder) return;
             const cleanNo = (lastOrder.noPesanan || "").replace(/[^a-zA-Z0-9]/g, "");
             const teks80mm = `[C]<font size="big"><b>EJ TOBACCO DELIVERY</b></font>\n[C]"belanja semakin nyaman menggunakan aplikasi toko ej"\n[C]================================================\n[C]<font size="big"><b>NO. RESI : ${lastOrder.noPesanan}</b></font>\n[C]================================================\n[L]<b>PENERIMA:</b>\n[L]${lastOrder.namaPembeli}\n[L]No. HP : ${lastOrder.nohp}\n\n[L]<b>ALAMAT PENGIRIMAN:</b>\n[L]${lastOrder.alamat}\n[C]================================================\n[L]METODE PEMBAYARAN: ${lastOrder.metode}\n[L]TOTAL TAGIHAN    : Rp ${Number(lastOrder.total).toLocaleString('id-ID')}\n[C]================================================\n[C][b]code128,3,80,${cleanNo},yes\n\n[C]------------------------------------------------\n[C]Tgl: ${lastOrder.tanggal} ${lastOrder.waktu}\n[C]HARAP VIDIO WAKTU UNBOXING PAKET\n\n\n\n\n`;
-            window.location.href = "rawbt:" + encodeURI(teks80mm);
+            
+            // --- JALUR SILUMAN RAWBT (GAK BIKIN WEB RELOAD) ---
+            const link = document.createElement('a');
+            link.href = "rawbt:" + encodeURI(teks80mm);
+            link.click();
         }
 
         function reprint(id) { lastOrder = allOrders.find(o => o.id === id); if(lastOrder) executePrint(); }
