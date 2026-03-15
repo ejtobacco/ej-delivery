@@ -689,6 +689,7 @@
             const link = document.createElement('a');
             link.href = "rawbt:" + encodeURI(teks80mm);
             link.click();
+            jarvisBicara("Perintah cetak struk telah dikirim ke printer.");
         }
 
         function reprint(id) { lastOrder = allOrders.find(o => o.id === id); if(lastOrder) executePrint(); }
