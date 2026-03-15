@@ -490,8 +490,13 @@
         let filtered = allData.filter(o => {
             const match = (o.namaPembeli || "").toLowerCase().includes(search) || (o.noPesanan || "").toLowerCase().includes(search);
             const ok = String(o.kurir || "").toLowerCase();
+            
+            // PERBAIKAN GUDANG: Lihat semua yang statusnya Gudang!
             if (currentTab === 'Gudang') return match && o.status === 'Gudang';
+            
+            // JIKA BUKAN TAB GUDANG, BARU COCOKKAN NAMA KURIR
             if (ok !== me) return false;
+            
             if (currentTab === 'Proses') return match && (o.status !== 'Terkirim' && o.status !== 'Gagal' && o.status !== 'Gudang');
             return match && (o.status === currentTab && o.tanggal === today);
         });
@@ -677,19 +682,52 @@
         }
     }
 
+    // ================= OTAK BLANK SPOT (OFFLINE SYNC KURIR) =================
+    function prosesDataOffline() {
+        let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
+        if (q.length === 0) return;
+
+        // Bikin notifikasi tanpa alert mengganggu
+        let notifTeks = document.getElementById('teksKoneksi');
+        if (notifTeks) {
+            notifTeks.innerText = `SINKRONISASI ${q.length} DATA...`;
+            notifTeks.style.color = "var(--gold)";
+            if(navigator.vibrate) navigator.vibrate([50, 50]);
+        }
+
+        q.forEach(item => {
+            if (item.type === 'edit') db.ref('pesanan/'+item.id).update(item.data);
+            if (item.type === 'foto') db.ref('foto_bukti/'+item.id).set(item.data);
+        });
+
+        localStorage.removeItem('ejOfflineKurir');
+        setTimeout(() => { updateStatusInternet(); }, 3000);
+    }
+
     function updateStatusInternet() {
         const lampu = document.getElementById('lampuKoneksi');
         const teks = document.getElementById('teksKoneksi');
+        let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
+        let teksAntri = q.length > 0 ? ` [${q.length} ANTRI]` : "";
+
         if (navigator.onLine) {
             document.body.classList.remove('is-offline');
+            db.goOnline();
             if(lampu) { lampu.style.background = "var(--safe)"; lampu.style.boxShadow = "0 0 10px var(--safe)"; }
             if(teks) { teks.innerText = "SISTEM ONLINE"; teks.style.color = "var(--safe)"; }
+            if(q.length > 0) prosesDataOffline(); // Tembak data kalau ada antrean
         } else {
             document.body.classList.add('is-offline');
+            db.goOffline();
             if(lampu) { lampu.style.background = "var(--offline)"; lampu.style.boxShadow = "0 0 10px var(--offline)"; }
-            if(teks) { teks.innerText = "KONEKSI TERPUTUS"; teks.style.color = "var(--offline)"; }
+            if(teks) { teks.innerText = "KONEKSI TERPUTUS" + teksAntri; teks.style.color = "var(--offline)"; }
         }
     }
+    
+    window.addEventListener('online', updateStatusInternet); 
+    window.addEventListener('offline', updateStatusInternet); 
+    updateStatusInternet();
+    // ========================================================================
 
         function toggleDetail(id) { 
         const d = document.getElementById('detail-' + id); 
@@ -767,7 +805,7 @@
         
         const btnUpload = document.getElementById('btnUploadFoto');
         const teksAsli = btnUpload.innerHTML;
-        btnUpload.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> MENGIRIM...`;
+        btnUpload.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> MEMPROSES...`;
         btnUpload.disabled = true;
 
         const reader = new FileReader(); reader.onload = function(e) {
@@ -776,8 +814,27 @@
                 if (w > h) { if (w > 600) { h *= 600 / w; w = 600; } } else { if (h > 800) { w *= 800 / h; h = 800; } }
                 canvas.width = w; canvas.height = h;
                 canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                db.ref('foto_bukti/'+id).set(canvas.toDataURL('image/jpeg', 0.5)).then(() => {
-                    db.ref('pesanan/'+id).update({ status:'Terkirim', adaFoto:true, catatanKurir:"Diterima: "+n, waktuSelesai:new Date().toLocaleTimeString() }).then(() => {
+                
+                const dataFoto = canvas.toDataURL('image/jpeg', 0.5);
+                const dataUpdate = { status:'Terkirim', adaFoto:true, catatanKurir:"Diterima: "+n, waktuSelesai:new Date().toLocaleTimeString() };
+
+                // --- BLANK SPOT (JIKA MATI SINYAL) ---
+                if (!navigator.onLine) {
+                    let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
+                    q.push({ type: 'foto', id: id, data: dataFoto });
+                    q.push({ type: 'edit', id: id, data: dataUpdate });
+                    localStorage.setItem('ejOfflineKurir', JSON.stringify(q));
+
+                    document.getElementById('modalPenerima').style.display='none';
+                    btnUpload.innerHTML = teksAsli; btnUpload.disabled = false;
+                    document.getElementById('inputNamaPenerima').value = "";
+                    if(navigator.vibrate) navigator.vibrate(100);
+                    updateStatusInternet();
+                    return;
+                }
+
+                db.ref('foto_bukti/'+id).set(dataFoto).then(() => {
+                    db.ref('pesanan/'+id).update(dataUpdate).then(() => {
                         document.getElementById('modalPenerima').style.display='none';
                         btnUpload.innerHTML = teksAsli;
                         btnUpload.disabled = false;
@@ -786,8 +843,7 @@
                     });
                 }).catch(err => {
                     alert("❌ Gagal mengirim foto! Pastikan sinyal internet stabil.");
-                    btnUpload.innerHTML = teksAsli;
-                    btnUpload.disabled = false;
+                    btnUpload.innerHTML = teksAsli; btnUpload.disabled = false;
                 });
             }; img.src = e.target.result;
         }; reader.readAsDataURL(file);
@@ -836,15 +892,27 @@
     
     function prosesSimpanAlasan(statusPilihan) { 
         const a = document.getElementById('textAlasan').value; 
-        if(!a) {
-            alert("⚠️ Alasan tidak boleh kosong! Kasih tau admin kenapa paket ini bermasalah.");
-            return;
-        }
-        db.ref('pesanan/'+tempId).update({ 
-            status: statusPilihan, // <-- Ngambil status dari tombol yang dipencet
+        if(!a) { alert("⚠️ Alasan tidak boleh kosong!"); return; }
+        
+        let du = { 
+            status: statusPilihan, 
             alasanTunda: a, 
             waktuUpdate: new Date().toLocaleTimeString() 
-        }).then(()=>{
+        };
+
+        // --- BLANK SPOT (JIKA MATI SINYAL) ---
+        if (!navigator.onLine) {
+            let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
+            q.push({ type: 'edit', id: tempId, data: du });
+            localStorage.setItem('ejOfflineKurir', JSON.stringify(q));
+            
+            document.getElementById('modalAlasan').style.display='none';
+            document.getElementById('textAlasan').value = "";
+            updateStatusInternet();
+            return;
+        }
+
+        db.ref('pesanan/'+tempId).update(du).then(()=>{
             document.getElementById('modalAlasan').style.display='none';
             document.getElementById('textAlasan').value = "";
         }); 
