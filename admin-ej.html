@@ -724,7 +724,21 @@
         function reprint(id) { lastOrder = allOrders.find(o => o.id === id); if(lastOrder) executePrint(); }
         function viewFoto(id, src) { document.getElementById('modalFoto').style.display='flex'; document.getElementById('imgBukti').src=src||""; if(!src) db.ref('foto_bukti/'+id).once('value', s=>document.getElementById('imgBukti').src=s.val()); }
         function bukaPopupHapus(id) { document.getElementById('modalHapusPesanan').style.display='flex'; document.getElementById('btnConfirmHapus').onclick=()=>{ db.ref('pesanan/'+id).remove(); db.ref('foto_bukti/'+id).remove(); document.getElementById('modalHapusPesanan').style.display='none'; if(navigator.vibrate) navigator.vibrate(50); }; }
-        function bukaPopupKirimUlang(id) { document.getElementById('modalKirimUlang').style.display='flex'; document.getElementById('btnConfirmKirimUlang').onclick=()=>{ db.ref('pesanan/'+id).update({status:'Gudang', kurir:'', alasanTunda:null, waktuUpdate:new Date().toLocaleTimeString()}).then(() => { document.getElementById('modalKirimUlang').style.display='none'; if(navigator.vibrate) navigator.vibrate(50); }); }; }
+        function bukaPopupKirimUlang(id) { 
+    document.getElementById('modalKirimUlang').style.display='flex'; 
+    document.getElementById('btnConfirmKirimUlang').onclick=()=>{ 
+        db.ref('pesanan/'+id).update({
+            status: 'Gudang', 
+            kurir: '', 
+            alasanTunda: null, 
+            tanggal: formatTglDB(new Date()), // <-- SUNTIKAN TANGGAL RESET
+            waktuUpdate: new Date().toLocaleTimeString()
+        }).then(() => { 
+            document.getElementById('modalKirimUlang').style.display='none'; 
+            if(navigator.vibrate) navigator.vibrate(50); 
+        }); 
+    }; 
+}
 
         function pilihPill(val, element) {
             document.querySelectorAll('.status-pill').forEach(p => p.classList.remove('pill-active'));
@@ -755,24 +769,25 @@
         }
 
         function simpanEdit() {
-            const stat = document.getElementById('editStatus').value;
-            let du = { 
-                status: stat, 
-                namaPembeli: document.getElementById('editPembeli').value, 
-                nohp: document.getElementById('editNohp').value, 
-                alamat: document.getElementById('editAlamat').value, 
-                metode: document.getElementById('editMetode').value, 
-                total: document.getElementById('editTotal').value, 
-                mapLink: document.getElementById('editMapLink').value, 
-                urgent: document.getElementById('editUrgent').checked, 
-                waktuUpdate: new Date().toLocaleTimeString() 
-            };
-            if(stat==='Gudang'){du.kurir=''; du.alasanTunda=null;}
-            db.ref('pesanan/'+editId).update(du).then(()=>{
-                document.getElementById('modalEdit').style.display='none';
-                if(navigator.vibrate) navigator.vibrate(100);
-            });
-        }
+    const stat = document.getElementById('editStatus').value;
+    let du = { 
+        status: stat, 
+        namaPembeli: document.getElementById('editPembeli').value, 
+        nohp: document.getElementById('editNohp').value, 
+        alamat: document.getElementById('editAlamat').value, 
+        metode: document.getElementById('editMetode').value, 
+        total: document.getElementById('editTotal').value, 
+        mapLink: document.getElementById('editMapLink').value, 
+        urgent: document.getElementById('editUrgent').checked, 
+        tanggal: formatTglDB(new Date()), // <-- SUNTIKAN TANGGAL HARI INI
+        waktuUpdate: new Date().toLocaleTimeString() 
+    };
+    if(stat === 'Gudang') { du.kurir = ''; du.alasanTunda = null; }
+    db.ref('pesanan/'+editId).update(du).then(()=>{
+        document.getElementById('modalEdit').style.display='none';
+        if(navigator.vibrate) navigator.vibrate(100);
+    });
+}
 
         function bukaLaporan() { 
             // 1. Cek Gembok Kasta
