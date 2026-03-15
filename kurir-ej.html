@@ -281,7 +281,8 @@
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-auth-compat.js"></script>
     <script>
     const firebaseConfig = { apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg", authDomain: "ejtobacco-v2.firebaseapp.com", databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "ejtobacco-v2", storageBucket: "ejtobacco-v2.firebasestorage.app", messagingSenderId: "366973371317", appId: "1:366973371317:web:c5ec32460cd9cf0f6c8ffc" };
     firebase.initializeApp(firebaseConfig);
@@ -375,9 +376,20 @@
         }, 500);
     }
 
+    // SUNTIKAN KTP DIGITAL UNTUK KURIR
+firebase.auth().signInWithEmailAndPassword("tokoej2020@gmail.com", "ejtbk2020")
+.then(() => {
+    console.log("Akses Kurir Diterima Firebase!");
+    
+    // Pindahkan 3 baris penarik data ke DALAM sini
     db.ref('pesanan').limitToLast(200).on('value', snap => { allData = snap.val() ? Object.keys(snap.val()).map(k => ({id:k, ...snap.val()[k]})).reverse() : []; if(myName) updateUI(); });
     db.ref('pengeluaran').on('value', snap => { allPengeluaranData = snap.val() || {}; if(myName) updateUI(); });
     db.ref('setoran_kurir').on('value', snap => { allSetoranData = snap.val() || {}; if(myName) updateUI(); });
+})
+.catch((error) => {
+    alert("⚠️ Kurir gagal konek ke database! Pastikan internet stabil.");
+    console.error(error);
+});
 
     function updateUI() {
         const today = getTgl(); let gd=0, p=0, s=0, g=0, codK=0; const me = myName.toLowerCase();
