@@ -328,6 +328,38 @@
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
     <script>
+        // --- MESIN POP-UP MODERN (EJ ALERT) ---
+        function ejAlert(judul, pesan, tipe = 'warning') {
+            const overlay = document.getElementById('ejAlertOverlay');
+            const box = document.getElementById('ejAlertBox');
+            const icon = document.getElementById('ejAlertIcon');
+            const title = document.getElementById('ejAlertTitle');
+            const text = document.getElementById('ejAlertText');
+
+            if (tipe === 'danger') {
+                icon.innerHTML = '<i class="fa-solid fa-shield-xmark" style="color:var(--danger)"></i>';
+                box.style.borderColor = 'var(--danger)';
+            } else if (tipe === 'success') {
+                icon.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--safe)"></i>';
+                box.style.borderColor = 'var(--safe)';
+            } else {
+                icon.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:var(--gold)"></i>';
+                box.style.borderColor = 'var(--gold)';
+            }
+
+            title.innerText = judul;
+            text.innerText = pesan;
+            overlay.style.display = 'flex';
+            setTimeout(() => { box.style.transform = "scale(1)"; }, 10);
+            if(navigator.vibrate) navigator.vibrate(50);
+        }
+
+        function tutupEjAlert() {
+            const box = document.getElementById('ejAlertBox');
+            box.style.transform = "scale(0.9)";
+            setTimeout(() => { document.getElementById('ejAlertOverlay').style.display = 'none'; }, 200);
+        }
+        
     const firebaseConfig = { apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg", authDomain: "ejtobacco-v2.firebaseapp.com", databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "ejtobacco-v2", storageBucket: "ejtobacco-v2.firebasestorage.app", messagingSenderId: "366973371317", appId: "1:366973371317:web:c5ec32460cd9cf0f6c8ffc" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -426,8 +458,7 @@
                 aktifkanRadar(); 
                 memoriPIN = ""; 
             } else { 
-                alert("⚠️ PIN SALAH! Pastikan PIN sesuai dengan nama kurir."); 
-                memoriPIN = ""; 
+                ejAlert("AKSES DITOLAK", "PIN salah! Pastikan Anda memilih nama dan memasukkan PIN yang benar.", "danger"); 
             }
         } else { 
             if (memoriPIN.length < 4) memoriPIN += val; 
@@ -470,7 +501,7 @@
         db.ref('setoran_kurir').on('value', snap => { allSetoranData = snap.val() || {}; if(myName) updateUI(); });
     })
     .catch((error) => {
-        alert("⚠️ GAGAL TERHUBUNG! Pastikan internet stabil.");
+        ejAlert("SERVER TERPUTUS", "Gagal terhubung ke pusat. Pastikan sinyal internet stabil.", "danger");
     });
         
     function updateUI() {
@@ -832,7 +863,7 @@
                         if(navigator.vibrate) navigator.vibrate(100);
                     });
                 }).catch(err => {
-                    alert("❌ Gagal mengirim foto! Pastikan sinyal internet stabil.");
+                    ejAlert("UPLOAD GAGAL", "Gagal mengirim foto ke server. Pastikan sinyal stabil atau gunakan Mode Offline.", "danger");
                     btnUpload.innerHTML = teksAsli; btnUpload.disabled = false;
                 });
             }; img.src = e.target.result;
@@ -865,7 +896,7 @@
     function prosesSimpanExpense() { 
         const k=document.getElementById('expKet').value, n=document.getElementById('expNom').value; 
         if(!k || !n) {
-            alert("⚠️ Waduh! Keterangan dan Nominal Rp harus diisi dulu Bos!");
+            ejAlert("DATA BELUM LENGKAP", "Keterangan dan Nominal (Rp) harus diisi sebelum disimpan!", "warning");
             return; 
         }
         db.ref('pengeluaran').push({ kurir:myName, keterangan:k, nominal:Number(n), tanggal:getTgl(), waktu:new Date().toLocaleTimeString() }).then(()=>{
@@ -882,7 +913,7 @@
     
     function prosesSimpanAlasan(statusPilihan) { 
         const a = document.getElementById('textAlasan').value; 
-        if(!a) { alert("⚠️ Alasan tidak boleh kosong!"); return; }
+        if(!a) { ejAlert("ALASAN KOSONG", "Harap tuliskan alasan kenapa paket ini gagal atau ditunda!", "warning"); return; }
         
         let du = { 
             status: statusPilihan, 
@@ -1024,5 +1055,14 @@
         setTimeout(() => { window.isSwipingMode = false; }, 100);
     });
     </script>
+    
+    <div id="ejAlertOverlay" class="modal-overlay" style="justify-content:center; padding:20px; z-index:9999999;">
+        <div class="glass-card" style="width:100%; max-width:320px; text-align:center; border-color:var(--gold); transform:scale(0.9); transition:0.3s;" id="ejAlertBox">
+            <div id="ejAlertIcon" style="font-size:40px; margin-bottom:15px;"></div>
+            <h2 id="ejAlertTitle" style="font-size:16px; color:white; margin-bottom:10px;"></h2>
+            <p id="ejAlertText" style="font-size:12px; color:gray; margin-bottom:20px; line-height:1.5;"></p>
+            <button class="btn-main" onclick="tutupEjAlert()">MENGERTI</button>
+        </div>
+    </div>
 </body>
 </html>
