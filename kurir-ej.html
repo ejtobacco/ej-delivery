@@ -36,6 +36,12 @@
         .drag-handle { cursor: grab; }
         .drag-handle:active { cursor: grabbing; }
         .nomor-urut { transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); } /* Pelumas perubahan angka */
+
+        /* EFEK SWIPE TO ACTION */
+        .swipe-bg { position: absolute; inset: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; font-weight: 800; font-size: 14px; z-index: 0; }
+        .swipe-bg .left-action { color: var(--safe); transition: 0.2s; }
+        .swipe-bg .right-action { color: var(--danger); transition: 0.2s; }
+        .swipe-content { position: relative; z-index: 1; background: var(--gradient-dark); transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); touch-action: pan-y; }
         
         /* HEADER PREMIUM */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 0; z-index: 9999; background: rgba(5,5,5,0.85); backdrop-filter: blur(15px); padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -116,6 +122,37 @@
         /* KUSTOM INPUT DALAM MODAL */
         .modal-input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 15px; color: white; outline: none; font-size: 13px; margin-bottom: 15px; }
         .modal-input:focus { border-color: var(--gold); }
+   
+  /* ================= FITUR MATAHARI TERIK (SUNLIGHT MODE) ================= */
+        body.sunlight-mode { background: #E5E7EB; color: #111827; }
+        body.sunlight-mode .glass-card { background: #FFFFFF !important; border: 1px solid #D1D5DB !important; box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important; }
+        body.sunlight-mode .glass-card::before { display: none; } /* Matikan garis emas atas biar lebih clean */
+        body.sunlight-mode .wallet-card { background: #FFFFFF !important; border: 1px solid #D1D5DB !important; border-top: 4px solid var(--safe) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important; color: #111; }
+        body.sunlight-mode .wallet-card::before { display: none; }
+        body.sunlight-mode #namaKurirHeader { color: #111 !important; }
+        
+        /* Ubah warna Tab & Input */
+        body.sunlight-mode .tab-btn { background: #FFFFFF; color: #6B7280; border-color: #D1D5DB; }
+        body.sunlight-mode .tab-btn.active { background: rgba(212,175,55,0.15); color: #B48E2D; border-color: var(--gold); }
+        body.sunlight-mode .search-box, body.sunlight-mode .modal-input { background: #F9FAFB; color: #111; border-color: #D1D5DB; }
+        body.sunlight-mode .search-box::placeholder, body.sunlight-mode .modal-input::placeholder { color: #9CA3AF; }
+        
+        /* Ubah Laci Bawah & Drag Handle */
+        body.sunlight-mode .bottom-sheet { background: #FFFFFF !important; }
+        body.sunlight-mode .sheet-pill { background: #D1D5DB; }
+        body.sunlight-mode .swipe-content { background: #FFFFFF !important; }
+        body.sunlight-mode .drag-handle { background: #FEF3C7 !important; border-bottom: 1px solid #FDE68A !important; color: #D97706 !important; }
+        body.sunlight-mode .nomor-urut { background: #F59E0B !important; color: #FFF !important; }
+        body.sunlight-mode .num-btn { color: #111; border-color: #D1D5DB; }
+        
+        /* Trik Sulap: Memaksa text inline HTML yang putih jadi hitam */
+        body.sunlight-mode div[style*="color:white"] { color: #111827 !important; }
+        body.sunlight-mode h2[style*="color:#fff"] { color: #111827 !important; }
+        body.sunlight-mode div[style*="color:#ddd"] { color: #374151 !important; }
+        body.sunlight-mode div[style*="background:rgba(0,0,0,0.2)"] { background: #F9FAFB !important; border-top-color: #E5E7EB !important; }
+        body.sunlight-mode div[style*="background:rgba(0,0,0,0.3)"] { background: #F3F4F6 !important; }
+        body.sunlight-mode div[style*="background:rgba(0,0,0,0.4)"] { background: #F3F4F6 !important; border-color: #D1D5DB !important; }
+        body.sunlight-mode div[style*="background:rgba(0,0,0,0.5)"] { background: #E5E7EB !important; border-color: #D1D5DB !important; color: #374151 !important; }  
     </style>
 </head>
 <body>
@@ -162,8 +199,13 @@
             <div class="main-logo-text"><i class="fa-solid fa-crown" style="font-size:14px; margin-right:5px;"></i> EJ TOBACCO</div>
             <div style="font-size:9px; letter-spacing:1px; color:gray; margin-left:20px; display: flex; align-items: center; gap: 8px;">
                 APP KURIR | <b id="namaKurirHeader" style="color:white;">...</b>
-                <button onclick="forceRefresh()" style="background:transparent; border:none; color:var(--blue); cursor:pointer; padding:0; margin-left:5px;"><i id="iconRefresh" class="fa-solid fa-rotate-right" style="font-size:12px;"></i></button>
+                
+                <button onclick="toggleSunlightMode()" style="background:transparent; border:none; cursor:pointer; padding:0; margin-left:5px; font-size:14px;"><i id="iconMatahari" class="fa-solid fa-sun" style="color:#F59E0B; transition:0.3s;"></i></button>
+                
+                <button onclick="forceRefresh()" style="background:transparent; border:none; color:var(--blue); cursor:pointer; padding:0;"><i id="iconRefresh" class="fa-solid fa-rotate-right" style="font-size:12px;"></i></button>
+                
                 <button onclick="tampilkanPopupLogout()" style="background:transparent; border:none; color:var(--danger); cursor:pointer; padding:0;"><i class="fa-solid fa-right-from-bracket" style="font-size:12px;"></i></button>
+                
             </div>
         </div>
         <div style="text-align: right;">
@@ -234,12 +276,15 @@
     <div id="modalAlasan" class="modal-overlay">
         <div class="glass-card bottom-sheet" style="border-color:var(--warning);">
             <div class="sheet-pill"></div>
-            <h2 id="judulAlasan" style="text-align:center; color:var(--warning); font-size: 16px;"><i class="fa-solid fa-circle-exclamation"></i> ALASAN GAGAL/TUNDA</h2>
-            <textarea id="textAlasan" class="modal-input" style="height:100px; margin-top:15px;" placeholder="Tulis alasan jelas (Rumah kosong, Uang kurang, Dll)"></textarea>
+            <h2 style="text-align:center; color:var(--warning); font-size: 16px;"><i class="fa-solid fa-circle-exclamation"></i> TULIS ALASAN DULU</h2>
+            <textarea id="textAlasan" class="modal-input" style="height:100px; margin-top:15px;" placeholder="Kenapa nih Bos? (Rumah kosong, Uang kurang, Alamat palsu...)"></textarea>
+            
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-                <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalAlasan').style.display='none'">BATAL</button>
-                <button class="btn-main" style="background:var(--warning); color:black;" onclick="prosesSimpanAlasan()"><i class="fa-solid fa-check"></i> KONFIRMASI</button>
+                <button class="btn-main" style="background:var(--warning); color:black;" onclick="prosesSimpanAlasan('Tunda')"><i class="fa-solid fa-clock"></i> TUNDA</button>
+                <button class="btn-main" style="background:var(--danger); color:white;" onclick="prosesSimpanAlasan('Gagal')"><i class="fa-solid fa-xmark"></i> CANCEL/GAGAL</button>
             </div>
+            
+            <button class="action-btn" style="background:rgba(255,255,255,0.05); color:white; width:100%; margin-top:10px; border:1px solid rgba(255,255,255,0.1);" onclick="document.getElementById('modalAlasan').style.display='none'">BATAL</button>
         </div>
     </div>
 
@@ -272,509 +317,4 @@
             <div class="sheet-pill"></div>
             <i class="fa-solid fa-triangle-exclamation" style="font-size:40px; color:var(--danger); margin-bottom:15px;"></i>
             <h2 style="color:white; font-size: 16px; margin-bottom:10px;">YAKIN INGIN KELUAR?</h2>
-            <p style="font-size:12px; color:gray; margin-bottom:20px;">Sesi Anda akan ditutup. Anda harus memasukkan PIN lagi untuk masuk.</p>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalLogout').style.display='none'">BATAL</button>
-                <button class="btn-main" style="background:var(--danger); color:white;" onclick="eksekusiLogout()"><i class="fa-solid fa-right-from-bracket"></i> KELUAR</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
-    <script>
-    const firebaseConfig = { apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg", authDomain: "ejtobacco-v2.firebaseapp.com", databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "ejtobacco-v2", storageBucket: "ejtobacco-v2.firebasestorage.app", messagingSenderId: "366973371317", appId: "1:366973371317:web:c5ec32460cd9cf0f6c8ffc" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    let currentTab = 'Proses', allData = [], allPengeluaranData = {}, allSetoranData = {}, tempFileSukses = null, tempIdSukses = "";
-    
-    // 1. PANGGIL MEMORI HP
-    let myName = localStorage.getItem('namaKurir') || "";
-
-    // 2. MESIN AUTO-LOGIN (Langsung bypass layar PIN kalau memori ada)
-    window.onload = () => {
-        if (myName) {
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
-            updateUI();
-            aktifkanRadar();
-        }
-    };
-    
-    function getTgl() { const n = new Date(); return `${String(n.getDate()).padStart(2,'0')}/${String(n.getMonth()+1).padStart(2,'0')}/${n.getFullYear()}`; }
-    
-    setInterval(() => { 
-        const now = new Date(); 
-        document.getElementById('clock').innerHTML = `<i class="fa-regular fa-clock"></i> ${now.toLocaleTimeString('id-ID')}`; 
-        
-        // UPDATE TANGGAL OTOMATIS
-        const opsiTgl = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
-        if(document.getElementById('currentDay')) document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', opsiTgl).toUpperCase();
-        
-        updateStatusInternet();
-    }, 1000);
-
-    const dataPIN = { "kurirA": "1111", "kurirB": "2222", "kurirC": "3333" };
-    let memoriPIN = ""; 
-
-        // ---> MESIN ANIMASI RELOAD WUS WUS <---
-    function wusWusReload(btn) {
-        btn.style.transform = "scale(0.85)"; // Tombol mengecil pas ditekan
-        const icon = btn.querySelector('i');
-        icon.classList.add('fa-spin'); // Icon panah muter kenceng
-        
-        setTimeout(() => {
-            window.location.reload(); // Refresh halaman setelah setengah detik
-        }, 500); 
-    }
-
-    function pressPin(val) {
-        if (val === 'C') { 
-            memoriPIN = ""; 
-        } else if (val === 'OK') {
-            const sel = document.getElementById('namaKurirInput').value;
-            if (memoriPIN === dataPIN[sel]) { 
-                myName = sel; 
-                localStorage.setItem('namaKurir', myName); // <-- SUNTIKAN KODE INI (Simpan ke Memori)
-                document.getElementById('loginOverlay').style.display='none'; 
-                document.getElementById('namaKurirHeader').innerText=myName.toUpperCase(); 
-                updateUI(); 
-                aktifkanRadar(); 
-                memoriPIN = ""; 
-            } else { 
-                alert("⚠️ PIN SALAH! Pastikan PIN sesuai dengan nama kurir."); 
-                memoriPIN = ""; 
-            }
-        } else { 
-            if (memoriPIN.length < 4) memoriPIN += val; 
-        }
-        document.getElementById('pinDisplay').innerText = memoriPIN.length > 0 ? "*".repeat(memoriPIN.length) : "****";
-    }
-
-    function tampilkanPopupLogout() {
-        document.getElementById('modalLogout').style.display = 'flex';
-    }
-
-    function eksekusiLogout() {
-        myName = "";
-        localStorage.removeItem('namaKurir'); // <-- SUNTIKAN KODE INI (Hapus Memori)
-        document.getElementById('pinDisplay').innerText = "****";
-        memoriPIN = "";
-        document.getElementById('modalLogout').style.display = 'none';
-        document.getElementById('loginOverlay').style.display = 'flex';
-    }
-
-    function forceRefresh() {
-        const icon = document.getElementById('iconRefresh');
-        icon.classList.add('fa-spin'); 
-        db.goOffline(); 
-        setTimeout(() => {
-            db.goOnline(); 
-            setTimeout(() => { icon.classList.remove('fa-spin'); }, 1000); 
-        }, 500);
-    }
-
-    // --- KTP SATPAM FIREBASE (WAJIB ADA BIAR BISA BACA DATA) ---
-    firebase.auth().signInWithEmailAndPassword("tokoej2020@gmail.com", "ejtbk2020")
-    .then(() => {
-        console.log("KTP KURIR DITERIMA SATPAM!");
-        db.ref('pesanan').limitToLast(200).on('value', snap => { 
-            allData = snap.val() ? Object.keys(snap.val()).map(k => ({id:k, ...snap.val()[k]})).reverse() : []; 
-            if(myName) updateUI(); 
-        });
-        db.ref('pengeluaran').on('value', snap => { allPengeluaranData = snap.val() || {}; if(myName) updateUI(); });
-        db.ref('setoran_kurir').on('value', snap => { allSetoranData = snap.val() || {}; if(myName) updateUI(); });
-    })
-    .catch((error) => {
-        alert("⚠️ GAGAL TERHUBUNG KE SERVER! Pastikan email/password Firebase benar.");
-        console.error(error);
-    });
-    function updateUI() {
-        const today = getTgl(); let gd=0, p=0, s=0, g=0, codK=0; const me = myName.toLowerCase();
-        allData.forEach(o => {
-            const ok = String(o.kurir || "").toLowerCase();
-            if (o.status === 'Gudang') gd++;
-            if (ok === me) {
-                if (o.status === 'Proses' || o.status === 'Menunggu' || o.status === 'Tunda') p++;
-                else if (o.status === 'Terkirim' && o.tanggal === today) { s++; if(o.metode==='COD') codK += Number(o.total || 0); }
-                else if (o.status === 'Gagal' && o.tanggal === today) g++;
-            }
-        });
-        let expK = 0; Object.values(allPengeluaranData).forEach(e => { if(String(e.kurir||"").toLowerCase() === me && e.tanggal === today) expK += Number(e.nominal || 0); });
-        let setK = 0; const key = today.replace(/\//g, '-'); if(allSetoranData[key] && allSetoranData[key][myName]) setK = Number(allSetoranData[key][myName]);
-        document.getElementById('c-Gudang').innerText=gd; document.getElementById('c-Proses').innerText=p; document.getElementById('c-Terkirim').innerText=s; document.getElementById('c-Gagal').innerText=g;
-        document.getElementById('totalCOD').innerText="Rp "+codK.toLocaleString('id-ID'); document.getElementById('totalPengeluaran').innerText="Rp "+expK.toLocaleString('id-ID');
-        const bersih = codK - expK - setK; document.getElementById('setoranBersih').innerText="Rp "+Math.max(0, bersih).toLocaleString('id-ID');
-        renderOrders();
-    }
-
-    function renderOrders() {
-        const container = document.getElementById('orderContainer');
-        const search = document.getElementById('searchOrder').value.toLowerCase().trim();
-        const today = getTgl(); const me = myName.toLowerCase();
-        container.innerHTML = "";
-
-        let filtered = allData.filter(o => {
-            const match = (o.namaPembeli || "").toLowerCase().includes(search) || (o.noPesanan || "").toLowerCase().includes(search);
-            const ok = String(o.kurir || "").toLowerCase();
-            
-            // PERBAIKAN GUDANG: Lihat semua yang statusnya Gudang!
-            if (currentTab === 'Gudang') return match && o.status === 'Gudang';
-            
-            // JIKA BUKAN TAB GUDANG, BARU COCOKKAN NAMA KURIR
-            if (ok !== me) return false;
-            
-            if (currentTab === 'Proses') return match && (o.status !== 'Terkirim' && o.status !== 'Gagal' && o.status !== 'Gudang');
-            return match && (o.status === currentTab && o.tanggal === today);
-        });
-
-        // --- MESIN PENGURUT RUTE (DRAG & DROP) ---
-        if (currentTab === 'Proses') {
-            let customOrder = JSON.parse(localStorage.getItem('rute_'+myName)) || [];
-            filtered.sort((a, b) => {
-                let indexA = customOrder.indexOf(a.id);
-                let indexB = customOrder.indexOf(b.id);
-                if (indexA === -1) indexA = 9999; // Kalau paket baru masuk, taruh bawah
-                if (indexB === -1) indexB = 9999;
-                return indexA - indexB;
-            });
-        }
-        // ------------------------------------------
-
-        // 1. Tambahkan (o, index) di sini
-        filtered.forEach((o, index) => {
-            const waNum = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-            const trackLink = `https://ejtobacco.github.io/ej-delivery/tracking.html?n=${myName}`;
-            const msg = `*EJ TOBACCO DELIVERY* 🚀\n------------------------------------------\nHalo Kak *${o.namaPembeli.toUpperCase()}* 👋\n\nSaya kurir *${myName.toUpperCase()}* sedang meluncur mengantar paket kakak.\n\n*KAKAK BISA PANTAU POSISI SAYA SECARA LIVE:* \n${trackLink}\n\nTagihan COD: *Rp${Number(o.total || 0).toLocaleString()}* 🙏`;
-            
-            let btnMaps = "";
-            if (o.mapLink && o.mapLink.trim() !== "") {
-                let lv = o.mapLink.trim(); if (!lv.startsWith("http")) lv = "https://" + lv;
-                btnMaps = `<button onclick="window.open('${lv}', '_blank')" class="action-btn btn-maps"><i class="fa-solid fa-map-location-dot"></i> MAPS</button>`;
-            }
-
-            let badgeClass = "", iconStatus = "";
-            if(o.status === 'Gudang') { badgeClass = "badge-gudang"; iconStatus = "fa-warehouse"; }
-            else if(o.status === 'Terkirim') { badgeClass = "badge-sukses"; iconStatus = "fa-check-double"; }
-            else if(o.status === 'Gagal') { badgeClass = "badge-gagal"; iconStatus = "fa-triangle-exclamation"; }
-            else { badgeClass = "badge-proses"; iconStatus = "fa-motorcycle"; }
-
-            let payBadge = o.metode === 'COD' ? `<span style="background:var(--warning); color:black; padding:2px 5px; border-radius:4px; font-size:8px; font-weight:800;">COD</span>` : `<span style="background:var(--blue); color:white; padding:2px 5px; border-radius:4px; font-size:8px; font-weight:800;">TF</span>`;
-
-            // 2. GAGANG TARIKAN BARU DENGAN NOMOR URUT BULAT EMAS
-            let dragBar = currentTab === 'Proses' ? `
-            <div class="drag-handle" style="background:rgba(212,175,55,0.1); display:flex; align-items:center; padding:8px 15px; color:var(--gold); font-size:10px; font-weight:800; letter-spacing:1px; border-bottom:1px solid rgba(212,175,55,0.2);">
-                <div class="nomor-urut" style="background:var(--gold); color:black; width:22px; height:22px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:12px; margin-right:10px;">${index + 1}</div>
-                <div style="flex:1; text-align:center;"><i class="fa-solid fa-grip-lines"></i> GESER ATUR RUTE</div>
-            </div>` : '';
-
-            container.innerHTML += `
-            <div class="glass-card sortable-item ${o.urgent?'card-urgent':''}" data-id="${o.id}" style="padding:0; overflow:hidden; ${o.status === 'Gudang' ? 'border-color:gray; opacity:0.8;' : 'border-color:var(--gold);'}">
-                ${dragBar}
-                <div onclick="toggleDetail('${o.id}')" style="padding:15px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <div style="width:35px; height:35px; border-radius:10px; display:flex; justify-content:center; align-items:center; font-size:14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);">
-                            <i class="fa-solid ${iconStatus}" style="color:${o.status==='Terkirim'?'var(--safe)':'var(--gold)'}"></i>
-                        </div>
-                        <div>
-                            <div style="font-size:13px; font-weight:800; color:white; margin-bottom:2px;">${o.namaPembeli}</div>
-                            <div style="font-size:10px; color:gray;">${o.noPesanan} • ${payBadge} Rp ${Number(o.total).toLocaleString('id-ID')}</div>
-                        </div>
-                    </div>
-                    <i id="icon-arrow-${o.id}" class="fa-solid fa-chevron-down" style="font-size:12px; color:var(--gold); transition:0.3s;"></i>
-                </div>
-
-                <div id="detail-${o.id}" style="display:none; padding:0 15px 15px 15px; border-top:1px dashed rgba(255,255,255,0.1); background:rgba(0,0,0,0.2);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin:12px 0;">
-                        <div class="order-badge ${badgeClass}"><i class="fa-solid ${iconStatus}"></i> ${o.status.toUpperCase()}</div>
-                        <div style="font-size:10px; color:gray;"><i class="fa-regular fa-clock"></i> ${o.tanggal}</div>
-                    </div>
-                    <div style="font-size:12px; color:#ddd; margin-bottom:15px; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; border-left:2px solid ${o.status==='Gudang'?'gray':'var(--gold)'}; line-height:1.4;">
-                        <b style="color:var(--danger); font-size:10px; display:block; margin-bottom:3px;">ALAMAT PENGIRIMAN:</b>
-                        ${o.alamat}
-                    </div>
-                    ${o.status === 'Gudang' ? `<button class="btn-main" onclick="ambilPaket('${o.id}')"><i class="fa-solid fa-box-open"></i> KLAIM & MASUKKAN TAS SAYA</button>` : 
-                    (o.status !== 'Terkirim' && o.status !== 'Gagal' ? `
-                    <div style="display:grid; grid-template-columns: ${btnMaps !== '' ? '1fr 1fr' : '1fr'}; gap:8px; margin-bottom:8px;">
-                        <button onclick="window.open('https://wa.me/${waNum}?text=${encodeURIComponent(msg)}', '_blank')" class="action-btn btn-wa"><i class="fa-brands fa-whatsapp" style="font-size:14px;"></i> KABARI PELANGGAN</button>
-                        ${btnMaps}
-                    </div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
-                        <button class="action-btn" style="background:var(--safe);" onclick="document.getElementById('f-${o.id}').click()"><i class="fa-solid fa-camera"></i> SELESAI</button>
-                        <button class="action-btn" style="background:var(--warning); color:black;" onclick="updateStat('${o.id}', 'Tunda')"><i class="fa-solid fa-clock"></i> TUNDA</button>
-                    </div>
-                    <button class="action-btn" style="background:rgba(239,68,68,0.1); border: 1px solid var(--danger); color:var(--danger); width:100%; margin-top:8px;" onclick="updateStat('${o.id}', 'Gagal')"><i class="fa-solid fa-xmark"></i> CANCEL / GAGAL</button>
-                    ` : `<div style="font-size:11px; text-align:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:10px; color:gray;"><i class="fa-solid fa-lock"></i> PESANAN SELESAI / TERKUNCI</div>`)}
-                    
-                    <input type="file" id="f-${o.id}" accept="image/*" capture="environment" style="display:none;" onchange="uploadSelesai('${o.id}', '${o.metode}', ${o.total}, this)">
-                </div>
-            </div>`;
-        });
-        
-        if (filtered.length === 0) container.innerHTML = `<div style="text-align:center; padding:50px 20px; opacity:0.3;"><i class="fa-solid fa-box-open" style="font-size:40px; display:block; margin-bottom:10px;"></i>Tidak ada paket di tab ini.</div>`;
-        
-        // JALANKAN MESIN DRAG & DROP
-        initSortable();
-    }
-
-        let sortableInstance = null;
-    function initSortable() {
-        const container = document.getElementById('orderContainer');
-        if (sortableInstance) sortableInstance.destroy(); // Bersihkan sisa mesin lama
-        
-        // Cuma aktif kalau lagi di tab TAS SAYA
-        if (currentTab === 'Proses') {
-            sortableInstance = new Sortable(container, {
-                handle: '.drag-handle', 
-                animation: 350,         
-                easing: "cubic-bezier(0.25, 1, 0.5, 1)", 
-                ghostClass: 'sortable-ghost', 
-                dragClass: 'sortable-drag', 
-                forceFallback: true,    
-                fallbackTolerance: 5, // Dinaikkan dikit biar jari gemetar aman
-                
-                // === FITUR TAHAN & VISUAL HAPTIC ===
-                delay: 400, 
-                delayOnTouchOnly: true, 
-                
-                onChoose: function (evt) {
-                    // 1. Perkuat getaran jadi 100ms (Biar Android kerasa banget)
-                    if(navigator.vibrate) navigator.vibrate(100); 
-                    
-                    // 2. EFEK VISUAL: Kartu membesar dan nyala emas (Biar iPhone/iOS tetap tahu)
-                    evt.item.style.transform = "scale(1.03)";
-                    evt.item.style.boxShadow = "0 0 20px rgba(212, 175, 55, 0.6)";
-                    evt.item.style.transition = "0.2s";
-                },
-                
-                onUnchoose: function(evt) {
-                    // 3. Kalau kurir cuma nahan tapi nggak jadi narik, balikin ke ukuran normal
-                    evt.item.style.transform = "";
-                    evt.item.style.boxShadow = "";
-                },
-                // =========================================
-                // --- MESIN LIVE-UPDATE ANGKA SAAT DIGESER ---
-                onChange: function(evt) {
-                    let urut = 1;
-                    const semuaKartu = container.querySelectorAll('.sortable-item');
-                    semuaKartu.forEach(el => {
-                        // Abaikan kartu kloning/bayangan yang nempel di jari
-                        if (!el.classList.contains('sortable-drag')) {
-                            const badge = el.querySelector('.nomor-urut');
-                            if (badge) { badge.innerText = urut; urut++; }
-                        }
-                    });
-                    if(navigator.vibrate) navigator.vibrate([10]); 
-                },
-
-                onEnd: function (evt) {
-                    let newOrder = [];
-                    let urut = 1;
-                    const semuaKartu = container.querySelectorAll('.sortable-item');
-                    
-                    semuaKartu.forEach(el => {
-                        // Abaikan juga pas nyimpan ke memori rute
-                        if (!el.classList.contains('sortable-drag')) {
-                            newOrder.push(el.getAttribute('data-id'));
-                            const badge = el.querySelector('.nomor-urut');
-                            if (badge) { badge.innerText = urut; urut++; }
-                        }
-                    });
-                    
-                    localStorage.setItem('rute_'+myName, JSON.stringify(newOrder));
-                    if(navigator.vibrate) navigator.vibrate([50]); 
-                }
-            });
-        }
-    }
-
-    // ================= OTAK BLANK SPOT (OFFLINE SYNC KURIR) =================
-    function prosesDataOffline() {
-        let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
-        if (q.length === 0) return;
-
-        let notifTeks = document.getElementById('teksKoneksi');
-        if (notifTeks) {
-            notifTeks.innerText = `SINKRONISASI ${q.length} DATA...`;
-            notifTeks.style.color = "var(--gold)";
-            if(navigator.vibrate) navigator.vibrate([50, 50]);
-        }
-
-        q.forEach(item => {
-            if (item.type === 'edit') db.ref('pesanan/'+item.id).update(item.data);
-            if (item.type === 'foto') db.ref('foto_bukti/'+item.id).set(item.data);
-        });
-
-        localStorage.removeItem('ejOfflineKurir');
-        setTimeout(() => { updateStatusInternet(); }, 3000);
-    }
-
-    function updateStatusInternet() {
-        const lampu = document.getElementById('lampuKoneksi');
-        const teks = document.getElementById('teksKoneksi');
-        let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
-        let teksAntri = q.length > 0 ? ` [${q.length} ANTRI]` : "";
-
-        if (navigator.onLine) {
-            document.body.classList.remove('is-offline');
-            db.goOnline();
-            if(lampu) { lampu.style.background = "var(--safe)"; lampu.style.boxShadow = "0 0 10px var(--safe)"; }
-            if(teks) { teks.innerText = "SISTEM ONLINE"; teks.style.color = "var(--safe)"; }
-            if(q.length > 0) prosesDataOffline(); // Tembak data kalau ada antrean
-        } else {
-            document.body.classList.add('is-offline');
-            db.goOffline();
-            if(lampu) { lampu.style.background = "var(--offline)"; lampu.style.boxShadow = "0 0 10px var(--offline)"; }
-            if(teks) { teks.innerText = "KONEKSI TERPUTUS" + teksAntri; teks.style.color = "var(--offline)"; }
-        }
-    }
-    
-    window.addEventListener('online', updateStatusInternet); 
-    window.addEventListener('offline', updateStatusInternet); 
-    updateStatusInternet();
-    // ========================================================================
-
-        function toggleDetail(id) { 
-        const d = document.getElementById('detail-' + id); 
-        const a = document.getElementById('icon-arrow-' + id); 
-        if (d.style.display === "none") { 
-            d.style.display = "block"; 
-            if(a) a.style.transform = "rotate(180deg)"; 
-        } else { 
-            d.style.display = "none"; 
-            if(a) a.style.transform = "rotate(0deg)"; 
-        } 
-    }
-
-    function ambilPaket(id) { db.ref('pesanan/'+id).update({ status:'Proses', kurir:myName, waktuAmbil:new Date().toLocaleTimeString() }).then(() => { document.getElementById('searchOrder').value=""; setTab('Proses'); }); }
-        
-    let tempMetodeSukses = "", tempTotalSukses = 0;
-
-    function uploadSelesai(id, metode, total, input) { 
-        if (input.files[0]) { 
-            tempFileSukses = input.files[0]; 
-            tempIdSukses = id; 
-            tempMetodeSukses = metode;
-            tempTotalSukses = Number(total || 0);
-
-            // Reset Form Modal
-            document.getElementById('inputNamaPenerima').value = "";
-            const uangIn = document.getElementById('uangDiterima');
-            const teksKem = document.getElementById('teksKembalian');
-            const calcDiv = document.getElementById('kalkulatorCOD');
-
-            // Logika Detektor COD
-            if (metode === 'COD') {
-                calcDiv.style.display = 'block'; // Munculkan Kalkulator
-                document.getElementById('tagihanCalc').innerText = "Rp " + tempTotalSukses.toLocaleString('id-ID');
-                uangIn.value = "";
-                teksKem.innerText = "Rp 0";
-                teksKem.style.color = "white";
-            } else {
-                calcDiv.style.display = 'none'; // Sembunyikan kalau Transfer
-            }
-
-            document.getElementById('modalPenerima').style.display='flex'; 
-            input.value=""; 
-        } 
-    }
-
-    function hitungKembalian() {
-        const uang = Number(document.getElementById('uangDiterima').value || 0);
-        const teksKem = document.getElementById('teksKembalian');
-        
-        if (uang === 0) {
-            teksKem.innerText = "Rp 0"; teksKem.style.color = "white"; return;
-        }
-
-        const kembalian = uang - tempTotalSukses;
-        
-        if (kembalian < 0) {
-            // UANG KURANG (MERAH)
-            teksKem.innerText = "- Rp " + Math.abs(kembalian).toLocaleString('id-ID');
-            teksKem.style.color = "var(--danger)";
-        } else if (kembalian === 0) {
-            // UANG PAS (HIJAU)
-            teksKem.innerText = "UANG PAS";
-            teksKem.style.color = "var(--safe)";
-        } else {
-            // KEMBALIAN (EMAS)
-            teksKem.innerText = "Kembali: Rp " + kembalian.toLocaleString('id-ID');
-            teksKem.style.color = "var(--gold)";
-        }
-    }
-    
-    function eksekusiUploadSelesai() {
-        let n = document.getElementById('inputNamaPenerima').value || "Keluarga/Pihak Rumah";
-        const id = tempIdSukses, file = tempFileSukses; 
-        
-        const btnUpload = document.getElementById('btnUploadFoto');
-        const teksAsli = btnUpload.innerHTML;
-        btnUpload.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> MENGIRIM...`;
-        btnUpload.disabled = true;
-
-        const reader = new FileReader(); reader.onload = function(e) {
-            const img = new Image(); img.onload = function() {
-                const canvas = document.createElement('canvas'); let w = img.width, h = img.height;
-                if (w > h) { if (w > 600) { h *= 600 / w; w = 600; } } else { if (h > 800) { w *= 800 / h; h = 800; } }
-                canvas.width = w; canvas.height = h;
-                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                db.ref('foto_bukti/'+id).set(canvas.toDataURL('image/jpeg', 0.5)).then(() => {
-                    db.ref('pesanan/'+id).update({ status:'Terkirim', adaFoto:true, catatanKurir:"Diterima: "+n, waktuSelesai:new Date().toLocaleTimeString() }).then(() => {
-                        document.getElementById('modalPenerima').style.display='none';
-                        btnUpload.innerHTML = teksAsli;
-                        btnUpload.disabled = false;
-                        document.getElementById('inputNamaPenerima').value = "";
-                        if(navigator.vibrate) navigator.vibrate(100);
-                    });
-                }).catch(err => {
-                    alert("❌ Gagal mengirim foto! Pastikan sinyal internet stabil.");
-                    btnUpload.innerHTML = teksAsli;
-                    btnUpload.disabled = false;
-                });
-            }; img.src = e.target.result;
-        }; reader.readAsDataURL(file);
-    }
-    
-    function batalUploadSelesai() { document.getElementById('modalPenerima').style.display='none'; tempFileSukses=null; }
-    function setTab(t) { currentTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('t-'+t).classList.add('active'); renderOrders(); }
-    function toggleScanner() { const r = document.getElementById('reader'); r.style.display = r.style.display==='block'?'none':'block'; if(r.style.display==='block') startScanner(); }
-    function startScanner() { html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode:"environment" }, { fps:10, qrbox:250 }, (txt) => {
-        const target = allData.find(o => o.noPesanan.replace(/\W/g, "") === txt.replace(/\W/g, ""));
-        if (target) { if (target.status==='Gudang') ambilPaket(target.id); else { document.getElementById('searchOrder').value=target.noPesanan; renderOrders(); } html5QrCode.stop(); document.getElementById('reader').style.display='none'; }
-    }); }
-    
-    function tambahPengeluaran() { document.getElementById('modalExpense').style.display='flex'; }
-    
-    function prosesSimpanExpense() { 
-        const k=document.getElementById('expKet').value, n=document.getElementById('expNom').value; 
-        if(!k || !n) {
-            alert("⚠️ Waduh! Keterangan dan Nominal Rp harus diisi dulu Bos!");
-            return; 
-        }
-        db.ref('pengeluaran').push({ kurir:myName, keterangan:k, nominal:Number(n), tanggal:getTgl(), waktu:new Date().toLocaleTimeString() }).then(()=>{
-            document.getElementById('modalExpense').style.display='none';
-            document.getElementById('expKet').value = "";
-            document.getElementById('expNom').value = "";
-        }); 
-    }
-    
-    function updateStat(id, s) { tempId = id; tempStat = s; document.getElementById('modalAlasan').style.display='flex'; }
-    
-    function prosesSimpanAlasan() { 
-        const a=document.getElementById('textAlasan').value; 
-        if(!a) {
-            alert("⚠️ Alasan tidak boleh kosong! Kasih tau admin kenapa paket ini ditunda/gagal.");
-            return;
-        }
-        db.ref('pesanan/'+tempId).update({ status:tempStat, alasanTunda:a, waktuUpdate:new Date().toLocaleTimeString() }).then(()=>{
-            document.getElementById('modalAlasan').style.display='none';
-            document.getElementById('textAlasan').value = "";
-        }); 
-    }
-    
-    function aktifkanRadar() { if (navigator.geolocation) { navigator.geolocation.watchPosition(pos => { db.ref('tracking/'+myName).set({ lat: pos.coords.latitude, lng: pos.coords.longitude, waktu: new Date().toLocaleTimeString() }); }, null, { enableHighAccuracy:true }); } }
-    </script>
-</body>
-</html>
+            <p style="font-size:12px; color:gray; margin-bottom:20px;">Sesi Anda akan ditutup. Anda harus memas
