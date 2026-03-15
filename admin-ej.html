@@ -203,7 +203,7 @@
     </div>
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
-        <div class="glass-card" style="..." onclick="bukaLaporanBaru()">
+        <div class="glass-card" style="padding:15px; margin:0; text-align:center; cursor:pointer;" onclick="bukaLaporan()">
             <i class="fa-solid fa-chart-pie" style="font-size:24px; color:var(--gold); margin-bottom:10px;"></i>
             <div style="font-size:11px; font-weight:800;">REKAP & RANKING</div>
         </div>
@@ -560,26 +560,8 @@
             renderList();
         }
 
-        function bukaPopupSetoran(namaKurir, jumlah) { 
-            document.getElementById('teksTerimaSetoran').innerHTML = `Terima setoran <b>Rp ${jumlah.toLocaleString('id-ID')}</b> dari <b>${namaKurir.toUpperCase()}</b>?`; 
-            document.getElementById('modalTerimaSetoran').style.display = 'flex'; 
-            
-            document.getElementById('btnConfirmSetoran').onclick = function() { 
-                const keyTgl = document.getElementById('datePicker').value.split('-').reverse().join('-'); 
-                
-                db.ref(`setoran_kurir/${keyTgl}/${namaKurir}`).transaction(cv => (Number(cv) || 0) + jumlah).then(() => { 
-                    document.getElementById('modalTerimaSetoran').style.display = 'none'; 
-                    
-                    // --- SUNTIKAN SENSASI BANK DIGITAL (JARVIS) ---
-                    if(navigator.vibrate) navigator.vibrate([100, 50, 100]); // HP Getar ala mesin EDC
-                    
-                    // Kita eja angkanya biar robot Jarvis bacanya enak dan berwibawa
-                    const teksSuara = `Setoran tunai dari kurir ${namaKurir}, sebesar ${jumlah} rupiah, berhasil dikonfirmasi. Saldo kas telah diperbarui.`;
-                    jarvisBicara(teksSuara);
-                    // ----------------------------------------------
-                }); 
-            }; 
-        }
+        function bukaPopupSetoran(namaKurir, jumlah) { document.getElementById('teksTerimaSetoran').innerHTML = `Terima setoran <b>Rp ${jumlah.toLocaleString('id-ID')}</b> dari <b>${namaKurir.toUpperCase()}</b>?`; document.getElementById('modalTerimaSetoran').style.display = 'flex'; document.getElementById('btnConfirmSetoran').onclick = function() { const keyTgl = document.getElementById('datePicker').value.split('-').reverse().join('-'); db.ref(`setoran_kurir/${keyTgl}/${namaKurir}`).transaction(cv => (Number(cv) || 0) + jumlah).then(() => { document.getElementById('modalTerimaSetoran').style.display = 'none'; }); }; }
+
         function renderList() {
             const keyword = document.getElementById('searchBar').value.toLowerCase();
             const tglAktif = document.getElementById('datePicker').value.split('-').reverse().join('/');
@@ -764,105 +746,78 @@
             });
         }
 
-      // ================= MESIN LAPORAN CUSTOM TANGGAL (FIXED) =================
-        function bukaLaporanBaru() { 
-            // 1. Setel tanggal otomatis (Mulai dari tanggal 1 bulan ini sampai hari ini)
-            const now = new Date();
-            const y = now.getFullYear();
-            const m = String(now.getMonth() + 1).padStart(2, '0');
-            const d = String(now.getDate()).padStart(2, '0');
+        function bukaLaporan() { document.getElementById('bulanLaporan').value = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`; document.getElementById('laporanOverlay').style.display = 'flex'; hitungLaporan(); }
+        function hitungLaporan() {
+            const v = document.getElementById('bulanLaporan').value; if(!v) return;
+            const t = `${v.split('-')[1]}/${v.split('-')[0]}`; 
+            let s=0, g=0, c=0, tr=0;
             
-            document.getElementById('lapMulai').value = `${y}-${m}-01`;
-            document.getElementById('lapSelesai').value = `${y}-${m}-${d}`;
-            
-            // 2. Munculkan Laci Laporan
-            document.getElementById('laporanOverlay').style.display = 'flex'; 
-            
-            // 3. Jalankan hitungan
-            hitungLaporanBaru(); 
-            
-            // 4. Panggil Jarvis buat lapor
-            setTimeout(() => {
-                jarvisBicara("Membuka brankas data. Intelijen performa kurir siap dianalisa.");
-            }, 500);
-        }
-
-        function hitungLaporanBaru() {
-            const tglMulai = document.getElementById('lapMulai').value; 
-            const tglSelesai = document.getElementById('lapSelesai').value;
-            if(!tglMulai || !tglSelesai) return;
-
-            // Konversi rentang tanggal ke angka biar gampang dibandingin
-            const dMulai = new Date(tglMulai).setHours(0,0,0,0);
-            const dSelesai = new Date(tglSelesai).setHours(23,59,59,999);
-
-            let totalS=0, totalC=0, totalTr=0;
             let kurirStats = {};
 
             allOrders.forEach(o => { 
-                if(!o.tanggal) return;
-                const p = o.tanggal.split('/');
-                const orderDate = new Date(`${p[2]}-${p[1]}-${p[0]}`).getTime();
-
-                // Saring data berdasarkan tanggal & status TERKIRIM
-                if(orderDate >= dMulai && orderDate <= dSelesai) { 
+                if(o.tanggal && o.tanggal.includes(t)) { 
                     if(o.status === 'Terkirim') { 
-                        totalS++; 
-                        let nominal = Number(o.total || 0);
-                        if(o.metode === 'COD') totalC += nominal; else totalTr += nominal; 
-                        
+                        s++; 
+                        if(o.metode==='COD') c+=Number(o.total||0); else tr+=Number(o.total||0); 
                         if(o.kurir) {
                             let namaK = o.kurir.toUpperCase();
-                            if(!kurirStats[namaK]) kurirStats[namaK] = { terkirim: 0, cod: 0, tf: 0 };
-                            kurirStats[namaK].terkirim++;
-                            if(o.metode === 'COD') kurirStats[namaK].cod += nominal;
-                            else kurirStats[namaK].tf += nominal;
+                            if(!kurirStats[namaK]) kurirStats[namaK] = { sukses: 0, gagal: 0 };
+                            kurirStats[namaK].sukses++;
                         }
-                    }
+                    } else if(o.status === 'Gagal') { 
+                        g++; 
+                        if(o.kurir) {
+                            let namaK = o.kurir.toUpperCase();
+                            if(!kurirStats[namaK]) kurirStats[namaK] = { sukses: 0, gagal: 0 };
+                            kurirStats[namaK].gagal++;
+                        }
+                    } 
                 } 
             });
 
-            // Urutkan Peringkat (Paling banyak kirim paket di urutan atas)
             let leaderboard = Object.keys(kurirStats).map(nama => {
-                return { nama: nama, ...kurirStats[nama] };
-            }).sort((a, b) => b.terkirim - a.terkirim);
+                return { nama: nama, sukses: kurirStats[nama].sukses, gagal: kurirStats[nama].gagal };
+            }).sort((a, b) => b.sukses - a.sukses);
 
-            let htmlKurir = `<div style="margin-top:20px;"><div class="dashboard-header" style="color:var(--safe);"><i class="fa-solid fa-ranking-star"></i> RANKING PAKET TERKIRIM</div>`;
+            let htmlLeaderboard = `<div style="margin-top:20px;"><div style="font-size:11px; font-weight:800; color:var(--blue); margin-bottom:10px; display:flex; align-items:center; gap:5px; text-transform:uppercase;"><i class="fa-solid fa-ranking-star"></i> KINERJA KURIR BULAN INI</div>`;
             
             if(leaderboard.length === 0) {
-                htmlKurir += `<div style="font-size:10px; color:gray; text-align:center; padding: 15px; border:1px dashed rgba(255,255,255,0.1); border-radius:10px;">Gak ada data paket terkirim di rentang ini.</div>`;
+                htmlLeaderboard += `<div style="font-size:10px; color:gray; text-align:center; padding: 10px; border:1px dashed gray; border-radius:10px;">Belum ada data kurir bulan ini.</div>`;
             } else {
                 leaderboard.forEach((k, index) => {
-                    let medali = (index === 0) ? `<i class="fa-solid fa-medal" style="color:gold;"></i>` : `<b style="color:gray;">#${index+1}</b>`;
-                    htmlKurir += `
-                    <div class="report-box" style="padding:15px; margin-bottom:10px; display:flex; flex-direction:column; gap:8px; cursor:default; background:rgba(255,255,255,0.02); border:1px solid rgba(34,197,94,0.15); animation: fadeInUpItem 0.4s forwards; opacity:0;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div style="display:flex; align-items:center; gap:10px;">${medali} <b style="color:white; font-size:13px;">${k.nama}</b></div>
-                            <span style="color:var(--safe); font-weight:800; background:rgba(34,197,94,0.1); padding:4px 8px; border-radius:8px; border:1px solid var(--safe); font-size:10px;">${k.terkirim} PAKET</span>
+                    let medali = "";
+                    if(index === 0) medali = `<i class="fa-solid fa-medal" style="color: gold; font-size:16px; text-shadow: 0 0 10px rgba(212,175,55,0.5);"></i>`;
+                    else if(index === 1) medali = `<i class="fa-solid fa-medal" style="color: silver; font-size:14px;"></i>`;
+                    else if(index === 2) medali = `<i class="fa-solid fa-medal" style="color: #CD7F32; font-size:14px;"></i>`;
+                    else medali = `<b style="color:gray; font-size:11px;">#${index+1}</b>`;
+
+                    htmlLeaderboard += `
+                    <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:10px 15px; border-radius:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="width:20px; text-align:center;">${medali}</div>
+                            <b style="font-size:12px; color:white;">${k.nama}</b>
                         </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; border-top:1px dashed rgba(255,255,255,0.05); padding-top:8px;">
-                            <div style="font-size:10px; color:gray;">COD: <b class="uang-blur" style="color:var(--warning);">Rp ${k.cod.toLocaleString('id-ID')}</b></div>
-                            <div style="font-size:10px; color:gray; text-align:right;">TF: <b class="uang-blur" style="color:var(--blue);">Rp ${k.tf.toLocaleString('id-ID')}</b></div>
+                        <div style="text-align:right; font-size:11px;">
+                            <span style="color:var(--safe); font-weight:800; background:rgba(34,197,94,0.1); padding:3px 6px; border-radius:6px;"><i class="fa-solid fa-check"></i> ${k.sukses}</span> 
+                            <span style="color:var(--danger); font-weight:800; background:rgba(239,68,68,0.1); padding:3px 6px; border-radius:6px; margin-left:5px;"><i class="fa-solid fa-xmark"></i> ${k.gagal}</span>
                         </div>
                     </div>`;
                 });
             }
+            htmlLeaderboard += `</div>`;
 
-            // Tampilkan ke layar laci
             document.getElementById('isiLaporan').innerHTML = `
-                <div style="background:var(--gradient-dark); padding:15px; border-radius:15px; border:1px solid var(--gold);">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span style="color:gray; font-size:11px;">Total Terkirim:</span><b style="color:var(--safe); font-size:14px;">${totalS} PAKET</b></div>
-                    <hr style="border:none; border-top:1px dashed rgba(255,255,255,0.1); margin:10px 0;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span style="color:gray; font-size:11px;">Tunai (COD):</span><b class="uang-blur">Rp ${totalC.toLocaleString('id-ID')}</b></div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span style="color:gray; font-size:11px;">Transfer:</span><b class="uang-blur">Rp ${totalTr.toLocaleString('id-ID')}</b></div>
-                    <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:2px solid var(--gold); color:var(--gold);"><b>TOTAL OMZET:</b><b class="uang-blur" style="font-size:16px;">Rp ${(totalC+totalTr).toLocaleString('id-ID')}</b></div>
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; border:1px solid rgba(255,255,255,0.1);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span style="color:gray; font-size:11px;">Total Sukses:</span><b>${s} Pcs</b></div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span style="color:gray; font-size:11px;">Total Gagal:</span><b>${g} Pcs</b></div>
+                    <hr style="border:none; border-top:1px dashed rgba(255,255,255,0.2); margin:10px 0;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span style="color:gray; font-size:11px;">Tunai (COD):</span><b class="uang-blur" style="color:var(--warning);">Rp ${c.toLocaleString('id-ID')}</b></div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span style="color:gray; font-size:11px;">Transfer:</span><b class="uang-blur" style="color:var(--blue);">Rp ${tr.toLocaleString('id-ID')}</b></div>
+                    <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:15px; border-top:2px solid var(--gold); color:var(--gold);"><b>TOTAL OMZET:</b><b class="uang-blur" style="font-size:16px;">Rp ${(c+tr).toLocaleString('id-ID')}</b></div>
                 </div>
-                ${htmlKurir}
+                ${htmlLeaderboard}
             `;
         }
-        // Tambahkan pemicu agar saat ganti input tanggal, hitungan langsung jalan
-        document.getElementById('lapMulai').onchange = hitungLaporanBaru;
-        document.getElementById('lapSelesai').onchange = hitungLaporanBaru;
 
         let map, markers={};
         function renderRadarMarkers() { if(!map) return; const f = document.getElementById('radarFilterSelect').value; for(let k in markers) { map.removeLayer(markers[k]); } markers = {}; for(let k in mapDataFirebase) { if(f === 'ALL' || f === k) { markers[k] = L.marker([mapDataFirebase[k].lat, mapDataFirebase[k].lng]).addTo(map).bindPopup(k.toUpperCase()); } } }
