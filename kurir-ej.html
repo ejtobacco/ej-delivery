@@ -123,39 +123,28 @@
     <audio id="beepSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
     
     <div id="loginOverlay">
-        
-        <button onclick="wusWusReload(this)" style="position: absolute; top: 25px; right: 25px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212, 175, 55, 0.3); color: var(--gold); padding: 10px; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(0,0,0,0.5); z-index: 10; transition: 0.2s;">
-            <i class="fa-solid fa-rotate-right"></i>
-        </button>
+    <div style="text-align: center; width: 320px; padding: 25px; background: rgba(255,255,255,0.02); border: 1px solid var(--gold); border-radius: 25px; backdrop-filter: blur(15px);">
+        <i class="fa-solid fa-motorcycle" style="font-size: 50px; color: var(--gold); margin-bottom: 15px;"></i>
+        <h2 style="color:#fff; letter-spacing: 2px;">EJ LOGISTICS</h2>
+        <p style="color:var(--gold); font-size:10px; margin-bottom:25px; opacity:0.8;">OFFICIAL COURIER ACCESS</p>
 
-        <div style="text-align: center; width: 320px;">
-            
-            <div style="margin-bottom: 30px;">
-                <i class="fa-solid fa-motorcycle" style="font-size: 40px; color: var(--gold); margin-bottom: 15px;"></i>
-                <h2 style="color:#fff;">EJ ACCESS</h2>
-                <p style="color:var(--gold); font-size:10px; letter-spacing:2px;">SECURITY VERIFICATION</p>
-            </div>
-            
-            <div class="input-group" style="margin-bottom: 20px;">
-                <i class="fa-solid fa-user-astronaut" style="z-index: 10;"></i>
-                <select id="namaKurirInput" style="width: 100%; background: #111; color: var(--gold); border: 1px solid var(--gold); padding: 15px 15px 15px 45px; border-radius: 12px; font-weight: 800; outline: none; appearance: none;">
-                    <option value="kurirA">KURIR - kurirA</option>
-                    <option value="kurirB">KURIR - kurirB</option>
-                    <option value="kurirC">KURIR - kurirC</option>
-                </select>
-            </div>
-            
-            <div class="pin-display" id="pinDisplay">****</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; justify-items: center;">
-                <button class="num-btn" onclick="pressPin('1')">1</button><button class="num-btn" onclick="pressPin('2')">2</button><button class="num-btn" onclick="pressPin('3')">3</button>
-                <button class="num-btn" onclick="pressPin('4')">4</button><button class="num-btn" onclick="pressPin('5')">5</button><button class="num-btn" onclick="pressPin('6')">6</button>
-                <button class="num-btn" onclick="pressPin('7')">7</button><button class="num-btn" onclick="pressPin('8')">8</button><button class="num-btn" onclick="pressPin('9')">9</button>
-                <button class="num-btn" onclick="pressPin('C')" style="color:var(--danger)"><i class="fa-solid fa-delete-left"></i></button>
-                <button class="num-btn" onclick="pressPin('0')">0</button>
-                <button class="num-btn" onclick="pressPin('OK')" style="color:var(--safe)"><i class="fa-solid fa-check"></i></button>
-            </div>
+        <div class="input-group">
+            <i class="fa-solid fa-envelope"></i>
+            <input type="email" id="emailInput" placeholder="Email Akun Kurir..." style="padding-left:45px;">
         </div>
+
+        <div class="input-group">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="passInput" placeholder="Password..." style="padding-left:45px;">
+        </div>
+
+        <button class="btn-main" id="btnLoginNow" onclick="prosesLoginEmail()">
+            <i class="fa-solid fa-right-to-bracket"></i> MASUK SEKARANG
+        </button>
+        
+        <p id="teksErrorLogin" style="color:#F87171; font-size:10px; margin-top:15px; display:none; background:rgba(239,68,68,0.1); padding:10px; border-radius:10px; border:1px solid #EF4444;"></p>
     </div>
+</div>
 
     <div class="header">
         <div class="logo-text-container" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
@@ -286,106 +275,76 @@
     <script>
     const firebaseConfig = { apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg", authDomain: "ejtobacco-v2.firebaseapp.com", databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "ejtobacco-v2", storageBucket: "ejtobacco-v2.firebasestorage.app", messagingSenderId: "366973371317", appId: "1:366973371317:web:c5ec32460cd9cf0f6c8ffc" };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    let currentTab = 'Proses', allData = [], allPengeluaranData = {}, allSetoranData = {}, tempFileSukses = null, tempIdSukses = "";
-    
-    // 1. PANGGIL MEMORI HP
-    let myName = localStorage.getItem('namaKurir') || "";
-
-    // 2. MESIN AUTO-LOGIN FIREBASE
-    window.onload = () => {
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user && myName) {
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
-                mulaiTarikDataKurir(); // Mulai sedot data
-            } else {
-                document.getElementById('loginOverlay').style.display = 'flex';
-            }
-        });
-    };
-
-        function mulaiTarikDataKurir() {
-        db.ref('pesanan').limitToLast(200).on('value', snap => { allData = snap.val() ? Object.keys(snap.val()).map(k => ({id:k, ...snap.val()[k]})).reverse() : []; if(myName) updateUI(); });
-        db.ref('pengeluaran').limitToLast(150).on('value', snap => { allPengeluaranData = snap.val() || {}; if(myName) updateUI(); });
-        db.ref('setoran_kurir').on('value', snap => { allSetoranData = snap.val() || {}; if(myName) updateUI(); });
-        aktifkanRadar();
-    }
-    
-    function getTgl() { const n = new Date(); return `${String(n.getDate()).padStart(2,'0')}/${String(n.getMonth()+1).padStart(2,'0')}/${n.getFullYear()}`; }
-    
-    setInterval(() => { 
-        const now = new Date(); 
-        document.getElementById('clock').innerHTML = `<i class="fa-regular fa-clock"></i> ${now.toLocaleTimeString('id-ID')}`; 
         
-        // UPDATE TANGGAL OTOMATIS
-        const opsiTgl = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
-        if(document.getElementById('currentDay')) document.getElementById('currentDay').innerText = now.toLocaleDateString('id-ID', opsiTgl).toUpperCase();
-        
-        updateStatusInternet();
-    }, 1000);
+    // --- LOGIKA UTAMA EJ KURIR (EMAIL LOGIN VERSION) ---
+const db = firebase.database();
+let myName = localStorage.getItem('namaKurir') || "";
+let currentTab = 'Proses', allData = [], allPengeluaranData = {}, allSetoranData = {};
 
-    const dataPIN = { "kurirA": "1111", "kurirB": "2222", "kurirC": "3333" };
-    let memoriPIN = ""; 
-
-        // ---> MESIN ANIMASI RELOAD WUS WUS <---
-    function wusWusReload(btn) {
-        btn.style.transform = "scale(0.85)"; // Tombol mengecil pas ditekan
-        const icon = btn.querySelector('i');
-        icon.classList.add('fa-spin'); // Icon panah muter kenceng
-        
-        setTimeout(() => {
-            window.location.reload(); // Refresh halaman setelah setengah detik
-        }, 500); 
-    }
-
-    function pressPin(val) {
-        if (val === 'C') { 
-            memoriPIN = ""; 
-        } else if (val === 'OK') {
-            const sel = document.getElementById('namaKurirInput').value;
-            document.getElementById('pinDisplay').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            
-            // RAKIT EMAIL DAN PASSWORD FIREBASE DARI PIN
-            const emailKurir = sel.toLowerCase() + "@ejtobacco.com";
-            const passKurir = memoriPIN + "ej";
-
-            // PROSES LOGIN KE FIREBASE
-            firebase.auth().signInWithEmailAndPassword(emailKurir, passKurir)
-            .then((userCredential) => {
-                myName = sel; 
-                localStorage.setItem('namaKurir', myName); 
-                document.getElementById('loginOverlay').style.display='none'; 
-                document.getElementById('namaKurirHeader').innerText=myName.toUpperCase(); 
-                mulaiTarikDataKurir();
-                memoriPIN = ""; 
-            })
-            .catch((error) => {
-                alert("⚠️ PIN SALAH! Atau akun belum dibuat oleh Bos."); 
-                memoriPIN = ""; 
-                document.getElementById('pinDisplay').innerText = "****";
-            });
-        } else { 
-            if (memoriPIN.length < 4) memoriPIN += val; 
+// 1. CEK STATUS LOGIN SAAT BUKA APLIKASI
+window.onload = () => {
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            // Jika user sudah login, ambil nama dari emailnya
+            myName = user.email.split('@')[0];
+            localStorage.setItem('namaKurir', myName);
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
+            mulaiTarikData(); 
+        } else {
+            document.getElementById('loginOverlay').style.display = 'flex';
         }
-        if (val !== 'OK') document.getElementById('pinDisplay').innerText = memoriPIN.length > 0 ? "*".repeat(memoriPIN.length) : "****";
-    }
+    });
+};
 
-    function tampilkanPopupLogout() {
-        document.getElementById('modalLogout').style.display = 'flex';
-    }
+    // 2. FUNGSI LOGIN (Dijalankan saat tombol dipencet)
+function prosesLoginEmail() {
+    const email = document.getElementById('emailInput').value.trim();
+    const pass = document.getElementById('passInput').value.trim();
+    const btn = document.getElementById('btnLoginNow');
+    const err = document.getElementById('teksErrorLogin');
+
+    if(!email || !pass) { alert("⚠️ Isi Email & Password dulu Bos!"); return; }
+
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> MEMVERIFIKASI...';
+    btn.disabled = true;
+    err.style.display = 'none';
+
+    firebase.auth().signInWithEmailAndPassword(email, pass)
+    .then(() => { console.log("Berhasil Masuk!"); })
+    .catch((error) => {
+        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> MASUK SEKARANG';
+        btn.disabled = false;
+        err.innerText = "❌ GAGAL: Email/Password salah atau tidak ada sinyal.";
+        err.style.display = 'block';
+    });
+}
+
+    // 3. TARIK DATA DARI DATABASE
+function mulaiTarikData() {
+    db.ref('pesanan').limitToLast(200).on('value', snap => { 
+        allData = snap.val() ? Object.keys(snap.val()).map(k => ({id:k, ...snap.val()[k]})).reverse() : []; 
+        updateUI(); 
+    });
+    db.ref('pengeluaran').limitToLast(150).on('value', snap => { 
+        allPengeluaranData = snap.val() || {}; 
+        updateUI(); 
+    });
+    db.ref('setoran_kurir').on('value', snap => { 
+        allSetoranData = snap.val() || {}; 
+        updateUI(); 
+    });
+    aktifkanRadar(); // Nyalakan GPS
+}
 
     function eksekusiLogout() {
+    if(confirm("Keluar dari aplikasi?")) {
         firebase.auth().signOut().then(() => {
-            myName = "";
-            localStorage.removeItem('namaKurir'); 
-            document.getElementById('pinDisplay').innerText = "****";
-            memoriPIN = "";
-            document.getElementById('modalLogout').style.display = 'none';
-            document.getElementById('loginOverlay').style.display = 'flex';
+            localStorage.removeItem('namaKurir');
+            window.location.reload();
         });
-    }}
+    }
+}
 
     function forceRefresh() {
         const icon = document.getElementById('iconRefresh');
