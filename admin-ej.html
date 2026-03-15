@@ -989,42 +989,44 @@
         
         function setTvMode(nyala) {
             if (isTvMode === nyala) return; 
-            if (nyala && window.innerHeight < 250) return; 
-
             isTvMode = nyala;
+            
             const icon = document.getElementById('iconTV');
-            const mapAsli = document.getElementById('mapRadar');
-            const slotTv = document.getElementById('tvMapSlot');
-            let slotModalAsli = document.getElementById('mapRadar').parentNode; 
+            const mapAsli = document.getElementById('mapRadar'); // Ini si petanya
+            const slotTv = document.getElementById('tvMapSlot'); // Wadah pas miring
+            const slotModalAsli = document.getElementById('radarOverlay').querySelector('div div'); // Wadah pas tegak (Laci)
 
             if (isTvMode) {
+                // --- MODE MIRING (NASA) ---
                 document.body.classList.add('tv-mode');
-                if(icon) icon.style.color = 'var(--blue)'; 
-                if(navigator.vibrate) navigator.vibrate([100, 50]); 
+                if(icon) icon.style.color = 'var(--blue)';
                 
+                // Pindahkan peta ke layar kanan
                 if(slotTv && mapAsli) slotTv.appendChild(mapAsli);
                 
                 if(!map) { 
-                    map=L.map('mapRadar').setView([-6.8694, 109.0435], 13); 
+                    map = L.map('mapRadar').setView([-6.8694, 109.0435], 13); 
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); 
                     db.ref('tracking').on('value', s => { mapDataFirebase = s.val(); if(mapDataFirebase) renderRadarMarkers(); }); 
                 }
             } else {
+                // --- MODE TEGAK (NORMAL) ---
                 document.body.classList.remove('tv-mode');
                 if(icon) icon.style.color = 'gray';
                 
-                // Balikin ke modal awal
-                const modalBody = document.querySelector('#radarOverlay div div'); 
-                if(modalBody && mapAsli) modalBody.appendChild(mapAsli);
+                // WAJIB: Kembalikan peta ke laci modal (kandangnya)
+                if(slotModalAsli && mapAsli) {
+                    slotModalAsli.appendChild(mapAsli);
+                }
             }
 
-            // --- JADWAL REFRESH PETA OTOMATIS (BIAR GAK TERPOTONG) ---
+            // --- REFRESH MESIN PETA ---
             setTimeout(() => { 
                 if(map) {
-                    map.invalidateSize(); 
+                    map.invalidateSize(); // Paksa peta sadar ukuran wadah baru
                     autoFocusKurir(); // Langsung bidik kurir
                 }
-            }, 500);
+            }, 500); // Kasih jeda biar transisi layar selesai dulu
         }
 
         // FUNGSI AUTO-BIDIK KURIR
