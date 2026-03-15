@@ -36,19 +36,19 @@
         .swipe-content { position: relative; z-index: 1; background: var(--gradient-dark); transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); touch-action: pan-y; }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 0; z-index: 9999; background: rgba(5,5,5,0.85); backdrop-filter: blur(15px); padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .main-logo-text { color: var(--gold); font-weight: 800; font-size: 20px; letter-spacing: 1px; text-transform: uppercase; }
+        .main-logo-text { color: var(--gold); font-weight: 800; font-size: 20px; letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(212,175,55,0.3); }
         
-        .wallet-card { background: var(--gradient-dark); border: 1px solid var(--safe); border-radius: 20px; padding: 20px; margin-bottom: 20px; text-align: center; position: relative; }
+        .wallet-card { background: var(--gradient-dark); border: 1px solid var(--safe); border-radius: 20px; padding: 20px; margin-bottom: 20px; text-align: center; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         #totalCOD { display: block; font-size: 32px; font-weight: 800; color: var(--safe); margin-top: 5px; }
 
         .tab-menu { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
-        .tab-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 5px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 10px; text-align: center; cursor: pointer; }
+        .tab-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 5px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 10px; text-align: center; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .tab-btn.active { background: rgba(212, 175, 55, 0.15); border-color: var(--gold); color: var(--gold); }
 
         .search-box { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 15px 14px 45px; color: white; outline: none; margin-bottom: 15px; }
-        .glass-card { background: var(--gradient-dark); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; margin-bottom: 15px; position: relative; overflow: hidden; }
+        .glass-card { background: var(--gradient-dark); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; margin-bottom: 15px; position: relative; overflow: hidden; transition: 0.3s; }
         .btn-main { background: var(--gradient-gold); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; }
-        .action-btn { border: none; padding: 12px; border-radius: 10px; font-size: 10px; font-weight: 800; color: white; cursor: pointer; }
+        .action-btn { border: none; padding: 12px; border-radius: 10px; font-size: 10px; font-weight: 800; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
         
         body.is-offline #orderContainer { pointer-events: none; opacity: 0.5; }
         .order-badge { padding: 5px 12px; border-radius: 20px; font-size: 9px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; }
@@ -58,11 +58,17 @@
         .badge-gagal { background: rgba(239,68,68,0.2); color: #F87171; border: 1px solid #EF4444; }
 
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100000; flex-direction: column; justify-content: flex-end; align-items: center; backdrop-filter: blur(5px); }
-        .bottom-sheet { width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 20px 20px 40px 20px; }
-        .modal-input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 15px; color: white; margin-bottom: 15px; }
+        .bottom-sheet { width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 20px 20px 40px 20px; animation: slideUpSheet 0.4s forwards; }
+        .modal-input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 15px; color: white; margin-bottom: 15px; outline: none; }
+        
+        @keyframes slideUpSheet { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
 
+        /* SUNLIGHT MODE */
         body.sunlight-mode { background: #E5E7EB; color: #111; }
-        body.sunlight-mode .glass-card, body.sunlight-mode .wallet-card { background: white !important; border: 1px solid #ccc !important; color: #111; }
+        body.sunlight-mode .glass-card, body.sunlight-mode .wallet-card, body.sunlight-mode .bottom-sheet { background: white !important; border: 1px solid #ccc !important; color: #111; }
+        body.sunlight-mode .tab-btn { background: white; color: #555; border: 1px solid #ccc; }
+        body.sunlight-mode .search-box, body.sunlight-mode .modal-input { background: #eee; color: #000; border: 1px solid #ccc; }
+        body.sunlight-mode .swipe-content { background: white !important; }
     </style>
 </head>
 <body>
@@ -71,7 +77,8 @@
         <div style="text-align: center; width: 320px;">
             <i class="fa-solid fa-motorcycle" style="font-size: 40px; color: var(--gold); margin-bottom: 15px;"></i>
             <h2 style="color:#fff;">EJ ACCESS</h2>
-            <select id="namaKurirInput" style="width: 100%; background: #111; color: var(--gold); border: 1px solid var(--gold); padding: 15px; border-radius: 12px; font-weight: 800; margin: 20px 0;">
+            <p style="color:var(--gold); font-size:10px; letter-spacing:2px; margin-bottom:20px;">SECURITY VERIFICATION</p>
+            <select id="namaKurirInput" style="width: 100%; background: #111; color: var(--gold); border: 1px solid var(--gold); padding: 15px; border-radius: 12px; font-weight: 800; margin-bottom: 20px;">
                 <option value="kurirA">KURIR - kurirA</option>
                 <option value="kurirB">KURIR - kurirB</option>
                 <option value="kurirC">KURIR - kurirC</option>
@@ -81,54 +88,93 @@
                 <button class="num-btn" onclick="pressPin('1')">1</button><button class="num-btn" onclick="pressPin('2')">2</button><button class="num-btn" onclick="pressPin('3')">3</button>
                 <button class="num-btn" onclick="pressPin('4')">4</button><button class="num-btn" onclick="pressPin('5')">5</button><button class="num-btn" onclick="pressPin('6')">6</button>
                 <button class="num-btn" onclick="pressPin('7')">7</button><button class="num-btn" onclick="pressPin('8')">8</button><button class="num-btn" onclick="pressPin('9')">9</button>
-                <button class="num-btn" onclick="pressPin('C')">C</button><button class="num-btn" onclick="pressPin('0')">0</button><button class="num-btn" onclick="pressPin('OK')">OK</button>
+                <button class="num-btn" onclick="pressPin('C')" style="color:var(--danger)"><i class="fa-solid fa-delete-left"></i></button>
+                <button class="num-btn" onclick="pressPin('0')">0</button>
+                <button class="num-btn" onclick="pressPin('OK')" style="color:var(--safe)"><i class="fa-solid fa-check"></i></button>
             </div>
         </div>
     </div>
 
     <div class="header">
-        <div class="main-logo-text">EJ TOBACCO</div>
+        <div class="logo-text-container" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+            <div class="main-logo-text">EJ TOBACCO</div>
+            <div style="font-size:9px; color:gray; display:flex; align-items:center; gap:5px;">
+                <b id="namaKurirHeader">...</b> | 
+                <button onclick="toggleSunlightMode()" style="background:none; border:none; color:var(--warning);"><i class="fa-solid fa-sun"></i></button>
+                <button onclick="forceRefresh()" style="background:none; border:none; color:var(--blue);"><i class="fa-solid fa-rotate"></i></button>
+                <button onclick="tampilkanPopupLogout()" style="background:none; border:none; color:var(--danger);"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </div>
         <div style="text-align: right;">
             <div id="clock" style="font-size: 14px; font-weight: 800; color: var(--safe);">00:00:00</div>
-            <div id="teksKoneksi" style="font-size: 9px; font-weight: 800; color: var(--safe);">ONLINE</div>
+            <div id="teksKoneksi" style="font-size: 9px; font-weight: 800; color: var(--safe);">SISTEM ONLINE</div>
         </div>
     </div>
 
     <div class="wallet-card">
-        <span style="font-size:10px;">DOMPET COD HARI INI</span>
+        <span style="font-size:10px; color:var(--safe); font-weight:800;">DOMPET COD HARI INI</span>
         <b id="totalCOD">Rp 0</b>
-        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
-            <div style="text-align: left;"><span style="font-size: 8px;">KELUAR</span><b id="totalPengeluaran" style="color: var(--danger);">Rp 0</b></div>
-            <div style="text-align: right;"><span style="font-size: 8px;">WAJIB SETOR</span><b id="setoranBersih" style="color: var(--gold);">Rp 0</b></div>
+        <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.1);">
+            <div style="text-align: left;"><span style="font-size: 8px; color:var(--danger);">KELUAR</span><b id="totalPengeluaran" style="display:block; color: var(--danger); font-size:14px;">Rp 0</b></div>
+            <div style="text-align: right;"><span style="font-size: 8px; color:var(--gold);">WAJIB SETOR</span><b id="setoranBersih" style="display:block; color: var(--gold); font-size:14px;">Rp 0</b></div>
         </div>
-        <button onclick="tambahPengeluaran()" class="btn-main" style="margin-top: 10px; font-size: 10px;">CATAT PENGELUARAN</button>
+        <button onclick="tambahPengeluaran()" class="btn-main" style="margin-top: 15px; font-size: 10px; background:rgba(255,255,255,0.1); color:white;">CATAT PENGELUARAN</button>
     </div>
 
     <div class="tab-menu">
-        <div class="tab-btn" id="t-Gudang" onclick="setTab('Gudang')">GUDANG <span id="c-Gudang">0</span></div>
-        <div class="tab-btn active" id="t-Proses" onclick="setTab('Proses')">TAS SAYA <span id="c-Proses">0</span></div>
-        <div class="tab-btn" id="t-Terkirim" onclick="setTab('Terkirim')">SUKSES <span id="c-Terkirim">0</span></div>
-        <div class="tab-btn" id="t-Gagal" onclick="setTab('Gagal')">CANCEL <span id="c-Gagal">0</span></div>
+        <div class="tab-btn" id="t-Gudang" onclick="setTab('Gudang')"><i class="fa-solid fa-warehouse"></i>GUDANG <span id="c-Gudang">0</span></div>
+        <div class="tab-btn active" id="t-Proses" onclick="setTab('Proses')"><i class="fa-solid fa-motorcycle"></i>TAS SAYA <span id="c-Proses">0</span></div>
+        <div class="tab-btn" id="t-Terkirim" onclick="setTab('Terkirim')"><i class="fa-solid fa-circle-check"></i>SUKSES <span id="c-Terkirim">0</span></div>
+        <div class="tab-btn" id="t-Gagal" onclick="setTab('Gagal')"><i class="fa-solid fa-circle-xmark"></i>CANCEL <span id="c-Gagal">0</span></div>
     </div>
 
     <div class="input-group">
-        <input type="text" id="searchOrder" class="search-box" placeholder="Cari pesanan..." oninput="renderOrders()">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchOrder" class="search-box" placeholder="Cari nama atau resi..." oninput="renderOrders()">
     </div>
 
     <div id="orderContainer"></div>
 
     <div id="modalPenerima" class="modal-overlay">
         <div class="glass-card bottom-sheet">
-            <h2 style="color:var(--safe); text-align:center;">PAKET DITERIMA</h2>
-            <input type="text" id="inputNamaPenerima" class="modal-input" placeholder="Nama Penerima...">
-            <div id="kalkulatorCOD" style="display:none; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; margin-bottom:10px;">
-                <p>Tagihan: <b id="tagihanCalc">0</b></p>
-                <input type="number" id="uangDiterima" class="modal-input" placeholder="Uang diterima..." oninput="hitungKembalian()">
-                <p id="teksKembalian">Kembalian: Rp 0</p>
+            <div style="width:40px; height:5px; background:rgba(255,255,255,0.2); border-radius:10px; margin:0 auto 15px auto;"></div>
+            <h2 style="color:var(--safe); text-align:center; font-size:18px;"><i class="fa-solid fa-camera"></i> PAKET DITERIMA</h2>
+            <p style="font-size:11px; text-align:center; color:gray; margin-bottom:15px;">Foto bukti tersimpan. Siapa nama penerimanya?</p>
+            <input type="text" id="inputNamaPenerima" class="modal-input" placeholder="Nama Penerima (Misal: Istri, Anak, Ybs)">
+            
+            <div id="kalkulatorCOD" style="display:none; background:rgba(0,0,0,0.3); padding:15px; border-radius:12px; margin-bottom:15px; border:1px dashed var(--warning);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span style="font-size:12px; color:gray;">TAGIHAN:</span><b id="tagihanCalc" style="color:var(--warning); font-size:18px;">Rp 0</b></div>
+                <input type="number" id="uangDiterima" class="modal-input" placeholder="Uang yang diterima..." oninput="hitungKembalian()" style="margin-bottom:10px; border-color:var(--safe);">
+                <div id="teksKembalian" style="text-align:center; font-size:20px; font-weight:800;">Rp 0</div>
             </div>
+
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                 <button class="btn-main" style="background:#444; color:white;" onclick="batalUploadSelesai()">BATAL</button>
-                <button id="btnUploadFoto" class="btn-main" onclick="eksekusiUploadSelesai()">UPLOAD</button>
+                <button id="btnUploadFoto" class="btn-main" style="background:var(--safe); color:white;" onclick="eksekusiUploadSelesai()">UPLOAD & SELESAI</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalAlasan" class="modal-overlay">
+        <div class="glass-card bottom-sheet" style="border-color:var(--warning);">
+            <h2 style="text-align:center; color:var(--warning); font-size:18px;"><i class="fa-solid fa-circle-exclamation"></i> TULIS ALASAN</h2>
+            <textarea id="textAlasan" class="modal-input" style="height:100px; margin-top:15px;" placeholder="Kenapa paket ini bermasalah? (Misal: Alamat tidak ketemu, Uang kurang, Rumah kosong)"></textarea>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button class="btn-main" style="background:var(--warning); color:black;" onclick="prosesSimpanAlasan('Tunda')">TUNDA</button>
+                <button class="btn-main" style="background:var(--danger); color:white;" onclick="prosesSimpanAlasan('Gagal')">CANCEL</button>
+            </div>
+            <button class="action-btn" style="width:100%; margin-top:10px; background:none; border:1px solid #444;" onclick="document.getElementById('modalAlasan').style.display='none'">BATAL</button>
+        </div>
+    </div>
+
+    <div id="modalExpense" class="modal-overlay">
+        <div class="glass-card bottom-sheet">
+            <h2 style="color:var(--gold); text-align:center; font-size:18px;">CATAT PENGELUARAN</h2>
+            <input type="text" id="expKet" class="modal-input" placeholder="Untuk apa? (Bensin, Makan, Tambal Ban)">
+            <input type="number" id="expNom" class="modal-input" placeholder="Nominal (Rp)">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button class="btn-main" style="background:#444; color:white;" onclick="document.getElementById('modalExpense').style.display='none'">BATAL</button>
+                <button class="btn-main" style="background:var(--safe); color:white;" onclick="prosesSimpanExpense()">SIMPAN</button>
             </div>
         </div>
     </div>
@@ -136,9 +182,9 @@
     <div id="ejAlertOverlay" class="modal-overlay" style="justify-content:center; padding:20px; z-index:9999999;">
         <div class="glass-card" style="width:100%; max-width:320px; text-align:center; border-color:var(--gold);" id="ejAlertBox">
             <div id="ejAlertIcon" style="font-size:40px; margin-bottom:15px;"></div>
-            <h2 id="ejAlertTitle"></h2>
-            <p id="ejAlertText" style="margin: 10px 0 20px 0; font-size: 12px; color: #ccc;"></p>
-            <button class="btn-main" onclick="tutupEjAlert()">OK</button>
+            <h2 id="ejAlertTitle" style="font-size:18px;"></h2>
+            <p id="ejAlertText" style="margin: 10px 0 20px 0; font-size: 13px; color: #ccc;"></p>
+            <button class="btn-main" onclick="tutupEjAlert()">MENGERTI</button>
         </div>
     </div>
 
@@ -154,15 +200,19 @@
         let myName = localStorage.getItem('namaKurir') || "";
         let currentTab = 'Proses', allData = [], allPengeluaranData = {}, allSetoranData = {}, memoriPIN = "";
         const dataPIN = { "kurirA": "1111", "kurirB": "2222", "kurirC": "3333" };
+        let tempIdSukses, tempMetodeSukses, tempTotalSukses, tempFileSukses;
+        let wakeLock = null;
 
-        // --- KTP SATPAM (HARUS DI ATAS) ---
+        // --- KTP SATPAM & AUTO LOGIN ---
         firebase.auth().signInWithEmailAndPassword("tokoej2020@gmail.com", "ejtbk2020")
         .then(() => {
             console.log("KTP KURIR DITERIMA!");
             if (myName) {
                 document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
                 initDataRealtime();
                 aktifkanRadar();
+                if(currentTab === 'Proses') nyalakanMesinKopi();
             }
         });
 
@@ -185,8 +235,13 @@
                     else if (o.status === 'Gagal' && o.tanggal === today) g++;
                 }
             });
+            let expK = 0; Object.values(allPengeluaranData).forEach(e => { if(String(e.kurir||"").toLowerCase() === me && e.tanggal === today) expK += Number(e.nominal || 0); });
+            let setK = 0; const key = today.replace(/\//g, '-'); if(allSetoranData[key] && allSetoranData[key][myName]) setK = Number(allSetoranData[key][myName]);
+
             document.getElementById('c-Gudang').innerText=gd; document.getElementById('c-Proses').innerText=p; document.getElementById('c-Terkirim').innerText=s; document.getElementById('c-Gagal').innerText=g;
             document.getElementById('totalCOD').innerText="Rp "+codK.toLocaleString('id-ID');
+            document.getElementById('totalPengeluaran').innerText="Rp "+expK.toLocaleString('id-ID');
+            document.getElementById('setoranBersih').innerText="Rp "+Math.max(0, codK - expK - setK).toLocaleString('id-ID');
             renderOrders();
         }
 
@@ -197,29 +252,61 @@
             container.innerHTML = "";
 
             let filtered = allData.filter(o => {
-                const match = (o.namaPembeli || "").toLowerCase().includes(search);
+                const match = (o.namaPembeli || "").toLowerCase().includes(search) || (o.noPesanan || "").toLowerCase().includes(search);
                 if (currentTab === 'Gudang') return match && o.status === 'Gudang';
                 if (String(o.kurir || "").toLowerCase() !== me) return false;
                 if (currentTab === 'Proses') return match && (o.status === 'Proses' || o.status === 'Tunda');
                 return match && (o.status === currentTab && o.tanggal === today);
             });
 
-            filtered.forEach(o => {
+            // Sorting rute khusus tab Proses
+            if(currentTab === 'Proses') {
+                let customOrder = JSON.parse(localStorage.getItem('rute_'+myName)) || [];
+                filtered.sort((a,b) => (customOrder.indexOf(a.id) === -1 ? 999 : customOrder.indexOf(a.id)) - (customOrder.indexOf(b.id) === -1 ? 999 : customOrder.indexOf(b.id)));
+            }
+
+            filtered.forEach((o, idx) => {
+                const waNum = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
+                let badgeCls = o.status==='Gudang'?'badge-gudang':(o.status==='Terkirim'?'badge-sukses':(o.status==='Gagal'?'badge-gagal':'badge-proses'));
+                let dragHandle = currentTab === 'Proses' ? `<div class="drag-handle" style="background:rgba(212,175,55,0.1); padding:8px; text-align:center; color:var(--gold); font-size:10px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:800;"><span style="background:var(--gold); color:black; padding:2px 8px; border-radius:10px; margin-right:10px;">${idx+1}</span><i class="fa-solid fa-grip-lines"></i> GESER ATUR RUTE</div>` : '';
+                
+                let swipeAction = (o.status !== 'Terkirim' && o.status !== 'Gagal' && o.status !== 'Gudang') ? `
+                    <div class="swipe-bg">
+                        <div style="color:var(--safe);"><i class="fa-solid fa-camera"></i> SELESAI</div>
+                        <div style="color:var(--danger);">MASALAH <i class="fa-solid fa-xmark"></i></div>
+                    </div>` : '';
+
                 container.innerHTML += `
-                <div class="glass-card">
-                    <b>${o.namaPembeli}</b><br><small>${o.noPesanan}</small><br>
-                    <p style="font-size:11px; margin:10px 0;">${o.alamat}</p>
-                    <div class="order-badge ${o.status==='Gudang'?'badge-gudang':'badge-proses'}">${o.status}</div>
-                    <div style="margin-top:10px;">
-                        ${o.status === 'Gudang' ? `<button class="btn-main" onclick="ambilPaket('${o.id}')">AMBIL PAKET</button>` : 
-                        `<button class="action-btn" style="background:var(--safe); width:100%;" onclick="bukaModalFoto('${o.id}', '${o.metode}', ${o.total})">SELESAI</button>`}
+                <div class="glass-card sortable-item ${o.urgent?'card-urgent':''}" data-id="${o.id}" style="padding:0; overflow:hidden;">
+                    ${dragHandle}
+                    <div style="position:relative;">
+                        ${swipeAction}
+                        <div class="swipe-content" data-swipe-id="${o.id}" data-status="${o.status}" style="padding:15px;">
+                            <div onclick="if(!window.isSwipingMode) toggleDetail('${o.id}')" style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="display:flex; gap:12px; align-items:center;">
+                                    <div style="width:35px; height:35px; background:rgba(255,255,255,0.05); border-radius:10px; display:flex; justify-content:center; align-items:center;"><i class="fa-solid ${o.status==='Terkirim'?'fa-check-double':'fa-box'}" style="color:var(--gold)"></i></div>
+                                    <div><b>${o.namaPembeli}</b><br><small style="color:gray;">${o.noPesanan} • ${o.metode} Rp ${Number(o.total).toLocaleString()}</small></div>
+                                </div>
+                                <i id="icon-arrow-${o.id}" class="fa-solid fa-chevron-down" style="font-size:12px; color:var(--gold);"></i>
+                            </div>
+                            <div id="detail-${o.id}" style="display:none; margin-top:15px; border-top:1px dashed #333; padding-top:10px;">
+                                <div class="order-badge ${badgeCls}" style="margin-bottom:10px;">${o.status}</div>
+                                <p style="font-size:12px; line-height:1.5; color:#ddd;">${o.alamat}</p>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
+                                    <button class="action-btn" style="background:var(--wa);" onclick="window.open('https://wa.me/${waNum}', '_blank')"><i class="fa-brands fa-whatsapp"></i> WA</button>
+                                    ${o.mapLink ? `<button class="action-btn" style="background:var(--blue);" onclick="window.open('${o.mapLink}', '_blank')"><i class="fa-solid fa-map-location-dot"></i> MAPS</button>` : ''}
+                                </div>
+                                ${o.status === 'Gudang' ? `<button class="btn-main" style="margin-top:10px;" onclick="ambilPaket('${o.id}')">KLAIM PAKET SAYA</button>` : ''}
+                            </div>
+                            <input type="file" id="f-${o.id}" accept="image/*" capture="environment" style="display:none;" onchange="uploadSelesai('${o.id}', '${o.metode}', ${o.total}, this)">
+                        </div>
                     </div>
-                    <input type="file" id="f-${o.id}" accept="image/*" capture="environment" style="display:none;" onchange="uploadSelesai('${o.id}', '${o.metode}', ${o.total}, this)">
                 </div>`;
             });
+            initSortable();
         }
 
-        // --- FUNGSI PENDUKUNG ---
+        // --- CORE FUNCTIONS ---
         function pressPin(val) {
             if (val === 'C') memoriPIN = "";
             else if (val === 'OK') {
@@ -227,70 +314,184 @@
                     myName = document.getElementById('namaKurirInput').value;
                     localStorage.setItem('namaKurir', myName);
                     document.getElementById('loginOverlay').style.display='none';
-                    initDataRealtime();
-                } else { ejAlert("SALAH", "PIN Anda Salah!", "danger"); memoriPIN = ""; }
+                    document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
+                    initDataRealtime(); aktifkanRadar();
+                } else { ejAlert("AKSES DITOLAK", "PIN Salah!", "danger"); memoriPIN = ""; }
             } else { if(memoriPIN.length < 4) memoriPIN += val; }
             document.getElementById('pinDisplay').innerText = "*".repeat(memoriPIN.length) || "****";
         }
 
         function getTgl() { const n = new Date(); return `${String(n.getDate()).padStart(2,'0')}/${String(n.getMonth()+1).padStart(2,'0')}/${n.getFullYear()}`; }
-        function setTab(t) { currentTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('t-'+t).classList.add('active'); renderOrders(); }
-        function ambilPaket(id) { db.ref('pesanan/'+id).update({ status:'Proses', kurir:myName }); }
-        
+        function setTab(t) { 
+            currentTab = t; 
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
+            document.getElementById('t-'+t).classList.add('active'); 
+            t === 'Proses' ? nyalakanMesinKopi() : matikanMesinKopi();
+            renderOrders(); 
+        }
+
+        function ambilPaket(id) { 
+            db.ref('pesanan/'+id).update({ status:'Proses', kurir:myName, waktuAmbil:new Date().toLocaleTimeString() })
+            .then(() => { ejAlert("BERHASIL", "Paket masuk ke tas Anda!", "success"); }); 
+        }
+
+        function toggleSunlightMode() {
+            document.body.classList.toggle('sunlight-mode');
+            localStorage.setItem('sunlightMode', document.body.classList.contains('sunlight-mode') ? 'on' : 'off');
+        }
+
+        function forceRefresh() { window.location.reload(); }
+        function tampilkanPopupLogout() { document.getElementById('modalLogout').style.display='flex'; }
+        function eksekusiLogout() { localStorage.removeItem('namaKurir'); window.location.reload(); }
+
+        // --- ALERT & BLANK SPOT LOGIC ---
         function ejAlert(judul, pesan, tipe) {
             document.getElementById('ejAlertTitle').innerText = judul;
             document.getElementById('ejAlertText').innerText = pesan;
             document.getElementById('ejAlertOverlay').style.display = 'flex';
             const icon = document.getElementById('ejAlertIcon');
-            icon.innerHTML = tipe === 'danger' ? '<i class="fa-solid fa-circle-xmark" style="color:var(--danger)"></i>' : '<i class="fa-solid fa-circle-exclamation" style="color:var(--gold)"></i>';
+            icon.innerHTML = tipe === 'danger' ? '<i class="fa-solid fa-shield-xmark" style="color:var(--danger)"></i>' : (tipe === 'success' ? '<i class="fa-solid fa-circle-check" style="color:var(--safe)"></i>' : '<i class="fa-solid fa-circle-exclamation" style="color:var(--gold)"></i>');
+            if(navigator.vibrate) navigator.vibrate(50);
         }
-        function tutupEjAlert() { document.getElementById('ejAlertOverlay').style.display = 'none'; }
+        function tutupEjAlert() { document.getElementById('ejAlertOverlay').style.display='none'; }
+
         function updateStatusInternet() {
             const teks = document.getElementById('teksKoneksi');
-            if(navigator.onLine) { teks.innerText = "ONLINE"; teks.style.color = "var(--safe)"; prosesDataOffline(); }
-            else { teks.innerText = "OFFLINE"; teks.style.color = "var(--offline)"; }
+            let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
+            if(navigator.onLine) { 
+                teks.innerText = "ONLINE"; teks.style.color = "var(--safe)"; 
+                if(q.length > 0) prosesDataOffline(); 
+            } else { 
+                teks.innerText = "OFFLINE" + (q.length > 0 ? ` [${q.length} ANTRI]` : ""); 
+                teks.style.color = "var(--offline)"; 
+            }
         }
 
-        // --- OFFLINE LOGIC ---
         function prosesDataOffline() {
             let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
             if (q.length === 0) return;
-            q.forEach(item => { db.ref('pesanan/'+item.id).update(item.data); });
+            q.forEach(item => { 
+                if(item.type === 'edit') db.ref('pesanan/'+item.id).update(item.data); 
+                if(item.type === 'foto') db.ref('foto_bukti/'+item.id).set(item.data);
+            });
             localStorage.removeItem('ejOfflineKurir');
-            ejAlert("SUKSES", "Data offline berhasil disinkron!", "success");
+            ejAlert("SINKRONISASI", "Semua data offline berhasil dikirim!", "success");
         }
 
-        function bukaModalFoto(id, metode, total) { tempIdSukses = id; tempMetodeSukses = metode; tempTotalSukses = total; document.getElementById(`f-${id}`).click(); }
-        
-        let tempIdSukses, tempMetodeSukses, tempTotalSukses, tempFileSukses;
+        // --- UPLOAD & FINISH LOGIC ---
         function uploadSelesai(id, metode, total, input) {
-            tempFileSukses = input.files[0];
+            if(!input.files[0]) return;
+            tempFileSukses = input.files[0]; tempIdSukses = id; tempMetodeSukses = metode; tempTotalSukses = total;
             if (metode === 'COD') {
                 document.getElementById('modalPenerima').style.display = 'flex';
                 document.getElementById('kalkulatorCOD').style.display = 'block';
-                document.getElementById('tagihanCalc').innerText = total;
+                document.getElementById('tagihanCalc').innerText = "Rp " + Number(total).toLocaleString();
             } else {
-                eksekusiUploadSelesai();
+                document.getElementById('modalPenerima').style.display = 'flex';
+                document.getElementById('kalkulatorCOD').style.display = 'none';
             }
         }
 
+        function hitungKembalian() {
+            const uang = Number(document.getElementById('uangDiterima').value || 0);
+            const kembalian = uang - tempTotalSukses;
+            const el = document.getElementById('teksKembalian');
+            el.innerText = kembalian < 0 ? "Kurang: Rp " + Math.abs(kembalian).toLocaleString() : "Kembali: Rp " + kembalian.toLocaleString();
+            el.style.color = kembalian < 0 ? 'var(--danger)' : 'var(--safe)';
+        }
+
         function eksekusiUploadSelesai() {
-            const dataUpdate = { status:'Terkirim', waktuSelesai:new Date().toLocaleTimeString(), kurir:myName, tanggal:getTgl() };
-            if (!navigator.onLine) {
+            let p = document.getElementById('inputNamaPenerima').value || "Ybs/Keluarga";
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 600; canvas.height = 800;
+                    canvas.getContext('2d').drawImage(img, 0, 0, 600, 800);
+                    const dataFoto = canvas.toDataURL('image/jpeg', 0.5);
+                    const dataUpdate = { status:'Terkirim', catatanKurir:"Diterima: "+p, waktuSelesai:new Date().toLocaleTimeString(), tanggal:getTgl(), adaFoto:true };
+
+                    if (!navigator.onLine) {
+                        let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
+                        q.push({ type:'foto', id: tempIdSukses, data: dataFoto });
+                        q.push({ type:'edit', id: tempIdSukses, data: dataUpdate });
+                        localStorage.setItem('ejOfflineKurir', JSON.stringify(q));
+                        document.getElementById('modalPenerima').style.display='none';
+                        updateStatusInternet(); return;
+                    }
+
+                    db.ref('foto_bukti/'+tempIdSukses).set(dataFoto).then(() => {
+                        db.ref('pesanan/'+tempIdSukses).update(dataUpdate).then(() => {
+                            document.getElementById('modalPenerima').style.display='none';
+                            ejAlert("SUKSES", "Paket Berhasil Terkirim!", "success");
+                        });
+                    });
+                }; img.src = e.target.result;
+            }; reader.readAsDataURL(tempFileSukses);
+        }
+
+        function prosesSimpanAlasan(stat) {
+            const a = document.getElementById('textAlasan').value;
+            if(!a) { alert("Alasan wajib diisi!"); return; }
+            const du = { status:stat, alasanTunda:a, waktuUpdate:new Date().toLocaleTimeString() };
+            if(!navigator.onLine) {
                 let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
-                q.push({ id: tempIdSukses, data: dataUpdate });
+                q.push({ type:'edit', id: tempId, data: du });
                 localStorage.setItem('ejOfflineKurir', JSON.stringify(q));
-                ejAlert("OFFLINE", "Disimpan di HP sementara", "warning");
-                document.getElementById('modalPenerima').style.display='none';
+                document.getElementById('modalAlasan').style.display='none';
                 return;
             }
-            db.ref('pesanan/'+tempIdSukses).update(dataUpdate).then(() => {
-                document.getElementById('modalPenerima').style.display='none';
-                ejAlert("BERHASIL", "Data terkirim ke pusat", "success");
+            db.ref('pesanan/'+tempId).update(du).then(() => { document.getElementById('modalAlasan').style.display='none'; });
+        }
+
+        function updateStat(id) { tempId = id; document.getElementById('modalAlasan').style.display='flex'; }
+        function tambahPengeluaran() { document.getElementById('modalExpense').style.display='flex'; }
+        function prosesSimpanExpense() {
+            const k = document.getElementById('expKet').value, n = document.getElementById('expNom').value;
+            if(!k || !n) return;
+            db.ref('pengeluaran').push({ kurir:myName, keterangan:k, nominal:Number(n), tanggal:getTgl(), waktu:new Date().toLocaleTimeString() })
+            .then(() => { document.getElementById('modalExpense').style.display='none'; });
+        }
+
+        function batalUploadSelesai() { document.getElementById('modalPenerima').style.display='none'; }
+        function toggleDetail(id) { const d = document.getElementById('detail-'+id), a = document.getElementById('icon-arrow-'+id); d.style.display = d.style.display==='none'?'block':'none'; a.style.transform = d.style.display==='block'?'rotate(180deg)':'rotate(0)'; }
+
+        // --- SORTABLE & SWIPE ENGINE ---
+        function initSortable() {
+            const el = document.getElementById('orderContainer');
+            if (currentTab !== 'Proses') return;
+            new Sortable(el, {
+                handle: '.drag-handle', animation: 150,
+                onEnd: function() {
+                    let order = [];
+                    el.querySelectorAll('.sortable-item').forEach(item => order.push(item.getAttribute('data-id')));
+                    localStorage.setItem('rute_'+myName, JSON.stringify(order));
+                    updateUI();
+                }
             });
         }
-        
-        function aktifkanRadar() { if (navigator.geolocation) { navigator.geolocation.watchPosition(pos => { db.ref('tracking/'+myName).set({ lat: pos.coords.latitude, lng: pos.coords.longitude }); }); } }
+
+        let swipeStart = 0, swipeEl = null;
+        document.addEventListener('touchstart', e => { swipeEl = e.target.closest('.swipe-content'); if(swipeEl) { swipeStart = e.touches[0].clientX; window.isSwipingMode=false; } });
+        document.addEventListener('touchmove', e => {
+            if(!swipeEl) return;
+            let move = e.touches[0].clientX - swipeStart;
+            if(Math.abs(move) > 20) { window.isSwipingMode = true; swipeEl.style.transform = `translateX(${move}px)`; }
+        });
+        document.addEventListener('touchend', e => {
+            if(!swipeEl) return;
+            let move = e.changedTouches[0].clientX - swipeStart;
+            let id = swipeEl.getAttribute('data-swipe-id');
+            swipeEl.style.transform = '';
+            if(move > 100) document.getElementById(`f-${id}`).click();
+            else if(move < -100) updateStat(id);
+            setTimeout(() => { window.isSwipingMode = false; swipeEl = null; }, 100);
+        });
+
+        async function nyalakanMesinKopi() { if('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); }
+        function matikanMesinKopi() { if(wakeLock) { wakeLock.release(); wakeLock = null; } }
+        function aktifkanRadar() { if(navigator.geolocation) navigator.geolocation.watchPosition(p => { db.ref('tracking/'+myName).set({ lat:p.coords.latitude, lng:p.coords.longitude, waktu:new Date().toLocaleTimeString() }); }, null, {enableHighAccuracy:true}); }
     </script>
 </body>
 </html>
