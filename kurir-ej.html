@@ -589,19 +589,51 @@
         }
     }
 
+    // ================= OTAK BLANK SPOT (OFFLINE SYNC KURIR) =================
+    function prosesDataOffline() {
+        let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
+        if (q.length === 0) return;
+
+        let notifTeks = document.getElementById('teksKoneksi');
+        if (notifTeks) {
+            notifTeks.innerText = `SINKRONISASI ${q.length} DATA...`;
+            notifTeks.style.color = "var(--gold)";
+            if(navigator.vibrate) navigator.vibrate([50, 50]);
+        }
+
+        q.forEach(item => {
+            if (item.type === 'edit') db.ref('pesanan/'+item.id).update(item.data);
+            if (item.type === 'foto') db.ref('foto_bukti/'+item.id).set(item.data);
+        });
+
+        localStorage.removeItem('ejOfflineKurir');
+        setTimeout(() => { updateStatusInternet(); }, 3000);
+    }
+
     function updateStatusInternet() {
         const lampu = document.getElementById('lampuKoneksi');
         const teks = document.getElementById('teksKoneksi');
+        let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
+        let teksAntri = q.length > 0 ? ` [${q.length} ANTRI]` : "";
+
         if (navigator.onLine) {
             document.body.classList.remove('is-offline');
+            db.goOnline();
             if(lampu) { lampu.style.background = "var(--safe)"; lampu.style.boxShadow = "0 0 10px var(--safe)"; }
             if(teks) { teks.innerText = "SISTEM ONLINE"; teks.style.color = "var(--safe)"; }
+            if(q.length > 0) prosesDataOffline(); // Tembak data kalau ada antrean
         } else {
             document.body.classList.add('is-offline');
+            db.goOffline();
             if(lampu) { lampu.style.background = "var(--offline)"; lampu.style.boxShadow = "0 0 10px var(--offline)"; }
-            if(teks) { teks.innerText = "KONEKSI TERPUTUS"; teks.style.color = "var(--offline)"; }
+            if(teks) { teks.innerText = "KONEKSI TERPUTUS" + teksAntri; teks.style.color = "var(--offline)"; }
         }
     }
+    
+    window.addEventListener('online', updateStatusInternet); 
+    window.addEventListener('offline', updateStatusInternet); 
+    updateStatusInternet();
+    // ========================================================================
 
         function toggleDetail(id) { 
         const d = document.getElementById('detail-' + id); 
