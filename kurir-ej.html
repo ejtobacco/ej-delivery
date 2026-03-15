@@ -324,6 +324,15 @@
             </div>
         </div>
     </div>
+    
+    <div id="ejAlertOverlay" class="modal-overlay" style="justify-content:center; padding:20px; z-index:9999999;">
+        <div class="glass-card" style="width:100%; max-width:320px; text-align:center; border-color:var(--gold); transform:scale(0.9); transition:0.3s;" id="ejAlertBox">
+            <div id="ejAlertIcon" style="font-size:40px; margin-bottom:15px;"></div>
+            <h2 id="ejAlertTitle" style="font-size:16px; color:white; margin-bottom:10px;"></h2>
+            <p id="ejAlertText" style="font-size:12px; color:gray; margin-bottom:20px; line-height:1.5;"></p>
+            <button class="btn-main" onclick="tutupEjAlert()">MENGERTI</button>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
@@ -388,14 +397,7 @@
             document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
             updateUI();
             aktifkanRadar();
-        }
-            // Cek Login
-        if (myName) {
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
-            updateUI();
-            aktifkanRadar();
-            if (currentTab === 'Proses') nyalakanMesinKopi(); // <-- TAMBAHKAN BARIS INI
+            if (currentTab === 'Proses') nyalakanMesinKopi(); 
         }
     };
 
@@ -451,7 +453,7 @@
             const sel = document.getElementById('namaKurirInput').value;
             if (memoriPIN === dataPIN[sel]) { 
                 myName = sel; 
-                localStorage.setItem('namaKurir', myName); // <-- SUNTIKAN KODE INI (Simpan ke Memori)
+                localStorage.setItem('namaKurir', myName); 
                 document.getElementById('loginOverlay').style.display='none'; 
                 document.getElementById('namaKurirHeader').innerText=myName.toUpperCase(); 
                 updateUI(); 
@@ -459,6 +461,7 @@
                 memoriPIN = ""; 
             } else { 
                 ejAlert("AKSES DITOLAK", "PIN salah! Pastikan Anda memilih nama dan memasukkan PIN yang benar.", "danger"); 
+                memoriPIN = ""; 
             }
         } else { 
             if (memoriPIN.length < 4) memoriPIN += val; 
@@ -472,7 +475,7 @@
 
     function eksekusiLogout() {
         myName = "";
-        localStorage.removeItem('namaKurir'); // <-- SUNTIKAN KODE INI (Hapus Memori)
+        localStorage.removeItem('namaKurir'); // Hapus Memori
         document.getElementById('pinDisplay').innerText = "****";
         memoriPIN = "";
         document.getElementById('modalLogout').style.display = 'none';
@@ -745,6 +748,27 @@
         localStorage.removeItem('ejOfflineKurir');
         setTimeout(() => { updateStatusInternet(); }, 3000);
     }
+
+    function updateStatusInternet() {
+        const lampu = document.getElementById('lampuKoneksi');
+        const teks = document.getElementById('teksKoneksi');
+        let q = JSON.parse(localStorage.getItem('ejOfflineKurir') || '[]');
+        let teksAntri = q.length > 0 ? ` [${q.length} ANTRI]` : "";
+
+        if (navigator.onLine) {
+            document.body.classList.remove('is-offline');
+            db.goOnline();
+            if(lampu) { lampu.style.background = "var(--safe)"; lampu.style.boxShadow = "0 0 10px var(--safe)"; }
+            if(teks) { teks.innerText = "SISTEM ONLINE"; teks.style.color = "var(--safe)"; }
+            if(q.length > 0) prosesDataOffline(); // Tembak data kalau ada antrean
+        } else {
+            document.body.classList.add('is-offline');
+            db.goOffline();
+            if(lampu) { lampu.style.background = "var(--offline)"; lampu.style.boxShadow = "0 0 10px var(--offline)"; }
+            if(teks) { teks.innerText = "KONEKSI TERPUTUS" + teksAntri; teks.style.color = "var(--offline)"; }
+        }
+    }
+    
     window.addEventListener('online', updateStatusInternet); 
     window.addEventListener('offline', updateStatusInternet); 
     updateStatusInternet();
@@ -889,6 +913,8 @@
     function startScanner() { html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode:"environment" }, { fps:10, qrbox:250 }, (txt) => {
         const target = allData.find(o => o.noPesanan.replace(/\W/g, "") === txt.replace(/\W/g, ""));
         if (target) { if (target.status==='Gudang') ambilPaket(target.id); else { document.getElementById('searchOrder').value=target.noPesanan; renderOrders(); } html5QrCode.stop(); document.getElementById('reader').style.display='none'; }
+    }).catch(err => {
+        ejAlert("KAMERA GAGAL", "Tidak dapat mengakses kamera. Pastikan izin browser sudah diaktifkan.", "danger");
     }); }
     
     function tambahPengeluaran() { document.getElementById('modalExpense').style.display='flex'; }
@@ -1055,14 +1081,5 @@
         setTimeout(() => { window.isSwipingMode = false; }, 100);
     });
     </script>
-    
-    <div id="ejAlertOverlay" class="modal-overlay" style="justify-content:center; padding:20px; z-index:9999999;">
-        <div class="glass-card" style="width:100%; max-width:320px; text-align:center; border-color:var(--gold); transform:scale(0.9); transition:0.3s;" id="ejAlertBox">
-            <div id="ejAlertIcon" style="font-size:40px; margin-bottom:15px;"></div>
-            <h2 id="ejAlertTitle" style="font-size:16px; color:white; margin-bottom:10px;"></h2>
-            <p id="ejAlertText" style="font-size:12px; color:gray; margin-bottom:20px; line-height:1.5;"></p>
-            <button class="btn-main" onclick="tutupEjAlert()">MENGERTI</button>
-        </div>
-    </div>
 </body>
-</html>
+</html> mantap bos sudah jalan lancar semua sesuai keinginan. btw besok bahas yang mana dlu fitur yg udah saya setujui tadi wkwkw
