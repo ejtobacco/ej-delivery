@@ -759,7 +759,24 @@ function ambilPaket(id) {
     }); 
 }
     
-    function aktifkanRadar() { if (navigator.geolocation) { navigator.geolocation.watchPosition(pos => { db.ref('tracking/'+myName).set({ lat: pos.coords.latitude, lng: pos.coords.longitude, waktu: new Date().toLocaleTimeString() }); }, null, { enableHighAccuracy:true }); } }
+
+let lastGpsTime = 0;
+function aktifkanRadar() { 
+    if (navigator.geolocation) { 
+        navigator.geolocation.watchPosition(pos => { 
+            const now = Date.now();
+            // Cegah tembakan ke Firebase jika belum lewat 5 detik (5000 ms)
+            if (now - lastGpsTime > 5000) {
+                db.ref('tracking/'+myName).set({ 
+                    lat: pos.coords.latitude, 
+                    lng: pos.coords.longitude, 
+                    waktu: new Date().toLocaleTimeString() 
+                }); 
+                lastGpsTime = now;
+            }
+        }, null, { enableHighAccuracy: true }); 
+    } 
+}
     </script>
 </body>
 </html>
