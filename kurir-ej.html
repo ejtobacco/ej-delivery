@@ -610,8 +610,18 @@ firebase.auth().signInWithEmailAndPassword("tokoej2020@gmail.com", "ejtbk2020")
             if(a) a.style.transform = "rotate(0deg)"; 
         } 
     }
-
-    function ambilPaket(id) { db.ref('pesanan/'+id).update({ status:'Proses', kurir:myName, waktuAmbil:new Date().toLocaleTimeString() }).then(() => { document.getElementById('searchOrder').value=""; setTab('Proses'); }); }
+        
+function ambilPaket(id) { 
+    db.ref('pesanan/'+id).update({ 
+        status: 'Proses', 
+        kurir: myName, 
+        tanggal: getTgl(), // <-- Tanggal disinkronkan saat diambil
+        waktuAmbil: new Date().toLocaleTimeString() 
+    }).then(() => { 
+        document.getElementById('searchOrder').value=""; 
+        setTab('Proses'); 
+    }); 
+}
         
     let tempMetodeSukses = "", tempTotalSukses = 0;
 
@@ -670,36 +680,42 @@ firebase.auth().signInWithEmailAndPassword("tokoej2020@gmail.com", "ejtbk2020")
     }
     
     function eksekusiUploadSelesai() {
-        let n = document.getElementById('inputNamaPenerima').value || "Keluarga/Pihak Rumah";
-        const id = tempIdSukses, file = tempFileSukses; 
-        
-        const btnUpload = document.getElementById('btnUploadFoto');
-        const teksAsli = btnUpload.innerHTML;
-        btnUpload.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> MENGIRIM...`;
-        btnUpload.disabled = true;
+    let n = document.getElementById('inputNamaPenerima').value || "Keluarga/Pihak Rumah";
+    const id = tempIdSukses, file = tempFileSukses; 
+    
+    const btnUpload = document.getElementById('btnUploadFoto');
+    const teksAsli = btnUpload.innerHTML;
+    btnUpload.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> MENGIRIM...`;
+    btnUpload.disabled = true;
 
-        const reader = new FileReader(); reader.onload = function(e) {
-            const img = new Image(); img.onload = function() {
-                const canvas = document.createElement('canvas'); let w = img.width, h = img.height;
-                if (w > h) { if (w > 600) { h *= 600 / w; w = 600; } } else { if (h > 800) { w *= 800 / h; h = 800; } }
-                canvas.width = w; canvas.height = h;
-                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                db.ref('foto_bukti/'+id).set(canvas.toDataURL('image/jpeg', 0.5)).then(() => {
-                    db.ref('pesanan/'+id).update({ status:'Terkirim', adaFoto:true, catatanKurir:"Diterima: "+n, waktuSelesai:new Date().toLocaleTimeString() }).then(() => {
-                        document.getElementById('modalPenerima').style.display='none';
-                        btnUpload.innerHTML = teksAsli;
-                        btnUpload.disabled = false;
-                        document.getElementById('inputNamaPenerima').value = "";
-                        if(navigator.vibrate) navigator.vibrate(100);
-                    });
-                }).catch(err => {
-                    alert("❌ Gagal mengirim foto! Pastikan sinyal internet stabil.");
+    const reader = new FileReader(); reader.onload = function(e) {
+        const img = new Image(); img.onload = function() {
+            const canvas = document.createElement('canvas'); let w = img.width, h = img.height;
+            if (w > h) { if (w > 600) { h *= 600 / w; w = 600; } } else { if (h > 800) { w *= 800 / h; h = 800; } }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            db.ref('foto_bukti/'+id).set(canvas.toDataURL('image/jpeg', 0.5)).then(() => {
+                db.ref('pesanan/'+id).update({ 
+                    status: 'Terkirim', 
+                    adaFoto: true, 
+                    catatanKurir: "Diterima: "+n, 
+                    tanggal: getTgl(), // <-- Tanggal disinkronkan ke hari ini agar masuk omzet
+                    waktuSelesai: new Date().toLocaleTimeString() 
+                }).then(() => {
+                    document.getElementById('modalPenerima').style.display='none';
                     btnUpload.innerHTML = teksAsli;
                     btnUpload.disabled = false;
+                    document.getElementById('inputNamaPenerima').value = "";
+                    if(navigator.vibrate) navigator.vibrate(100);
                 });
-            }; img.src = e.target.result;
-        }; reader.readAsDataURL(file);
-    }
+            }).catch(err => {
+                alert("❌ Gagal mengirim foto! Pastikan sinyal internet stabil.");
+                btnUpload.innerHTML = teksAsli;
+                btnUpload.disabled = false;
+            });
+        }; img.src = e.target.result;
+    }; reader.readAsDataURL(file);
+}
     
     function batalUploadSelesai() { document.getElementById('modalPenerima').style.display='none'; tempFileSukses=null; }
     function setTab(t) { currentTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('t-'+t).classList.add('active'); renderOrders(); }
@@ -727,16 +743,21 @@ firebase.auth().signInWithEmailAndPassword("tokoej2020@gmail.com", "ejtbk2020")
     function updateStat(id, s) { tempId = id; tempStat = s; document.getElementById('modalAlasan').style.display='flex'; }
     
     function prosesSimpanAlasan() { 
-        const a=document.getElementById('textAlasan').value; 
-        if(!a) {
-            alert("⚠️ Alasan tidak boleh kosong! Kasih tau admin kenapa paket ini ditunda/gagal.");
-            return;
-        }
-        db.ref('pesanan/'+tempId).update({ status:tempStat, alasanTunda:a, waktuUpdate:new Date().toLocaleTimeString() }).then(()=>{
-            document.getElementById('modalAlasan').style.display='none';
-            document.getElementById('textAlasan').value = "";
-        }); 
+    const a=document.getElementById('textAlasan').value; 
+    if(!a) {
+        alert("⚠️ Alasan tidak boleh kosong! Kasih tau admin kenapa paket ini ditunda/gagal.");
+        return;
     }
+    db.ref('pesanan/'+tempId).update({ 
+        status: tempStat, 
+        alasanTunda: a, 
+        tanggal: getTgl(), // <-- Tanggal disinkronkan saat ditunda/gagal
+        waktuUpdate: new Date().toLocaleTimeString() 
+    }).then(()=>{
+        document.getElementById('modalAlasan').style.display='none';
+        document.getElementById('textAlasan').value = "";
+    }); 
+}
     
     function aktifkanRadar() { if (navigator.geolocation) { navigator.geolocation.watchPosition(pos => { db.ref('tracking/'+myName).set({ lat: pos.coords.latitude, lng: pos.coords.longitude, waktu: new Date().toLocaleTimeString() }); }, null, { enableHighAccuracy:true }); } }
     </script>
