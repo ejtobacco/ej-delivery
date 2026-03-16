@@ -630,6 +630,7 @@
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-storage-compat.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg",
@@ -1168,8 +1169,13 @@
         function bukaPopupHapus(id) {
             document.getElementById('modalHapusPesanan').style.display = 'flex';
             document.getElementById('btnConfirmHapus').onclick = () => {
+                // Hapus data dari Realtime Database
                 db.ref('pesanan/' + id).remove();
-                db.ref('foto_bukti/' + id).remove();
+                db.ref('foto_bukti/' + id).remove(); // Jaga-jaga hapus sisa foto lama
+                
+                // Hapus foto dari Firebase Storage
+                firebase.storage().ref('bukti_pengiriman/' + id + '.jpg').delete().catch(err => console.log("Foto sudah tidak ada di Storage"));
+                
                 document.getElementById('modalHapusPesanan').style.display = 'none';
                 if (navigator.vibrate) navigator.vibrate(50);
             };
