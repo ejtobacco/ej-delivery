@@ -1,748 +1,419 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EJ KURIR V4 - ULTRA PREMIUM</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#050505">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    
-    <style>
-        :root { 
-            --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.05); 
-            --glass-border: rgba(212, 175, 55, 0.3); --text-main: #FFFFFF; 
-            --safe: #22C55E; --warning: #F59E0B; --danger: #EF4444; 
-            --blue: #3B82F6; --wa: #25D366; --offline: #A855F7;
-            --gradient-gold: linear-gradient(135deg, #F7E08C, #D4AF37);
-            --gradient-dark: linear-gradient(145deg, #111, #000);
-        }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        /* MATIKAN PULL-TO-REFRESH DI SINI */
-        html, body { overscroll-behavior-y: none; }
-        
-        body { background: var(--bg); color: var(--text-main); padding: 15px; padding-bottom: 100px; overflow-x: hidden; user-select: none; transition: 0.3s; }
-        ::-webkit-scrollbar { display: none; }
-        /* EFEK DRAG & DROP PREMIUM */
-        .sortable-ghost { opacity: 0.3; background: rgba(212,175,55,0.1) !important; border: 2px dashed var(--gold) !important; transform: scale(0.98); }
-        .sortable-drag { opacity: 1 !important; box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important; transform: scale(1.02) !important; cursor: grabbing !important; z-index: 99999; }
-        .drag-handle { cursor: grab; }
-        .drag-handle:active { cursor: grabbing; }
-        .nomor-urut { transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); } /* Pelumas perubahan angka */
-        
-        /* HEADER PREMIUM */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 0; z-index: 9999; background: rgba(5,5,5,0.85); backdrop-filter: blur(15px); padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .logo-text-container { display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
-        .main-logo-text { color: var(--gold); font-weight: 800; font-size: 20px; letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(212,175,55,0.3); }
-        
-        /* KARTU DOMPET */
-        .wallet-card { background: var(--gradient-dark); border: 1px solid var(--safe); border-radius: 20px; padding: 20px; margin-bottom: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
-        .wallet-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--safe); opacity: 0.8; }
-        #totalCOD { display: block; font-size: 32px; font-weight: 800; color: var(--safe); margin-top: 5px; text-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
 
-        /* TABS */
-        .tab-menu { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
-        .tab-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 5px; border-radius: 12px; color: #fff; font-weight: 800; font-size: 10px; text-align: center; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .tab-btn i { font-size: 16px; color: gray; transition: 0.3s; }
-        .tab-btn.active { background: rgba(212, 175, 55, 0.15); border-color: var(--gold); color: var(--gold); box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
-        .tab-btn.active i { color: var(--gold); }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-        /* INPUT GROUP MEWAH */
-        .input-group { position: relative; margin-bottom: 15px; width: 100%; }
-        .input-group i { position: absolute; left: 15px; top: 15px; color: var(--gold); font-size: 14px; opacity: 0.8; }
-        .search-box { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 15px 14px 45px; color: white; outline: none; font-size: 13px; transition: 0.3s; }
-        .search-box:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+<title>EJ KURIR V5</title>
 
-        /* CARD & BUTTONS */
-        .glass-card { background: var(--gradient-dark); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; margin-bottom: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden; transition: 0.3s; }
-        .glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gradient-gold); opacity: 0.5; }
-        
-        .btn-main { background: var(--gradient-gold); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; font-size: 12px; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .btn-main:active { transform: scale(0.98); }
-        .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .action-btn { border: none; padding: 12px; border-radius: 10px; font-size: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; color: white; transition: 0.2s; }
-        .btn-wa { background: var(--wa); }
-        .btn-maps { background: var(--blue); }
-        
-        /* OFFLINE MODE (UNGU) & FREEZE KLIK */
-        body.is-offline .glass-card { border-color: var(--offline) !important; background: rgba(168, 85, 247, 0.05) !important; }
-        body.is-offline .glass-card::before { background: var(--offline) !important; }
-        body.is-offline #teksKoneksi { color: var(--offline) !important; }
-        body.is-offline #lampuKoneksi { background: var(--offline) !important; box-shadow: 0 0 10px var(--offline) !important; }
-        
-        /* MATIKAN KLIK PADA PESANAN & SCANNER SAAT OFFLINE */
-        body.is-offline #orderContainer { pointer-events: none; opacity: 0.5; filter: grayscale(0.8); }
-        body.is-offline #btnScanMain { pointer-events: none; opacity: 0.5; background: gray !important; border-color: gray !important; }
-        /* BADGES */
-        .order-badge { padding: 5px 12px; border-radius: 20px; font-size: 9px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; }
-        .badge-gudang { background: rgba(59,130,246,0.2); color: #60A5FA; border: 1px solid #3B82F6; }
-        .badge-proses { background: rgba(212,175,55,0.2); color: var(--gold); border: 1px solid var(--gold); }
-        .badge-sukses { background: rgba(34,197,94,0.2); color: #4ADE80; border: 1px solid #22C55E; }
-        .badge-gagal { background: rgba(239,68,68,0.2); color: #F87171; border: 1px solid #EF4444; }
-        
-        /* ANIMASI LACI BAWAH (BOTTOM SHEET) 60FPS */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100000; flex-direction: column; justify-content: flex-end; align-items: center; backdrop-filter: blur(5px); }
-        
-        @keyframes slideUpSheet { 
-            0% { transform: translateY(100%); opacity: 0; } 
-            100% { transform: translateY(0); opacity: 1; } 
-        }
-        
-        .bottom-sheet { width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 20px 20px 40px 20px; margin-bottom: 0; animation: slideUpSheet 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; border-bottom: none !important; }
-        
-        /* Pil Indikator khas iPhone/Gojek di atas laci */
-        .sheet-pill { width: 40px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 10px; margin: 0 auto 20px auto; }
-        
-        #imgPreview { max-width: 90%; max-height: 70vh; border-radius: 15px; border: 2px solid var(--gold); margin-bottom: auto; margin-top: auto; }
-        
-        @keyframes blinkUrgent { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-        .card-urgent { border: 1px solid var(--danger) !important; animation: blinkUrgent 2s infinite !important; }
-        .card-urgent::before { background: var(--danger) !important; }
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-        /* LOGIN */
-        #loginOverlay { position: fixed; inset: 0; background: #000; z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .pin-display { font-size: 40px; letter-spacing: 15px; margin: 30px 0; color: var(--gold); font-weight: 800; text-shadow: 0 0 15px rgba(212, 175, 55, 0.5); text-align: center; }
-        .num-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(212, 175, 55, 0.2); color: #fff; width: 75px; height: 75px; border-radius: 50%; font-size: 26px; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
-        .num-btn:active { background: var(--gold); color: #000; transform: scale(0.9); }
-        
-        /* KUSTOM INPUT DALAM MODAL */
-        .modal-input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 15px; color: white; outline: none; font-size: 13px; margin-bottom: 15px; }
-        .modal-input:focus { border-color: var(--gold); }
-    </style>
-</head>
-<body>
-    
-    <audio id="beepSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
-    
-    <div id="loginOverlay">
-    <div style="text-align: center; width: 320px; padding: 25px; background: rgba(255,255,255,0.02); border: 1px solid var(--gold); border-radius: 25px; backdrop-filter: blur(15px);">
-        <i class="fa-solid fa-motorcycle" style="font-size: 50px; color: var(--gold); margin-bottom: 15px;"></i>
-        <h2 style="color:#fff; letter-spacing: 2px;">EJ LOGISTICS</h2>
-        <p style="color:var(--gold); font-size:10px; margin-bottom:25px; opacity:0.8;">OFFICIAL COURIER ACCESS</p>
-
-        <div class="input-group">
-            <i class="fa-solid fa-envelope"></i>
-            <input type="email" id="emailInput" placeholder="Email Akun Kurir..." style="padding-left:45px;">
-        </div>
-
-        <div class="input-group">
-            <i class="fa-solid fa-lock"></i>
-            <input type="password" id="passInput" placeholder="Password..." style="padding-left:45px;">
-        </div>
-
-        <button class="btn-main" id="btnLoginNow" onclick="prosesLoginEmail()">
-            <i class="fa-solid fa-right-to-bracket"></i> MASUK SEKARANG
-        </button>
-        
-        <p id="teksErrorLogin" style="color:#F87171; font-size:10px; margin-top:15px; display:none; background:rgba(239,68,68,0.1); padding:10px; border-radius:10px; border:1px solid #EF4444;"></p>
-    </div>
-</div>
-
-    <div class="header">
-        <div class="logo-text-container" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
-            <div class="main-logo-text"><i class="fa-solid fa-crown" style="font-size:14px; margin-right:5px;"></i> EJ TOBACCO</div>
-            <div style="font-size:9px; letter-spacing:1px; color:gray; margin-left:20px; display: flex; align-items: center; gap: 8px;">
-                APP KURIR | <b id="namaKurirHeader" style="color:white;">...</b>
-                <button onclick="forceRefresh()" style="background:transparent; border:none; color:var(--blue); cursor:pointer; padding:0; margin-left:5px;"><i id="iconRefresh" class="fa-solid fa-rotate-right" style="font-size:12px;"></i></button>
-                <button onclick="tampilkanPopupLogout()" style="background:transparent; border:none; color:var(--danger); cursor:pointer; padding:0;"><i class="fa-solid fa-right-from-bracket" style="font-size:12px;"></i></button>
-            </div>
-        </div>
-        <div style="text-align: right;">
-            <div id="clock" style="font-size: 14px; font-weight: 800; color: var(--safe);"><i class="fa-regular fa-clock"></i> 00:00:00</div>
-            
-            <div id="currentDay" style="font-size: 9px; color: var(--gold); font-weight: 800; margin-top: 3px; letter-spacing: 0.5px;">LOADING...</div>
-
-            <div style="display: flex; align-items: center; gap: 5px; justify-content: flex-end; margin-top: 5px; background: rgba(34,197,94,0.1); padding: 3px 8px; border-radius: 20px;">
-                <div id="lampuKoneksi" style="width: 6px; height: 6px; background: var(--safe); border-radius: 50%; box-shadow: 0 0 10px var(--safe);"></div>
-                <div id="teksKoneksi" style="font-size: 8px; font-weight: 800; color: var(--safe);">SISTEM ONLINE</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="wallet-card">
-        <span style="font-size:10px; color:var(--safe); font-weight:800; letter-spacing:1px;"><i class="fa-solid fa-wallet"></i> DOMPET UANG COD HARI INI</span>
-        <b id="totalCOD">Rp 0</b>
-        <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1);">
-            <div style="text-align: left;"><span style="font-size: 8px; color: var(--danger); font-weight: 800;"><i class="fa-solid fa-arrow-trend-down"></i> KELUAR</span><b id="totalPengeluaran" style="display: block; font-size: 14px; color: var(--danger);">Rp 0</b></div>
-            <div style="text-align: right;"><span style="font-size: 8px; color: var(--gold); font-weight: 800;"><i class="fa-solid fa-sack-dollar"></i> WAJIB SETOR</span><b id="setoranBersih" style="display: block; font-size: 14px; color: var(--gold);">Rp 0</b></div>
-        </div>
-        <button onclick="tambahPengeluaran()" class="btn-main" style="margin-top: 15px; background: rgba(255,255,255,0.1); color: white; box-shadow: none; font-size: 10px;"><i class="fa-solid fa-pen-to-square"></i> CATAT PENGELUARAN</button>
-    </div>
-
-    <button class="btn-main" id="btnScanMain" onclick="toggleScanner()" style="margin-bottom: 15px;"><i class="fa-solid fa-barcode"></i> SCAN BARCODE (PICKUP PAKET)</button>
-    <div id="reader" style="width:100%; display:none; border-radius:15px; overflow:hidden; margin-bottom:15px; border: 2px solid var(--gold);"></div>
-
-    <div class="input-group">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="searchOrder" class="search-box" placeholder="Cari nama atau resi pelanggan..." oninput="renderOrders()">
-    </div>
-
-    <div class="tab-menu">
-        <div class="tab-btn" id="t-Gudang" onclick="setTab('Gudang')">
-            <i class="fa-solid fa-warehouse"></i> GUDANG <span id="c-Gudang" style="display:block; font-size:14px; margin-top:3px;">0</span>
-        </div>
-        <div class="tab-btn active" id="t-Proses" onclick="setTab('Proses')">
-            <i class="fa-solid fa-bag-shopping"></i> TAS SAYA <span id="c-Proses" style="display:block; font-size:14px; margin-top:3px;">0</span>
-        </div>
-        <div class="tab-btn" id="t-Terkirim" onclick="setTab('Terkirim')">
-            <i class="fa-solid fa-check-double"></i> SUKSES <span id="c-Terkirim" style="display:block; font-size:14px; margin-top:3px;">0</span>
-        </div>
-        <div class="tab-btn" id="t-Gagal" onclick="setTab('Gagal')">
-            <i class="fa-solid fa-triangle-exclamation"></i> CANCEL <span id="c-Gagal" style="display:block; font-size:14px; margin-top:3px;">0</span>
-        </div>
-    </div>
-
-    <div id="orderContainer"></div>
-
-    <div id="modalView" class="modal-overlay" onclick="this.style.display='none'">
-        <img id="imgPreview" src="">
-        <p style="color:var(--gold); margin-top:20px; margin-bottom:40px; font-weight:800; background:rgba(0,0,0,0.5); padding:10px 20px; border-radius:20px;"><i class="fa-solid fa-xmark"></i> TUTUP FOTO</p>
-    </div>
-    
-    <div id="modalExpense" class="modal-overlay">
-        <div class="glass-card bottom-sheet" style="border-color:var(--gold);">
-            <div class="sheet-pill"></div>
-            <h2 style="color:var(--gold); text-align:center; margin-bottom:20px; font-size: 16px;"><i class="fa-solid fa-gas-pump"></i> CATAT PENGELUARAN</h2>
-            <input type="text" id="expKet" class="modal-input" placeholder="Tulis Untuk Apa (Makan, Bensin...)">
-            <input type="number" id="expNom" class="modal-input" placeholder="Nominal (Rp)" inputmode="numeric">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-                <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalExpense').style.display='none'">BATAL</button>
-                <button class="btn-main" style="background:var(--safe); color:white;" onclick="prosesSimpanExpense()"><i class="fa-solid fa-save"></i> SIMPAN</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalAlasan" class="modal-overlay">
-        <div class="glass-card bottom-sheet" style="border-color:var(--warning);">
-            <div class="sheet-pill"></div>
-            <h2 id="judulAlasan" style="text-align:center; color:var(--warning); font-size: 16px;"><i class="fa-solid fa-circle-exclamation"></i> ALASAN GAGAL/TUNDA</h2>
-            <textarea id="textAlasan" class="modal-input" style="height:100px; margin-top:15px;" placeholder="Tulis alasan jelas (Rumah kosong, Uang kurang, Dll)"></textarea>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-                <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalAlasan').style.display='none'">BATAL</button>
-                <button class="btn-main" style="background:var(--warning); color:black;" onclick="prosesSimpanAlasan()"><i class="fa-solid fa-check"></i> KONFIRMASI</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalPenerima" class="modal-overlay">
-        <div class="glass-card bottom-sheet" style="border-color:var(--safe);">
-            <div class="sheet-pill"></div>
-            <h2 style="color:var(--safe); text-align:center; font-size: 16px;"><i class="fa-solid fa-camera"></i> PAKET DITERIMA</h2>
-            <p style="font-size:11px; text-align:center; color:gray; margin:15px 0;">Foto tersimpan! Siapa nama penerima paket ini?</p>
-            <input type="text" id="inputNamaPenerima" class="modal-input" placeholder="Nama Penerima / Satpam..." style="border-color:var(--safe); font-weight:800;">
-            
-            <div id="kalkulatorCOD" style="display:none; background:rgba(0,0,0,0.4); padding:15px; border-radius:12px; margin-bottom:15px; border:1px dashed var(--warning);">
-                <div style="font-size:10px; color:gray; margin-bottom:10px;">TAGIHAN COD: <b id="tagihanCalc" style="color:var(--warning); font-size:16px; float:right;">Rp 0</b></div>
-                <div class="input-group" style="margin-bottom:10px; width:100%;">
-                    <i class="fa-solid fa-hand-holding-dollar" style="color:var(--safe); top:13px;"></i>
-                    <input type="number" id="uangDiterima" class="modal-input" placeholder="Ketik Uang Diterima..." style="margin:0; border-color:var(--safe); font-size:14px; font-weight:800; background:rgba(34,197,94,0.1);" oninput="hitungKembalian()" inputmode="numeric">
-                </div>
-                <div style="text-align:center; font-size:10px; color:gray; font-weight:800; margin-top:5px;">KEMBALIAN / KEKURANGAN:</div>
-                <div id="teksKembalian" style="text-align:center; font-size:24px; font-weight:800; color:white; margin-top:5px; text-shadow:0 0 10px rgba(255,255,255,0.2);">Rp 0</div>
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-                <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="batalUploadSelesai()">BATAL</button>
-                <button id="btnUploadFoto" class="btn-main" style="background:var(--safe); color:white;" onclick="eksekusiUploadSelesai()"><i class="fa-solid fa-cloud-arrow-up"></i> UPLOAD</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalLogout" class="modal-overlay">
-        <div class="glass-card bottom-sheet" style="border-color:var(--danger); text-align:center;">
-            <div class="sheet-pill"></div>
-            <i class="fa-solid fa-triangle-exclamation" style="font-size:40px; color:var(--danger); margin-bottom:15px;"></i>
-            <h2 style="color:white; font-size: 16px; margin-bottom:10px;">YAKIN INGIN KELUAR?</h2>
-            <p style="font-size:12px; color:gray; margin-bottom:20px;">Sesi Anda akan ditutup. Anda harus memasukkan PIN lagi untuk masuk.</p>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalLogout').style.display='none'">BATAL</button>
-                <button class="btn-main" style="background:var(--danger); color:white;" onclick="eksekusiLogout()"><i class="fa-solid fa-right-from-bracket"></i> KELUAR</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-auth-compat.js"></script>
-    <script>
-    const firebaseConfig = { apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg", authDomain: "ejtobacco-v2.firebaseapp.com", databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "ejtobacco-v2", storageBucket: "ejtobacco-v2.firebasestorage.app", messagingSenderId: "366973371317", appId: "1:366973371317:web:c5ec32460cd9cf0f6c8ffc" };
-    firebase.initializeApp(firebaseConfig);
-        
-    // --- LOGIKA UTAMA EJ KURIR (EMAIL LOGIN VERSION) ---
-const db = firebase.database();
-let myName = localStorage.getItem('namaKurir') || "";
-let currentTab = 'Proses', allData = [], allPengeluaranData = {}, allSetoranData = {};
-let html5QrCode = null; // <--- TAMBAHKAN INI AGAR KAMERA LANCAR
-        
-// 1. CEK STATUS LOGIN SAAT BUKA APLIKASI
-window.onload = () => {
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            // Jika user sudah login, ambil nama dari emailnya
-            myName = user.email.split('@')[0];
-            localStorage.setItem('namaKurir', myName);
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
-            mulaiTarikData(); 
-        } else {
-            document.getElementById('loginOverlay').style.display = 'flex';
-        }
-    });
-};
 
-    // 2. FUNGSI LOGIN (Dijalankan saat tombol dipencet)
-function prosesLoginEmail() {
-    const email = document.getElementById('emailInput').value.trim();
-    const pass = document.getElementById('passInput').value.trim();
-    const btn = document.getElementById('btnLoginNow');
-    const err = document.getElementById('teksErrorLogin');
+<script src="https://unpkg.com/html5-qrcode"></script>
 
-    if(!email || !pass) { alert("⚠️ Isi Email & Password dulu Bos!"); return; }
+<style>
 
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> MEMVERIFIKASI...';
-    btn.disabled = true;
-    err.style.display = 'none';
-
-    firebase.auth().signInWithEmailAndPassword(email, pass)
-    .then(() => { console.log("Berhasil Masuk!"); })
-    .catch((error) => {
-        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> MASUK SEKARANG';
-        btn.disabled = false;
-        err.innerText = "❌ GAGAL: Email/Password salah atau tidak ada sinyal.";
-        err.style.display = 'block';
-    });
+body{
+margin:0;
+background:#050505;
+color:white;
+font-family:'Plus Jakarta Sans';
+padding:15px;
 }
 
-    // 3. TARIK DATA DARI DATABASE
-function mulaiTarikData() {
-    db.ref('pesanan').limitToLast(200).on('value', snap => { 
-        allData = snap.val() ? Object.keys(snap.val()).map(k => ({id:k, ...snap.val()[k]})).reverse() : []; 
-        updateUI(); 
-    });
-    db.ref('pengeluaran').limitToLast(150).on('value', snap => { 
-        allPengeluaranData = snap.val() || {}; 
-        updateUI(); 
-    });
-    db.ref('setoran_kurir').on('value', snap => { 
-        allSetoranData = snap.val() || {}; 
-        updateUI(); 
-    });
-    aktifkanRadar(); // Nyalakan GPS
+.header{
+display:flex;
+justify-content:space-between;
+margin-bottom:20px;
 }
 
-    function eksekusiLogout() {
-    if(confirm("Keluar dari aplikasi?")) {
-        firebase.auth().signOut().then(() => {
-            localStorage.removeItem('namaKurir');
-            window.location.reload();
-        });
-    }
+.card{
+background:#111;
+border:1px solid #D4AF37;
+border-radius:15px;
+padding:15px;
+margin-bottom:15px;
 }
 
-    function forceRefresh() {
-        const icon = document.getElementById('iconRefresh');
-        icon.classList.add('fa-spin'); 
-        db.goOffline(); 
-        setTimeout(() => {
-            db.goOnline(); 
-            setTimeout(() => { icon.classList.remove('fa-spin'); }, 1000); 
-        }, 500);
-    }
-
-    function updateUI() {
-        const today = getTgl(); let gd=0, p=0, s=0, g=0, codK=0; const me = myName.toLowerCase();
-        allData.forEach(o => {
-            const ok = String(o.kurir || "").toLowerCase();
-            if (o.status === 'Gudang') gd++;
-            if (ok === me) {
-                if (o.status === 'Proses' || o.status === 'Menunggu' || o.status === 'Tunda') p++;
-                else if (o.status === 'Terkirim' && o.tanggal === today) { s++; if(o.metode==='COD') codK += Number(o.total || 0); }
-                else if (o.status === 'Gagal' && o.tanggal === today) g++;
-            }
-        });
-        let expK = 0; Object.values(allPengeluaranData).forEach(e => { if(String(e.kurir||"").toLowerCase() === me && e.tanggal === today) expK += Number(e.nominal || 0); });
-        let setK = 0; const key = today.replace(/\//g, '-'); if(allSetoranData[key] && allSetoranData[key][myName]) setK = Number(allSetoranData[key][myName]);
-        document.getElementById('c-Gudang').innerText=gd; document.getElementById('c-Proses').innerText=p; document.getElementById('c-Terkirim').innerText=s; document.getElementById('c-Gagal').innerText=g;
-        document.getElementById('totalCOD').innerText="Rp "+codK.toLocaleString('id-ID'); document.getElementById('totalPengeluaran').innerText="Rp "+expK.toLocaleString('id-ID');
-        const bersih = codK - expK - setK; document.getElementById('setoranBersih').innerText="Rp "+Math.max(0, bersih).toLocaleString('id-ID');
-        renderOrders();
-    }
-
-    function renderOrders() {
-        const container = document.getElementById('orderContainer');
-        const search = document.getElementById('searchOrder').value.toLowerCase().trim();
-        const today = getTgl(); const me = myName.toLowerCase();
-        container.innerHTML = "";
-
-        let filtered = allData.filter(o => {
-            const match = (o.namaPembeli || "").toLowerCase().includes(search) || (o.noPesanan || "").toLowerCase().includes(search);
-            const ok = String(o.kurir || "").toLowerCase();
-            if (currentTab === 'Gudang') return match && o.status === 'Gudang';
-            if (ok !== me) return false;
-            if (currentTab === 'Proses') return match && (o.status !== 'Terkirim' && o.status !== 'Gagal' && o.status !== 'Gudang');
-            return match && (o.status === currentTab && o.tanggal === today);
-        });
-
-        // --- MESIN PENGURUT RUTE (DRAG & DROP) ---
-        if (currentTab === 'Proses') {
-            let customOrder = JSON.parse(localStorage.getItem('rute_'+myName)) || [];
-            filtered.sort((a, b) => {
-                let indexA = customOrder.indexOf(a.id);
-                let indexB = customOrder.indexOf(b.id);
-                if (indexA === -1) indexA = 9999; // Kalau paket baru masuk, taruh bawah
-                if (indexB === -1) indexB = 9999;
-                return indexA - indexB;
-            });
-        }
-        // ------------------------------------------
-
-        // 1. Tambahkan (o, index) di sini
-        filtered.forEach((o, index) => {
-            const waNum = String(o.nohp || "").replace(/\D/g, '').replace(/^0/, '62');
-            const trackLink = `https://ejtobacco.github.io/ej-delivery/tracking.html?n=${myName}`;
-            const msg = `*EJ TOBACCO DELIVERY* 🚀\n------------------------------------------\nHalo Kak *${o.namaPembeli.toUpperCase()}* 👋\n\nSaya kurir *${myName.toUpperCase()}* sedang meluncur mengantar paket kakak.\n\n*KAKAK BISA PANTAU POSISI SAYA SECARA LIVE:* \n${trackLink}\n\nTagihan COD: *Rp${Number(o.total || 0).toLocaleString()}* 🙏`;
-            
-            let btnMaps = "";
-            if (o.mapLink && o.mapLink.trim() !== "") {
-                let lv = o.mapLink.trim(); if (!lv.startsWith("http")) lv = "https://" + lv;
-                btnMaps = `<button onclick="window.open('${lv}', '_blank')" class="action-btn btn-maps"><i class="fa-solid fa-map-location-dot"></i> MAPS</button>`;
-            }
-
-            let badgeClass = "", iconStatus = "";
-            if(o.status === 'Gudang') { badgeClass = "badge-gudang"; iconStatus = "fa-warehouse"; }
-            else if(o.status === 'Terkirim') { badgeClass = "badge-sukses"; iconStatus = "fa-check-double"; }
-            else if(o.status === 'Gagal') { badgeClass = "badge-gagal"; iconStatus = "fa-triangle-exclamation"; }
-            else { badgeClass = "badge-proses"; iconStatus = "fa-motorcycle"; }
-
-            let payBadge = o.metode === 'COD' ? `<span style="background:var(--warning); color:black; padding:2px 5px; border-radius:4px; font-size:8px; font-weight:800;">COD</span>` : `<span style="background:var(--blue); color:white; padding:2px 5px; border-radius:4px; font-size:8px; font-weight:800;">TF</span>`;
-
-            // 2. GAGANG TARIKAN BARU DENGAN NOMOR URUT BULAT EMAS
-            let dragBar = currentTab === 'Proses' ? `
-            <div class="drag-handle" style="background:rgba(212,175,55,0.1); display:flex; align-items:center; padding:8px 15px; color:var(--gold); font-size:10px; font-weight:800; letter-spacing:1px; border-bottom:1px solid rgba(212,175,55,0.2);">
-                <div class="nomor-urut" style="background:var(--gold); color:black; width:22px; height:22px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:12px; margin-right:10px;">${index + 1}</div>
-                <div style="flex:1; text-align:center;"><i class="fa-solid fa-grip-lines"></i> GESER ATUR RUTE</div>
-            </div>` : '';
-
-            container.innerHTML += `
-            <div class="glass-card sortable-item ${o.urgent?'card-urgent':''}" data-id="${o.id}" style="padding:0; overflow:hidden; ${o.status === 'Gudang' ? 'border-color:gray; opacity:0.8;' : 'border-color:var(--gold);'}">
-                ${dragBar}
-                <div onclick="toggleDetail('${o.id}')" style="padding:15px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <div style="width:35px; height:35px; border-radius:10px; display:flex; justify-content:center; align-items:center; font-size:14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);">
-                            <i class="fa-solid ${iconStatus}" style="color:${o.status==='Terkirim'?'var(--safe)':'var(--gold)'}"></i>
-                        </div>
-                        <div>
-                            <div style="font-size:13px; font-weight:800; color:white; margin-bottom:2px;">${o.namaPembeli}</div>
-                            <div style="font-size:10px; color:gray;">${o.noPesanan} • ${payBadge} Rp ${Number(o.total).toLocaleString('id-ID')}</div>
-                        </div>
-                    </div>
-                    <i id="icon-arrow-${o.id}" class="fa-solid fa-chevron-down" style="font-size:12px; color:var(--gold); transition:0.3s;"></i>
-                </div>
-
-                <div id="detail-${o.id}" style="display:none; padding:0 15px 15px 15px; border-top:1px dashed rgba(255,255,255,0.1); background:rgba(0,0,0,0.2);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin:12px 0;">
-                        <div class="order-badge ${badgeClass}"><i class="fa-solid ${iconStatus}"></i> ${o.status.toUpperCase()}</div>
-                        <div style="font-size:10px; color:gray;"><i class="fa-regular fa-clock"></i> ${o.tanggal}</div>
-                    </div>
-                    <div style="font-size:12px; color:#ddd; margin-bottom:15px; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; border-left:2px solid ${o.status==='Gudang'?'gray':'var(--gold)'}; line-height:1.4;">
-                        <b style="color:var(--danger); font-size:10px; display:block; margin-bottom:3px;">ALAMAT PENGIRIMAN:</b>
-                        ${o.alamat}
-                    </div>
-                    ${o.status === 'Gudang' ? `<button class="btn-main" onclick="ambilPaket('${o.id}')"><i class="fa-solid fa-box-open"></i> KLAIM & MASUKKAN TAS SAYA</button>` : 
-                    (o.status !== 'Terkirim' && o.status !== 'Gagal' ? `
-                    <div style="display:grid; grid-template-columns: ${btnMaps !== '' ? '1fr 1fr' : '1fr'}; gap:8px; margin-bottom:8px;">
-                        <button onclick="window.open('https://wa.me/${waNum}?text=${encodeURIComponent(msg)}', '_blank')" class="action-btn btn-wa"><i class="fa-brands fa-whatsapp" style="font-size:14px;"></i> KABARI PELANGGAN</button>
-                        ${btnMaps}
-                    </div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
-                        <button class="action-btn" style="background:var(--safe);" onclick="document.getElementById('f-${o.id}').click()"><i class="fa-solid fa-camera"></i> SELESAI</button>
-                        <button class="action-btn" style="background:var(--warning); color:black;" onclick="updateStat('${o.id}', 'Tunda')"><i class="fa-solid fa-clock"></i> TUNDA</button>
-                    </div>
-                    <button class="action-btn" style="background:rgba(239,68,68,0.1); border: 1px solid var(--danger); color:var(--danger); width:100%; margin-top:8px;" onclick="updateStat('${o.id}', 'Gagal')"><i class="fa-solid fa-xmark"></i> CANCEL / GAGAL</button>
-                    ` : `<div style="font-size:11px; text-align:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:10px; color:gray;"><i class="fa-solid fa-lock"></i> PESANAN SELESAI / TERKUNCI</div>`)}
-                    
-                    <input type="file" id="f-${o.id}" accept="image/*" capture="environment" style="display:none;" onchange="uploadSelesai('${o.id}', '${o.metode}', ${o.total}, this)">
-                </div>
-            </div>`;
-        });
-        
-        if (filtered.length === 0) container.innerHTML = `<div style="text-align:center; padding:50px 20px; opacity:0.3;"><i class="fa-solid fa-box-open" style="font-size:40px; display:block; margin-bottom:10px;"></i>Tidak ada paket di tab ini.</div>`;
-        
-        // JALANKAN MESIN DRAG & DROP
-        initSortable();
-    }
-
-        let sortableInstance = null;
-    function initSortable() {
-        const container = document.getElementById('orderContainer');
-        if (sortableInstance) sortableInstance.destroy(); // Bersihkan sisa mesin lama
-        
-        // Cuma aktif kalau lagi di tab TAS SAYA
-        if (currentTab === 'Proses') {
-            sortableInstance = new Sortable(container, {
-                handle: '.drag-handle', 
-                animation: 350,         
-                easing: "cubic-bezier(0.25, 1, 0.5, 1)", 
-                ghostClass: 'sortable-ghost', 
-                dragClass: 'sortable-drag', 
-                forceFallback: true,    
-                fallbackTolerance: 5, // Dinaikkan dikit biar jari gemetar aman
-                
-                // === FITUR TAHAN & VISUAL HAPTIC ===
-                delay: 400, 
-                delayOnTouchOnly: true, 
-                
-                onChoose: function (evt) {
-                    // 1. Perkuat getaran jadi 100ms (Biar Android kerasa banget)
-                    if(navigator.vibrate) navigator.vibrate(100); 
-                    
-                    // 2. EFEK VISUAL: Kartu membesar dan nyala emas (Biar iPhone/iOS tetap tahu)
-                    evt.item.style.transform = "scale(1.03)";
-                    evt.item.style.boxShadow = "0 0 20px rgba(212, 175, 55, 0.6)";
-                    evt.item.style.transition = "0.2s";
-                },
-                
-                onUnchoose: function(evt) {
-                    // 3. Kalau kurir cuma nahan tapi nggak jadi narik, balikin ke ukuran normal
-                    evt.item.style.transform = "";
-                    evt.item.style.boxShadow = "";
-                },
-                // =========================================
-                // --- MESIN LIVE-UPDATE ANGKA SAAT DIGESER ---
-                onChange: function(evt) {
-                    let urut = 1;
-                    const semuaKartu = container.querySelectorAll('.sortable-item');
-                    semuaKartu.forEach(el => {
-                        // Abaikan kartu kloning/bayangan yang nempel di jari
-                        if (!el.classList.contains('sortable-drag')) {
-                            const badge = el.querySelector('.nomor-urut');
-                            if (badge) { badge.innerText = urut; urut++; }
-                        }
-                    });
-                    if(navigator.vibrate) navigator.vibrate([10]); 
-                },
-
-                onEnd: function (evt) {
-                    let newOrder = [];
-                    let urut = 1;
-                    const semuaKartu = container.querySelectorAll('.sortable-item');
-                    
-                    semuaKartu.forEach(el => {
-                        // Abaikan juga pas nyimpan ke memori rute
-                        if (!el.classList.contains('sortable-drag')) {
-                            newOrder.push(el.getAttribute('data-id'));
-                            const badge = el.querySelector('.nomor-urut');
-                            if (badge) { badge.innerText = urut; urut++; }
-                        }
-                    });
-                    
-                    localStorage.setItem('rute_'+myName, JSON.stringify(newOrder));
-                    if(navigator.vibrate) navigator.vibrate([50]); 
-                }
-            });
-        }
-    }
-
-    function updateStatusInternet() {
-        const lampu = document.getElementById('lampuKoneksi');
-        const teks = document.getElementById('teksKoneksi');
-        if (navigator.onLine) {
-            document.body.classList.remove('is-offline');
-            if(lampu) { lampu.style.background = "var(--safe)"; lampu.style.boxShadow = "0 0 10px var(--safe)"; }
-            if(teks) { teks.innerText = "SISTEM ONLINE"; teks.style.color = "var(--safe)"; }
-        } else {
-            document.body.classList.add('is-offline');
-            if(lampu) { lampu.style.background = "var(--offline)"; lampu.style.boxShadow = "0 0 10px var(--offline)"; }
-            if(teks) { teks.innerText = "KONEKSI TERPUTUS"; teks.style.color = "var(--offline)"; }
-        }
-    }
-
-        function toggleDetail(id) { 
-        const d = document.getElementById('detail-' + id); 
-        const a = document.getElementById('icon-arrow-' + id); 
-        if (d.style.display === "none") { 
-            d.style.display = "block"; 
-            if(a) a.style.transform = "rotate(180deg)"; 
-        } else { 
-            d.style.display = "none"; 
-            if(a) a.style.transform = "rotate(0deg)"; 
-        } 
-    }
-        
-function ambilPaket(id) { 
-    db.ref('pesanan/'+id).update({ 
-        status: 'Proses', 
-        kurir: myName, 
-        tanggal: getTgl(), // <-- Tanggal disinkronkan saat diambil
-        waktuAmbil: new Date().toLocaleTimeString() 
-    }).then(() => { 
-        document.getElementById('searchOrder').value=""; 
-        setTab('Proses'); 
-    }); 
+.btn{
+background:#D4AF37;
+color:black;
+padding:12px;
+border-radius:10px;
+border:none;
+font-weight:700;
+width:100%;
 }
-        
-    let tempMetodeSukses = "", tempTotalSukses = 0;
 
-    function uploadSelesai(id, metode, total, input) { 
-        if (input.files[0]) { 
-            tempFileSukses = input.files[0]; 
-            tempIdSukses = id; 
-            tempMetodeSukses = metode;
-            tempTotalSukses = Number(total || 0);
-
-            // Reset Form Modal
-            document.getElementById('inputNamaPenerima').value = "";
-            const uangIn = document.getElementById('uangDiterima');
-            const teksKem = document.getElementById('teksKembalian');
-            const calcDiv = document.getElementById('kalkulatorCOD');
-
-            // Logika Detektor COD
-            if (metode === 'COD') {
-                calcDiv.style.display = 'block'; // Munculkan Kalkulator
-                document.getElementById('tagihanCalc').innerText = "Rp " + tempTotalSukses.toLocaleString('id-ID');
-                uangIn.value = "";
-                teksKem.innerText = "Rp 0";
-                teksKem.style.color = "white";
-            } else {
-                calcDiv.style.display = 'none'; // Sembunyikan kalau Transfer
-            }
-
-            document.getElementById('modalPenerima').style.display='flex'; 
-            input.value=""; 
-        } 
-    }
-
-    function hitungKembalian() {
-        const uang = Number(document.getElementById('uangDiterima').value || 0);
-        const teksKem = document.getElementById('teksKembalian');
-        
-        if (uang === 0) {
-            teksKem.innerText = "Rp 0"; teksKem.style.color = "white"; return;
-        }
-
-        const kembalian = uang - tempTotalSukses;
-        
-        if (kembalian < 0) {
-            // UANG KURANG (MERAH)
-            teksKem.innerText = "- Rp " + Math.abs(kembalian).toLocaleString('id-ID');
-            teksKem.style.color = "var(--danger)";
-        } else if (kembalian === 0) {
-            // UANG PAS (HIJAU)
-            teksKem.innerText = "UANG PAS";
-            teksKem.style.color = "var(--safe)";
-        } else {
-            // KEMBALIAN (EMAS)
-            teksKem.innerText = "Kembali: Rp " + kembalian.toLocaleString('id-ID');
-            teksKem.style.color = "var(--gold)";
-        }
-    }
-    
-    function eksekusiUploadSelesai() {
-    let n = document.getElementById('inputNamaPenerima').value || "Keluarga/Pihak Rumah";
-    const id = tempIdSukses, file = tempFileSukses; 
-    
-    const btnUpload = document.getElementById('btnUploadFoto');
-    const teksAsli = btnUpload.innerHTML;
-    btnUpload.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> MENGIRIM...`;
-    btnUpload.disabled = true;
-
-    const reader = new FileReader(); reader.onload = function(e) {
-        const img = new Image(); img.onload = function() {
-            const canvas = document.createElement('canvas'); let w = img.width, h = img.height;
-            if (w > h) { if (w > 600) { h *= 600 / w; w = 600; } } else { if (h > 800) { w *= 800 / h; h = 800; } }
-            canvas.width = w; canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            db.ref('foto_bukti/'+id).set(canvas.toDataURL('image/jpeg', 0.5)).then(() => {
-                db.ref('pesanan/'+id).update({ 
-                    status: 'Terkirim', 
-                    adaFoto: true, 
-                    catatanKurir: "Diterima: "+n, 
-                    tanggal: getTgl(), // <-- Tanggal disinkronkan ke hari ini agar masuk omzet
-                    waktuSelesai: new Date().toLocaleTimeString() 
-                }).then(() => {
-                    document.getElementById('modalPenerima').style.display='none';
-                    btnUpload.innerHTML = teksAsli;
-                    btnUpload.disabled = false;
-                    document.getElementById('inputNamaPenerima').value = "";
-                    if(navigator.vibrate) navigator.vibrate(100);
-                });
-            }).catch(err => {
-                alert("❌ Gagal mengirim foto! Pastikan sinyal internet stabil.");
-                btnUpload.innerHTML = teksAsli;
-                btnUpload.disabled = false;
-            });
-        }; img.src = e.target.result;
-    }; reader.readAsDataURL(file);
+input{
+width:100%;
+padding:12px;
+border-radius:10px;
+border:none;
+background:#111;
+color:white;
+margin-bottom:10px;
 }
-    
-    function batalUploadSelesai() { document.getElementById('modalPenerima').style.display='none'; tempFileSukses=null; }
-    function setTab(t) { currentTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('t-'+t).classList.add('active'); renderOrders(); }
-    function toggleScanner() { const r = document.getElementById('reader'); r.style.display = r.style.display==='block'?'none':'block'; if(r.style.display==='block') startScanner(); }
-    function startScanner() { html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode:"environment" }, { fps:10, qrbox:250 }, (txt) => {
-        const target = allData.find(o => o.noPesanan.replace(/\W/g, "") === txt.replace(/\W/g, ""));
-        if (target) { if (target.status==='Gudang') ambilPaket(target.id); else { document.getElementById('searchOrder').value=target.noPesanan; renderOrders(); } html5QrCode.stop(); document.getElementById('reader').style.display='none'; }
-    }); }
-    
-    function tambahPengeluaran() { document.getElementById('modalExpense').style.display='flex'; }
-    
-    function prosesSimpanExpense() { 
-        const k=document.getElementById('expKet').value, n=document.getElementById('expNom').value; 
-        if(!k || !n) {
-            alert("⚠️ Waduh! Keterangan dan Nominal Rp harus diisi dulu Bos!");
-            return; 
-        }
-        db.ref('pengeluaran').push({ kurir:myName, keterangan:k, nominal:Number(n), tanggal:getTgl(), waktu:new Date().toLocaleTimeString() }).then(()=>{
-            document.getElementById('modalExpense').style.display='none';
-            document.getElementById('expKet').value = "";
-            document.getElementById('expNom').value = "";
-        }); 
-    }
-    
-    function updateStat(id, s) { tempId = id; tempStat = s; document.getElementById('modalAlasan').style.display='flex'; }
-    
-    function prosesSimpanAlasan() { 
-    const a=document.getElementById('textAlasan').value; 
-    if(!a) {
-        alert("⚠️ Alasan tidak boleh kosong! Kasih tau admin kenapa paket ini ditunda/gagal.");
-        return;
-    }
-    db.ref('pesanan/'+tempId).update({ 
-        status: tempStat, 
-        alasanTunda: a, 
-        tanggal: getTgl(), // <-- Tanggal disinkronkan saat ditunda/gagal
-        waktuUpdate: new Date().toLocaleTimeString() 
-    }).then(()=>{
-        document.getElementById('modalAlasan').style.display='none';
-        document.getElementById('textAlasan').value = "";
-    }); 
-}
-    
 
-let lastGpsTime = 0;
-function aktifkanRadar() { 
-    if (navigator.geolocation) { 
-        navigator.geolocation.watchPosition(pos => { 
-            const now = Date.now();
-            // Cegah tembakan ke Firebase jika belum lewat 5 detik (5000 ms)
-            if (now - lastGpsTime > 5000) {
-                db.ref('tracking/'+myName).set({ 
-                    lat: pos.coords.latitude, 
-                    lng: pos.coords.longitude, 
-                    waktu: new Date().toLocaleTimeString() 
-                }); 
-                lastGpsTime = now;
-            }
-        }, null, { enableHighAccuracy: true }); 
-    } 
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<div>
+<b style="color:#D4AF37">EJ TOBACCO</b><br>
+<span id="namaKurir">...</span>
+</div>
+
+<div>
+<div id="clock">00:00</div>
+<div id="internet">ONLINE</div>
+</div>
+
+</div>
+
+<div class="card">
+
+<b>DOMPET COD</b>
+
+<h2 id="totalCOD">Rp 0</h2>
+
+</div>
+
+<input id="searchOrder" placeholder="Cari pelanggan...">
+
+<div id="orderContainer"></div>
+
+<button class="btn" onclick="toggleScanner()">SCAN BARCODE</button>
+
+<div id="reader"></div>
+
+<script>
+
+const firebaseConfig={
+apiKey:"AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg",
+authDomain:"ejtobacco-v2.firebaseapp.com",
+databaseURL:"https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId:"ejtobacco-v2"
 }
-    </script>
+
+firebase.initializeApp(firebaseConfig)
+
+const db=firebase.database()
+
+let myName=""
+let allData=[]
+
+let html5QrCode=null
+
+let lastScan=""
+
+let lastLat=null
+let lastLng=null
+
+/* ======================
+TANGGAL
+====================== */
+
+function getTgl(){
+
+return new Date().toLocaleDateString('id-ID')
+
+}
+
+/* ======================
+JAM
+====================== */
+
+setInterval(()=>{
+
+document.getElementById("clock").innerText=
+new Date().toLocaleTimeString('id-ID')
+
+},1000)
+
+/* ======================
+STATUS INTERNET
+====================== */
+
+function updateInternet(){
+
+if(navigator.onLine){
+
+document.getElementById("internet").innerText="ONLINE"
+
+}else{
+
+document.getElementById("internet").innerText="OFFLINE"
+
+}
+
+}
+
+window.addEventListener("online",updateInternet)
+window.addEventListener("offline",updateInternet)
+
+updateInternet()
+
+/* ======================
+LOGIN
+====================== */
+
+firebase.auth().onAuthStateChanged(user=>{
+
+if(user){
+
+myName=user.email.split("@")[0]
+
+document.getElementById("namaKurir").innerText=myName
+
+mulaiTarikData()
+
+}
+
+})
+
+/* ======================
+TARIK DATA
+====================== */
+
+function mulaiTarikData(){
+
+db.ref("pesanan").limitToLast(200).on("value",snap=>{
+
+let data=snap.val()
+
+if(!data)return
+
+allData=Object.keys(data).map(k=>({
+
+id:k,
+...data[k]
+
+})).reverse()
+
+simpanCache()
+
+renderOrders()
+
+})
+
+}
+
+/* ======================
+CACHE OFFLINE
+====================== */
+
+function simpanCache(){
+
+localStorage.setItem(
+"cache_orders",
+JSON.stringify(allData)
+)
+
+}
+
+function loadCache(){
+
+let cache=localStorage.getItem("cache_orders")
+
+if(cache){
+
+allData=JSON.parse(cache)
+
+renderOrders()
+
+}
+
+}
+
+loadCache()
+
+/* ======================
+RENDER ORDER
+====================== */
+
+function renderOrders(){
+
+const container=document.getElementById("orderContainer")
+
+const search=document
+.getElementById("searchOrder")
+.value
+.toLowerCase()
+
+const fragment=document.createDocumentFragment()
+
+allData
+.filter(o=>
+
+(o.namaPembeli||"")
+.toLowerCase()
+.includes(search)
+
+)
+.forEach(o=>{
+
+let card=document.createElement("div")
+
+card.className="card"
+
+card.innerHTML=`
+
+<b>${o.namaPembeli}</b><br>
+
+${o.noPesanan}
+
+<br><br>
+
+<button class="btn"
+onclick="ambilPaket('${o.id}')">
+
+AMBIL PAKET
+
+</button>
+
+`
+
+fragment.appendChild(card)
+
+})
+
+container.innerHTML=""
+
+container.appendChild(fragment)
+
+}
+
+/* ======================
+AMBIL PAKET
+====================== */
+
+function ambilPaket(id){
+
+db.ref("pesanan/"+id).update({
+
+status:"Proses",
+kurir:myName,
+tanggal:getTgl()
+
+})
+
+}
+
+/* ======================
+SCANNER
+====================== */
+
+function toggleScanner(){
+
+let r=document.getElementById("reader")
+
+if(r.style.display==="block"){
+
+r.style.display="none"
+
+if(html5QrCode){
+
+html5QrCode.stop()
+
+}
+
+}else{
+
+r.style.display="block"
+
+startScanner()
+
+}
+
+}
+
+function startScanner(){
+
+html5QrCode=new Html5Qrcode("reader")
+
+html5QrCode.start(
+{facingMode:"environment"},
+{fps:10,qrbox:250},
+onScanSuccess
+)
+
+}
+
+function onScanSuccess(code){
+
+if(code===lastScan)return
+
+lastScan=code
+
+setTimeout(()=>{
+
+lastScan=""
+
+},2000)
+
+let order=allData.find(o=>
+o.noPesanan===code
+)
+
+if(order){
+
+ambilPaket(order.id)
+
+}
+
+}
+
+/* ======================
+GPS TRACKING
+====================== */
+
+function aktifkanRadar(){
+
+navigator.geolocation.watchPosition(pos=>{
+
+let lat=pos.coords.latitude
+let lng=pos.coords.longitude
+
+if(lastLat){
+
+let jarak=Math.sqrt(
+Math.pow(lat-lastLat,2)+
+Math.pow(lng-lastLng,2)
+)
+
+if(jarak<0.0002){
+return
+}
+
+}
+
+lastLat=lat
+lastLng=lng
+
+db.ref("tracking/"+myName).set({
+
+lat:lat,
+lng:lng,
+waktu:new Date().toLocaleTimeString()
+
+})
+
+})
+
+}
+
+aktifkanRadar()
+
+</script>
+
 </body>
 </html>
