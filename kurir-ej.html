@@ -690,13 +690,16 @@
         }
 
         function mulaiTarikData() {
-            db.ref('pesanan').limitToLast(200).on('value', snap => {
+            // NAIKKAN LIMIT KE 1500 (Aman karena sekarang hanya teks ringan)
+            // Ini menjamin pesanan tidak akan hilang dari layar kurir walau sehari ada 1000 orderan
+            db.ref('pesanan').limitToLast(1500).on('value', snap => {
                 const val = snap.val();
                 allData = val ? Object.keys(val).map(k => ({ id: k, ...val[k] })).reverse() : [];
                 updateUI();
             });
 
-            db.ref('pengeluaran').limitToLast(150).on('value', snap => {
+            // Pengeluaran kita naikkan ke 500
+            db.ref('pengeluaran').limitToLast(500).on('value', snap => {
                 allPengeluaranData = snap.val() || {};
                 updateUI();
             });
