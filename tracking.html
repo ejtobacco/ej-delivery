@@ -1,63 +1,243 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EJ LIVE TRACKING</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;800&display=swap" rel="stylesheet">
-    <style>
-        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: #050505; color: white; overflow: hidden; }
-        #map { height: 75vh; width: 100%; background: #111; }
-        .info-card { height: 25vh; padding: 20px; background: #0A0A0A; border-top: 2px solid #D4AF37; border-radius: 25px 25px 0 0; position: relative; z-index: 1000; text-align: center; }
-        .status-pulse { display: inline-block; width: 8px; height: 8px; background: #22C55E; border-radius: 50%; margin-right: 5px; box-shadow: 0 0 10px #22C55E; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
-        .kurir-name { font-size: 22px; font-weight: 800; color: #D4AF37; margin: 10px 0; text-transform: uppercase; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracking Kurir EJ</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
+
+  <style>
+    :root{
+      --gold:#D4AF37;
+      --bg:#050505;
+      --safe:#22C55E;
+      --glass:rgba(255,255,255,0.05);
+      --line:rgba(255,255,255,0.08);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+    body{
+      background:var(--bg);
+      color:white;
+      min-height:100vh;
+      padding:14px;
+      background:
+        radial-gradient(circle at top left, rgba(212,175,55,.12), transparent 25%),
+        radial-gradient(circle at top right, rgba(34,197,94,.08), transparent 20%),
+        #050505;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:18px;
+      margin-bottom:14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.45);
+    }
+    .card::before{
+      content:"";
+      display:block;
+      height:2px;
+      margin:-18px -18px 16px -18px;
+      border-radius:22px 22px 0 0;
+      background:linear-gradient(90deg, #F7E08C, #D4AF37);
+    }
+    .title{
+      font-size:20px;
+      font-weight:800;
+      color:var(--gold);
+      margin-bottom:6px;
+      letter-spacing:.5px;
+    }
+    .sub{
+      font-size:12px;
+      color:#b9b9b9;
+      line-height:1.5;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+    .mini{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+    }
+    .mini .label{
+      font-size:10px;
+      color:#9d9d9d;
+      margin-bottom:6px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+    }
+    .mini .value{
+      font-size:14px;
+      font-weight:800;
+      color:white;
+      word-break:break-word;
+    }
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      margin-top:12px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(34,197,94,.12);
+      border:1px solid rgba(34,197,94,.25);
+      color:var(--safe);
+      font-size:12px;
+      font-weight:800;
+    }
+    .dot{
+      width:8px;
+      height:8px;
+      background:var(--safe);
+      border-radius:50%;
+      box-shadow:0 0 10px var(--safe);
+    }
+    #map{
+      width:100%;
+      height:52vh;
+      border-radius:22px;
+      overflow:hidden;
+      border:1px solid rgba(212,175,55,.22);
+    }
+    .empty{
+      text-align:center;
+      padding:40px 20px;
+      color:#c5c5c5;
+      font-size:14px;
+      line-height:1.7;
+    }
+    .btn{
+      display:block;
+      width:100%;
+      text-align:center;
+      margin-top:14px;
+      text-decoration:none;
+      background:linear-gradient(135deg, #F7E08C, #D4AF37);
+      color:black;
+      padding:14px;
+      border-radius:14px;
+      font-weight:800;
+    }
+  </style>
 </head>
 <body>
-    <div id="map"></div>
-    <div class="info-card">
-        <div style="font-size: 11px; font-weight: 800; color: #22C55E;"><span class="status-pulse"></span> POSISI KURIR LIVE</div>
-        <div id="namaKurir" class="kurir-name">MENCARI...</div>
-        <p style="font-size: 11px; color: gray;">Peta otomatis mengikuti pergerakan kurir.</p>
+
+  <div class="card">
+    <div class="title">Tracking Kurir EJ</div>
+    <div class="sub">Pantau posisi kurir secara realtime dari link yang dibagikan lewat WhatsApp.</div>
+
+    <div id="infoBox">
+      <div class="empty">Memuat data tracking...</div>
     </div>
+  </div>
 
-    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
-    <script>
-        // PAKAI CONFIG FIREBASE BOS EJ (JANGAN DIGANTI)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg",
-            authDomain: "ejtobacco-v2.firebaseapp.com",
-            databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "ejtobacco-v2",
-            storageBucket: "ejtobacco-v2.firebasestorage.app",
-            messagingSenderId: "366973371317",
-            appId: "1:366973371317:web:c5ec32460cd9cf0f6c8ffc"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+  <div class="card">
+    <div id="map"></div>
+    <a id="btnMaps" class="btn" href="#" target="_blank" style="display:none;">Buka di Google Maps</a>
+  </div>
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const kurirId = urlParams.get('n') || "Unknown";
-        document.getElementById('namaKurir').innerText = "KURIR: " + kurirId;
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg",
+      authDomain: "ejtobacco-v2.firebaseapp.com",
+      databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "ejtobacco-v2",
+      storageBucket: "ejtobacco-v2.firebasestorage.app",
+      messagingSenderId: "366973371317",
+      appId: "1:366973371317:web:c5ec32460cd9cf0f6c8ffc"
+    };
 
-        const map = L.map('map', { zoomControl: false }).setView([-6.8694, 109.0435], 16);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        
-        const motorIcon = L.divIcon({ html: `<div style="font-size:30px;">🛵</div>`, iconSize: [30, 30], className: 'custom-icon' });
-        let marker = L.marker([-6.8694, 109.0435], {icon: motorIcon}).addTo(map);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        db.ref('tracking/' + kurirId).on('value', snap => {
-            const data = snap.val();
-            if (data) {
-                const pos = [data.lat, data.lng];
-                marker.setLatLng(pos);
-                map.panTo(pos);
-            }
-        });
-    </script>
+    const token = new URLSearchParams(window.location.search).get("t");
+
+    const infoBox = document.getElementById("infoBox");
+    const btnMaps = document.getElementById("btnMaps");
+
+    let map = L.map("map").setView([-6.2, 106.8], 13);
+    let marker = null;
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19
+    }).addTo(map);
+
+    function renderKosong(pesan) {
+      infoBox.innerHTML = `<div class="empty">${pesan}</div>`;
+      btnMaps.style.display = "none";
+    }
+
+    function renderInfo(data) {
+      infoBox.innerHTML = `
+        <div class="grid">
+          <div class="mini">
+            <div class="label">Kurir</div>
+            <div class="value">${data.namaKurir || data.courierId || "-"}</div>
+          </div>
+          <div class="mini">
+            <div class="label">No. Resi</div>
+            <div class="value">${data.noPesanan || "-"}</div>
+          </div>
+          <div class="mini">
+            <div class="label">Update Terakhir</div>
+            <div class="value">${data.waktu || "-"}</div>
+          </div>
+          <div class="mini">
+            <div class="label">Status Link</div>
+            <div class="value">${data.aktif ? "AKTIF" : "NONAKTIF"}</div>
+          </div>
+        </div>
+        <div class="status">
+          <span class="dot"></span>
+          Posisi kurir sedang dibagikan
+        </div>
+      `;
+    }
+
+    if (!token) {
+      renderKosong("Token tracking tidak ditemukan.<br>Pastikan link dari WhatsApp lengkap.");
+    } else {
+      db.ref("tracking_public/" + token).on("value", (snap) => {
+        const data = snap.val();
+
+        if (!data || data.aktif !== true) {
+          renderKosong("Link tracking tidak aktif atau sudah ditutup.");
+          return;
+        }
+
+        renderInfo(data);
+
+        const lat = Number(data.lat || 0);
+        const lng = Number(data.lng || 0);
+
+        if (!lat || !lng) {
+          btnMaps.style.display = "none";
+          return;
+        }
+
+        if (!marker) {
+          marker = L.marker([lat, lng]).addTo(map).bindPopup("Kurir EJ");
+        } else {
+          marker.setLatLng([lat, lng]);
+        }
+
+        map.setView([lat, lng], 16);
+
+        btnMaps.href = `https://www.google.com/maps?q=${lat},${lng}`;
+        btnMaps.style.display = "block";
+      });
+    }
+  </script>
 </body>
 </html>
