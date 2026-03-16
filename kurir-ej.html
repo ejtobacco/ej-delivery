@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EJ KURIR V5 - FIXED STABLE</title>
+    <title>EJ KURIR V5 - FIREBASE EMAIL LOGIN</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#050505">
 
@@ -15,10 +15,17 @@
 
     <style>
         :root {
-            --gold: #D4AF37; --bg: #050505; --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(212, 175, 55, 0.3); --text-main: #FFFFFF;
-            --safe: #22C55E; --warning: #F59E0B; --danger: #EF4444;
-            --blue: #3B82F6; --wa: #25D366; --offline: #A855F7;
+            --gold: #D4AF37;
+            --bg: #050505;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(212, 175, 55, 0.3);
+            --text-main: #FFFFFF;
+            --safe: #22C55E;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --blue: #3B82F6;
+            --wa: #25D366;
+            --offline: #A855F7;
             --gradient-gold: linear-gradient(135deg, #F7E08C, #D4AF37);
             --gradient-dark: linear-gradient(145deg, #111, #000);
         }
@@ -109,7 +116,9 @@
         .wallet-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 2px;
             background: var(--safe);
             opacity: 0.8;
@@ -386,16 +395,16 @@
         <div style="text-align: center; width: 320px; padding: 25px; background: rgba(255,255,255,0.02); border: 1px solid var(--gold); border-radius: 25px; backdrop-filter: blur(15px);">
             <i class="fa-solid fa-motorcycle" style="font-size: 50px; color: var(--gold); margin-bottom: 15px;"></i>
             <h2 style="color:#fff; letter-spacing: 2px;">EJ LOGISTICS</h2>
-            <p style="color:var(--gold); font-size:10px; margin-bottom:25px; opacity:0.8;">OFFICIAL COURIER ACCESS</p>
+            <p style="color:var(--gold); font-size:10px; margin-bottom:25px; opacity:0.8;">LOGIN KURIR FIREBASE</p>
 
             <div class="input-group">
                 <i class="fa-solid fa-envelope"></i>
-                <input type="email" id="emailInput" placeholder="Email Akun Kurir..." style="padding-left:45px;">
+                <input type="email" id="emailInput" class="modal-input" placeholder="Email kurir..." style="padding-left:45px;">
             </div>
 
             <div class="input-group">
                 <i class="fa-solid fa-lock"></i>
-                <input type="password" id="passInput" placeholder="Password..." style="padding-left:45px;">
+                <input type="password" id="passInput" class="modal-input" placeholder="Password..." style="padding-left:45px;">
             </div>
 
             <button class="btn-main" id="btnLoginNow" onclick="prosesLoginEmail()">
@@ -569,7 +578,7 @@
 
         const db = firebase.database();
 
-        let myName = localStorage.getItem('namaKurir') || "";
+        let myName = "";
         let currentTab = 'Proses';
         let allData = [];
         let allPengeluaranData = {};
@@ -652,27 +661,6 @@
             }
         }
 
-        setInterval(updateJamDanHari, 1000);
-        window.addEventListener('online', updateStatusInternet);
-        window.addEventListener('offline', updateStatusInternet);
-
-        window.onload = () => {
-            updateJamDanHari();
-            updateStatusInternet();
-
-            firebase.auth().onAuthStateChanged((user) => {
-                if (user) {
-                    myName = user.email.split('@')[0];
-                    localStorage.setItem('namaKurir', myName);
-                    document.getElementById('loginOverlay').style.display = 'none';
-                    document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
-                    mulaiTarikData();
-                } else {
-                    document.getElementById('loginOverlay').style.display = 'flex';
-                }
-            });
-        };
-
         function prosesLoginEmail() {
             const email = document.getElementById('emailInput').value.trim();
             const pass = document.getElementById('passInput').value.trim();
@@ -680,7 +668,8 @@
             const err = document.getElementById('teksErrorLogin');
 
             if (!email || !pass) {
-                alert("⚠️ Isi Email & Password dulu Bos!");
+                err.innerText = "⚠️ Email dan password wajib diisi.";
+                err.style.display = "block";
                 return;
             }
 
@@ -688,20 +677,18 @@
             btn.disabled = true;
             err.style.display = 'none';
 
-            firebase.auth().signInWithEmailAndPassword(email, pass)
+            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                .then(() => firebase.auth().signInWithEmailAndPassword(email, pass))
                 .then(() => {})
-                .catch(() => {
+                .catch((error) => {
                     btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> MASUK SEKARANG';
                     btn.disabled = false;
-                    err.innerText = "❌ GAGAL: Email/Password salah atau tidak ada sinyal.";
+                    err.innerText = "❌ Login gagal: " + error.message;
                     err.style.display = 'block';
                 });
         }
 
         function mulaiTarikData() {
-            if (listenersStarted) return;
-            listenersStarted = true;
-
             db.ref('pesanan').limitToLast(200).on('value', snap => {
                 const val = snap.val();
                 allData = val ? Object.keys(val).map(k => ({ id: k, ...val[k] })).reverse() : [];
@@ -717,9 +704,34 @@
                 allSetoranData = snap.val() || {};
                 updateUI();
             });
-
-            aktifkanRadar();
         }
+
+        setInterval(updateJamDanHari, 1000);
+        window.addEventListener('online', updateStatusInternet);
+        window.addEventListener('offline', updateStatusInternet);
+
+        window.onload = () => {
+            updateJamDanHari();
+            updateStatusInternet();
+
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    myName = user.email.split('@')[0];
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
+
+                    if (!listenersStarted) {
+                        mulaiTarikData();
+                        listenersStarted = true;
+                    }
+
+                    aktifkanRadar();
+                } else {
+                    myName = "";
+                    document.getElementById('loginOverlay').style.display = 'flex';
+                }
+            });
+        };
 
         async function eksekusiLogout() {
             try {
@@ -737,8 +749,8 @@
                 }
 
                 await firebase.auth().signOut();
-                localStorage.removeItem('namaKurir');
-                window.location.reload();
+                document.getElementById('modalLogout').style.display = 'none';
+                document.getElementById('loginOverlay').style.display = 'flex';
             } catch (e) {
                 alert("❌ Gagal logout, coba lagi.");
             }
