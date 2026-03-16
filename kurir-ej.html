@@ -716,7 +716,16 @@
 
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
-                    myName = user.email.split('@')[0];
+                    const emailAuth = user.email.toLowerCase();
+                    
+                    // BLOKIR JIKA YANG LOGIN ADALAH ADMIN ATAU BOS
+                    if (emailAuth === "bosej@ejtobacco.com" || emailAuth === "adminej@ejtobacco.com") {
+                        alert("⚠️ AKSES DITOLAK: Ini adalah aplikasi khusus Kurir. Akun Admin tidak dapat digunakan di sini.");
+                        firebase.auth().signOut();
+                        return;
+                    }
+
+                    myName = emailAuth.split('@')[0];
                     document.getElementById('loginOverlay').style.display = 'none';
                     document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
 
