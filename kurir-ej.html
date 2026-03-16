@@ -420,8 +420,8 @@
             <div class="main-logo-text"><i class="fa-solid fa-crown" style="font-size:14px; margin-right:5px;"></i> EJ TOBACCO</div>
             <div style="font-size:9px; letter-spacing:1px; color:gray; margin-left:20px; display: flex; align-items: center; gap: 8px;">
                 APP KURIR | <b id="namaKurirHeader" style="color:white;">...</b>
-                <button onclick="forceRefresh()" style="background:transparent; border:none; color:var(--blue); cursor:pointer; padding:0; margin-left:5px;">
-                    <i id="iconRefresh" class="fa-solid fa-rotate-right" style="font-size:12px;"></i>
+                <button onclick="tembakGPSSekarang(); forceRefresh();" style="background:transparent; border:none; color:var(--blue); cursor:pointer; padding:0; margin-left:5px;">
+                    <i id="iconRefresh" class="fa-solid fa-location-crosshairs" style="font-size:14px;"></i>
                 </button>
                 <button onclick="tampilkanPopupLogout()" style="background:transparent; border:none; color:var(--danger); cursor:pointer; padding:0;">
                     <i class="fa-solid fa-right-from-bracket" style="font-size:12px;"></i>
@@ -595,7 +595,7 @@
         let tempMetodeSukses = "";
         let tempTotalSukses = 0;
 
-        let lastGpsTime = 0;
+        let lastGpsTime = null;
         let gpsWatchId = null;
         let lastScanText = "";
 
@@ -1044,6 +1044,7 @@
         }
 
         function ambilPaket(id) {
+            tembakGPSSekarang();
             db.ref('pesanan/' + id).update({
                 status: 'Proses',
                 kurir: myName,
@@ -1111,6 +1112,8 @@
             const n = document.getElementById('inputNamaPenerima').value.trim() || "Keluarga/Pihak Rumah";
             const id = tempIdSukses;
             const file = tempFileSukses;
+
+            tembakGPSSekarang();
 
             if (!id || !file) {
                 alert("❌ Foto belum dipilih.");
@@ -1196,6 +1199,7 @@
         }
 
         function setTab(t) {
+            tembakGPSSekarang();
             currentTab = t;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('t-' + t).classList.add('active');
@@ -1324,36 +1328,74 @@
             });
         }
 
-        function aktifkanRadar() {
-            if (!navigator.geolocation || !myName) return;
+        // ==========================================
+        // SISTEM RADAR GPS BARU (ANTI-TIDUR & FORCE UPDATE)
+        // ==========================================
 
-            if (gpsWatchId !== null) {
-                navigator.geolocation.clearWatch(gpsWatchId);
-                gpsWatchId = null;
+        // 1. Fungsi agar layar HP kurir tidak otomatis mati/redup
+        async function cegahLayarMati() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Layar Anti-Tidur Aktif');
+                } catch (err) {
+                    console.log("Wake Lock ditolak/tidak didukung:", err);
+                }
             }
+        }
 
-            gpsWatchId = navigator.geolocation.watchPosition(
+        // 2. Kalau kurir mengantongi HP, lalu buka aplikasi lagi, langsung tembak GPS!
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                cegahLayarMati();
+                tembakGPSSekarang(); // Update GPS instan saat layar nyala lagi
+            }
+        });
+
+        // 3. Fungsi tembak GPS paksa secara manual / saat ada aktivitas
+        function tembakGPSSekarang() {
+            if (!navigator.geolocation || !myName) return;
+            
+            navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    const now = Date.now();
-
-                    if (now - lastGpsTime < 5000) return;
-
                     db.ref('tracking/' + myName).set({
                         lat: pos.coords.latitude,
                         lng: pos.coords.longitude,
                         waktu: new Date().toLocaleTimeString('id-ID')
                     });
+                    
+                    // Kedipkan lampu indikator koneksi jadi putih sebagai tanda GPS terkirim
+                    const lampu = document.getElementById('lampuKoneksi');
+                    if(lampu) {
+                        lampu.style.background = "white";
+                        setTimeout(() => { lampu.style.background = "var(--safe)"; }, 500);
+                    }
+                },
+                (err) => { console.log("Gagal tembak GPS manual:", err); },
+                { enableHighAccuracy: true, maximumAge: 0 }
+            );
+        }
 
-                    lastGpsTime = now;
+        // 4. Fungsi Radar Utama (Berjalan saat aplikasi dibuka)
+        function aktifkanRadar() {
+            if (!navigator.geolocation || !myName) return;
+
+            cegahLayarMati(); // Panggil fungsi anti-tidur
+
+            if (gpsWatchId !== null) {
+                navigator.geolocation.clearWatch(gpsWatchId);
+            }
+
+            gpsWatchId = navigator.geolocation.watchPosition(
+                (pos) => {
+                    db.ref('tracking/' + myName).set({
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude,
+                        waktu: new Date().toLocaleTimeString('id-ID')
+                    });
                 },
-                (err) => {
-                    console.log("GPS error:", err);
-                },
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 3000,
-                    timeout: 10000
-                }
+                (err) => { console.log("GPS error:", err); },
+                { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
             );
         }
 
