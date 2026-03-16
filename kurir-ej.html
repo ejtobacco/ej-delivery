@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EJ KURIR V5 - FIREBASE EMAIL LOGIN</title>
+    <title>EJ KURIR V8 - SUPER PREMIUM FINAL</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#050505">
 
@@ -385,6 +385,835 @@
         }
 
         .modal-input:focus { border-color: var(--gold); }
+    
+
+        /* ==== MODERN OVERRIDE V6 ==== */
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(59,130,246,0.08), transparent 24%),
+                radial-gradient(circle at top right, rgba(212,175,55,0.10), transparent 28%),
+                #07090d;
+            padding: 18px;
+            padding-bottom: 120px;
+        }
+
+        .header {
+            margin-bottom: 16px;
+            padding: 14px 0 12px;
+            background: linear-gradient(180deg, rgba(7,9,13,0.92), rgba(7,9,13,0.65), transparent);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .logo-text-container {
+            gap: 4px;
+        }
+
+        .main-logo-text {
+            color: #F6DD82;
+            font-size: 18px;
+            text-shadow: 0 0 18px rgba(212,175,55,0.22);
+        }
+
+        .wallet-card {
+            background:
+                radial-gradient(circle at top right, rgba(212,175,55,0.16), transparent 40%),
+                linear-gradient(180deg, #121826 0%, #0b0f16 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 26px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+            padding: 22px;
+            margin-bottom: 16px;
+        }
+
+        .wallet-card::before {
+            height: 3px;
+            background: var(--gradient-gold);
+        }
+
+        #totalCOD {
+            font-size: 34px;
+            color: #4ADE80;
+        }
+
+        .btn-main {
+            border-radius: 18px;
+            min-height: 54px;
+            box-shadow: 0 14px 28px rgba(212,175,55,0.18);
+            background: var(--gradient-gold);
+            color: #111;
+        }
+
+        #btnScanMain {
+            margin-bottom: 14px !important;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .quick-action-btn {
+            min-height: 82px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 10px 6px;
+            box-shadow: 0 14px 30px rgba(0,0,0,0.26);
+        }
+
+        .quick-action-btn i {
+            color: var(--gold);
+            font-size: 17px;
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .search-box,
+        .modal-input {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            min-height: 52px;
+        }
+
+        .tab-menu {
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .tab-btn {
+            min-height: 76px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.24);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(180deg, rgba(212,175,55,0.18), rgba(212,175,55,0.08));
+            border-color: rgba(212,175,55,0.35);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 16px;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.24);
+        }
+
+        .stat-card span {
+            display: block;
+            font-size: 11px;
+            color: #98A2B3;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .stat-card b {
+            display: block;
+            font-size: 20px;
+            color: white;
+            font-weight: 800;
+        }
+
+        .sort-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .chip-btn {
+            min-height: 36px;
+            padding: 0 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04);
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        #orderContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .glass-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.34);
+            margin-bottom: 0;
+        }
+
+        .action-btn {
+            border-radius: 16px;
+            min-height: 48px;
+            font-size: 12px;
+        }
+
+        .order-badge {
+            border-radius: 999px;
+        }
+
+        .modal-overlay {
+            background: rgba(0,0,0,0.72);
+            backdrop-filter: blur(8px);
+        }
+
+        .bottom-sheet {
+            background: #0f141d;
+            border-radius: 28px 28px 0 0;
+            box-shadow: 0 -20px 60px rgba(0,0,0,0.45);
+        }
+
+        .sheet-pill {
+            width: 68px;
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.18);
+        }
+
+        .quick-reason-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .reason-pill {
+            min-height: 44px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04);
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 8px 10px;
+        }
+
+        .reason-pill:hover {
+            border-color: rgba(212,175,55,0.35);
+            color: var(--gold);
+        }
+
+        .audit-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 12px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.08);
+        }
+
+        .audit-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 12px rgba(212,175,55,0.4);
+            margin-top: 4px;
+            flex: 0 0 auto;
+        }
+
+        .audit-item b {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .audit-item p {
+            font-size: 11px;
+            color: #98A2B3;
+            line-height: 1.45;
+        }
+
+        #toastBox {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translate(-50%, -16px);
+            width: min(380px, calc(100% - 28px));
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(17, 22, 32, 0.97);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+            color: white;
+            font-size: 13px;
+            font-weight: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.25s ease;
+            z-index: 1000000;
+        }
+
+        #toastBox.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        @media (max-width: 390px) {
+            body { padding: 14px; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr); }
+            .stat-grid { grid-template-columns: 1fr; }
+            .quick-reason-grid { grid-template-columns: 1fr; }
+        }
+
+
+        /* ==== POLISH V7 ==== */
+        body {
+            max-width: 460px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 15% 0%, rgba(59,130,246,0.10), transparent 26%),
+                radial-gradient(circle at 85% 0%, rgba(212,175,55,0.09), transparent 24%);
+            z-index: -1;
+        }
+
+        .header,
+        .wallet-card,
+        .tab-btn,
+        .quick-action-btn,
+        .stat-card,
+        .glass-card,
+        .bottom-sheet,
+        .input-group {
+            backdrop-filter: blur(18px);
+        }
+
+        .header,
+        .wallet-card,
+        .stat-card,
+        .glass-card,
+        .quick-action-btn,
+        .tab-btn,
+        .input-group {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after,
+        .wallet-card::after,
+        .glass-card::after,
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.06), transparent 42%);
+            pointer-events: none;
+        }
+
+        .glass-card,
+        .stat-card,
+        .quick-action-btn,
+        .tab-btn,
+        .wallet-card {
+            transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+        }
+
+        .glass-card:hover,
+        .stat-card:hover,
+        .quick-action-btn:hover,
+        .tab-btn:hover,
+        .wallet-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 22px 48px rgba(0,0,0,0.38);
+        }
+
+        .modal-input::placeholder,
+        .search-box::placeholder {
+            color: rgba(255,255,255,0.42);
+        }
+
+        .mini-order-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0 0 14px;
+        }
+
+        .mini-order-chip {
+            min-height: 30px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #d6deea;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .mini-order-chip.urgent {
+            color: #fecaca;
+            border-color: rgba(239,68,68,0.26);
+            background: rgba(239,68,68,0.10);
+        }
+
+        .route-progress {
+            margin: 0 0 14px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.035);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .route-progress-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #98A2B3;
+            margin-bottom: 10px;
+            letter-spacing: .3px;
+            text-transform: uppercase;
+        }
+
+        .route-progress-head b {
+            color: #F6DD82;
+            font-size: 10px;
+        }
+
+        .route-progress-track {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            overflow: hidden;
+        }
+
+        .route-progress-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #f7e08c, #d4af37, #22c55e);
+            box-shadow: 0 0 18px rgba(212,175,55,0.3);
+        }
+
+        .address-soft {
+            background: rgba(255,255,255,0.035) !important;
+            border: 1px solid rgba(255,255,255,0.05) !important;
+            border-radius: 16px !important;
+            padding: 12px 14px !important;
+        }
+
+        .detail-divider {
+            height: 1px;
+            margin: 6px 0 14px;
+            border: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.12), rgba(255,255,255,0));
+        }
+
+        @keyframes softRise {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .wallet-card,
+        .quick-actions,
+        .input-group,
+        .tab-menu,
+        .stat-grid,
+        .sort-row,
+        #orderContainer {
+            animation: softRise .35s ease both;
+        }
+
+        @media (max-width: 390px) {
+            .mini-order-chips {
+                gap: 6px;
+            }
+
+            .mini-order-chip {
+                font-size: 9px;
+                padding: 6px 8px;
+            }
+        }
+
+
+
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            padding-bottom: 168px;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: auto;
+            pointer-events: none;
+            z-index: -1;
+            filter: blur(10px);
+        }
+
+        body::before {
+            width: 220px;
+            height: 220px;
+            left: -60px;
+            top: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212,175,55,0.12), transparent 70%);
+        }
+
+        body::after {
+            width: 260px;
+            height: 260px;
+            right: -70px;
+            bottom: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59,130,246,0.10), transparent 70%);
+        }
+
+        .premium-login-box {
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.06);
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025)) !important;
+        }
+
+        .premium-login-box::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 42%);
+            pointer-events: none;
+        }
+
+        .header {
+            position: sticky;
+            top: 10px;
+            z-index: 26;
+            padding: 16px 18px;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(14,18,26,0.92), rgba(10,13,19,0.82));
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 22px 50px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.05);
+            backdrop-filter: blur(22px);
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 35%);
+            pointer-events: none;
+        }
+
+        .premium-surface {
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 26px 64px rgba(0,0,0,0.34), 0 0 0 1px rgba(212,175,55,0.08);
+        }
+
+        .wallet-premium-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 30px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.08);
+            color: #F6DD82;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .7px;
+        }
+
+        .wallet-card.premium-surface::before {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            right: -55px;
+            top: -55px;
+            background: radial-gradient(circle, rgba(247,224,140,0.18), transparent 70%);
+            pointer-events: none;
+        }
+
+        .wallet-card.premium-surface::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.06), transparent 42%);
+            pointer-events: none;
+        }
+
+        .premium-section-label {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 18px 4px 10px;
+        }
+
+        .premium-section-label span {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #F6DD82;
+            text-transform: uppercase;
+        }
+
+        .premium-section-label b {
+            font-size: 12px;
+            color: #D7DCE5;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        #sectionQuick,
+        #sectionSearch,
+        #sectionTabs,
+        #sectionStats,
+        #sectionSort,
+        #sectionOrders,
+        #sectionWallet {
+            scroll-margin-top: 110px;
+        }
+
+        .quick-action-btn,
+        .tab-btn,
+        .stat-card,
+        .chip-btn,
+        .action-btn,
+        .btn-main,
+        .glass-card.sortable-item,
+        .modal-input,
+        .bottom-sheet {
+            transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease, background .22s ease;
+        }
+
+        .quick-action-btn:hover,
+        .tab-btn:hover,
+        .stat-card:hover,
+        .chip-btn:hover,
+        .glass-card.sortable-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 36px rgba(0,0,0,0.30);
+        }
+
+        .quick-actions,
+        .tab-menu,
+        .stat-grid,
+        .sort-row {
+            position: relative;
+        }
+
+        .quick-action-btn {
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 32px rgba(0,0,0,0.22);
+        }
+
+        .input-group,
+        .tab-menu,
+        .stat-grid,
+        .sort-row {
+            background: linear-gradient(180deg, rgba(17,22,32,0.86), rgba(12,16,24,0.82));
+            border: 1px solid rgba(255,255,255,0.07);
+            box-shadow: 0 20px 44px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.03);
+        }
+
+        #sectionSearch {
+            padding: 4px;
+            border-radius: 22px;
+        }
+
+        .tab-menu {
+            padding: 10px;
+            border-radius: 24px;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            min-height: 78px;
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .tab-btn.active {
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 14px 28px rgba(212,175,55,0.12);
+        }
+
+        .stat-grid {
+            padding: 10px;
+            border-radius: 24px;
+        }
+
+        .stat-card {
+            border-radius: 18px !important;
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03)) !important;
+            border: 1px solid rgba(255,255,255,0.06) !important;
+        }
+
+        .sort-row {
+            padding: 10px;
+            border-radius: 22px;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .chip-btn {
+            background: rgba(255,255,255,0.045);
+            border: 1px solid rgba(255,255,255,0.08);
+            white-space: nowrap;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+
+        #sectionOrders {
+            position: relative;
+        }
+
+        #orderContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .glass-card.sortable-item {
+            border-radius: 24px !important;
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.028)) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 40px rgba(0,0,0,0.26) !important;
+        }
+
+        .modal-overlay {
+            backdrop-filter: blur(10px);
+            background: rgba(4,6,10,0.72) !important;
+        }
+
+        .glass-card.bottom-sheet {
+            border-radius: 28px 28px 0 0 !important;
+            background: linear-gradient(180deg, rgba(17,22,32,0.98), rgba(10,13,19,0.96)) !important;
+            box-shadow: 0 -24px 64px rgba(0,0,0,0.42) !important;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .glass-card.bottom-sheet::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 34%);
+            pointer-events: none;
+        }
+
+        #toastBox {
+            bottom: 136px !important;
+            top: auto !important;
+            border-radius: 18px !important;
+            background: rgba(17,22,32,0.95) !important;
+            border: 1px solid rgba(255,255,255,0.09) !important;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.34) !important;
+        }
+
+        .fab-super {
+            position: fixed;
+            right: max(16px, calc(50% - 205px));
+            bottom: 116px;
+            width: 60px;
+            height: 60px;
+            border-radius: 22px;
+            border: none;
+            background: var(--gradient-gold);
+            color: #111;
+            font-size: 20px;
+            box-shadow: 0 24px 42px rgba(212,175,55,0.28);
+            z-index: 45;
+        }
+
+        .premium-bottom-dock {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 20px;
+            width: min(420px, calc(100% - 28px));
+            padding: 10px;
+            border-radius: 28px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            background: rgba(10,12,18,0.86);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 24px 52px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.06);
+            backdrop-filter: blur(22px);
+            z-index: 44;
+        }
+
+        .dock-btn {
+            min-height: 60px;
+            border-radius: 18px;
+            border: none;
+            background: transparent;
+            color: #98A2B3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .dock-btn i {
+            font-size: 16px;
+        }
+
+        .dock-btn.active {
+            background: rgba(212,175,55,0.12);
+            color: #F6DD82;
+        }
+
+        @media (max-width: 390px) {
+            body { padding-bottom: 184px; }
+            .premium-bottom-dock { width: calc(100% - 20px); bottom: 14px; }
+            .fab-super { right: 14px; bottom: 106px; width: 56px; height: 56px; }
+            .premium-section-label { flex-direction: column; align-items: flex-start; }
+            .premium-section-label b { text-align: left; }
+        }
+
     </style>
 </head>
 <body>
@@ -392,7 +1221,7 @@
     <audio id="beepSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div id="loginOverlay">
-        <div style="text-align: center; width: 320px; padding: 25px; background: rgba(255,255,255,0.02); border: 1px solid var(--gold); border-radius: 25px; backdrop-filter: blur(15px);">
+        <div class="premium-login-box" style="text-align: center; width: 320px; padding: 25px; background: rgba(255,255,255,0.02); border: 1px solid var(--gold); border-radius: 25px; backdrop-filter: blur(15px);">
             <i class="fa-solid fa-motorcycle" style="font-size: 50px; color: var(--gold); margin-bottom: 15px;"></i>
             <h2 style="color:#fff; letter-spacing: 2px;">EJ LOGISTICS</h2>
             <p style="color:var(--gold); font-size:10px; margin-bottom:25px; opacity:0.8;">LOGIN KURIR FIREBASE</p>
@@ -440,7 +1269,8 @@
         </div>
     </div>
 
-    <div class="wallet-card">
+    <div id="sectionWallet" class="wallet-card premium-surface">
+        <div class="wallet-premium-badge"><i class="fa-solid fa-sparkles"></i> SUPER PREMIUM DELIVERY PANEL</div>
         <span style="font-size:10px; color:var(--safe); font-weight:800; letter-spacing:1px;"><i class="fa-solid fa-wallet"></i> DOMPET UANG COD HARI INI</span>
         <b id="totalCOD">Rp 0</b>
         <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1);">
@@ -462,13 +1292,25 @@
         <i class="fa-solid fa-barcode"></i> SCAN BARCODE (PICKUP PAKET)
     </button>
     <div id="reader" style="width:100%; display:none; border-radius:15px; overflow:hidden; margin-bottom:15px; border: 2px solid var(--gold);"></div>
+    <div class="premium-section-label" id="sectionQuickLabel"><span>OPERASIONAL</span><b>Aksi cepat kurir</b></div>
 
-    <div class="input-group">
+    <div id="sectionQuick" class="quick-actions">
+        <button class="quick-action-btn" onclick="forceRefresh(); tembakGPSSekarang();"><i class="fa-solid fa-location-crosshairs"></i><span>Refresh GPS</span></button>
+        <button class="quick-action-btn" onclick="tambahPengeluaran()"><i class="fa-solid fa-receipt"></i><span>Pengeluaran</span></button>
+        <button class="quick-action-btn" onclick="urutkanRuteCepat('nominal')"><i class="fa-solid fa-sack-dollar"></i><span>Sort COD</span></button>
+        <button class="quick-action-btn" onclick="tampilkanAuditLog()"><i class="fa-solid fa-shield-halved"></i><span>Audit Log</span></button>
+    </div>
+
+    <div class="premium-section-label"><span>PENCARIAN</span><b>Cari pelanggan cepat</b></div>
+
+    <div id="sectionSearch" class="input-group">
         <i class="fa-solid fa-magnifying-glass"></i>
         <input type="text" id="searchOrder" class="search-box" placeholder="Cari nama atau resi pelanggan..." oninput="renderOrders()">
     </div>
 
-    <div class="tab-menu">
+    <div class="premium-section-label"><span>PANEL STATUS</span><b>Gudang, tas saya, sukses, cancel</b></div>
+
+    <div id="sectionTabs" class="tab-menu">
         <div class="tab-btn" id="t-Gudang" onclick="setTab('Gudang')">
             <i class="fa-solid fa-warehouse"></i> GUDANG <span id="c-Gudang" style="display:block; font-size:14px; margin-top:3px;">0</span>
         </div>
@@ -483,7 +1325,33 @@
         </div>
     </div>
 
-    <div id="orderContainer"></div>
+    <div class="premium-section-label"><span>INSIGHT</span><b>Ringkasan performa hari ini</b></div>
+
+    <div id="sectionStats" class="stat-grid">
+        <div class="stat-card"><span>Paket aktif</span><b id="metricAktif">0</b></div>
+        <div class="stat-card"><span>Order urgent</span><b id="metricUrgent">0</b></div>
+        <div class="stat-card"><span>Sukses hari ini</span><b id="metricSukses">0</b></div>
+        <div class="stat-card"><span>Gagal / tunda</span><b id="metricGagal">0</b></div>
+    </div>
+
+    <div class="premium-section-label"><span>DELIVERY BOARD</span><b>Urutkan rute pengantaran</b></div>
+
+    <div id="sectionSort" class="sort-row">
+        <button class="chip-btn" onclick="urutkanRuteCepat('manual')"><i class="fa-solid fa-grip-lines"></i> Urutan Saya</button>
+        <button class="chip-btn" onclick="urutkanRuteCepat('nominal')"><i class="fa-solid fa-arrow-down-wide-short"></i> COD terbesar</button>
+        <button class="chip-btn" onclick="urutkanRuteCepat('nama')"><i class="fa-solid fa-arrow-down-a-z"></i> Nama A-Z</button>
+    </div>
+
+    <div id="sectionOrders"><div id="orderContainer"></div></div>
+
+    <button class="fab-super" onclick="tambahPengeluaran()" title="Tambah pengeluaran cepat"><i class="fa-solid fa-plus"></i></button>
+
+    <div class="premium-bottom-dock" id="premiumDock">
+        <button class="dock-btn active" data-target="top"><i class="fa-solid fa-house"></i><span>Home</span></button>
+        <button class="dock-btn" data-target="sectionWallet"><i class="fa-solid fa-wallet"></i><span>Dompet</span></button>
+        <button class="dock-btn" data-target="sectionTabs"><i class="fa-solid fa-layer-group"></i><span>Status</span></button>
+        <button class="dock-btn" data-target="sectionOrders"><i class="fa-solid fa-route"></i><span>Order</span></button>
+    </div>
 
     <div id="modalView" class="modal-overlay" onclick="this.style.display='none'">
         <img id="imgPreview" src="">
@@ -509,7 +1377,13 @@
         <div class="glass-card bottom-sheet" style="border-color:var(--warning);">
             <div class="sheet-pill"></div>
             <h2 id="judulAlasan" style="text-align:center; color:var(--warning); font-size: 16px;"><i class="fa-solid fa-circle-exclamation"></i> ALASAN GAGAL/TUNDA</h2>
-            <textarea id="textAlasan" class="modal-input" style="height:100px; margin-top:15px;" placeholder="Tulis alasan jelas (Rumah kosong, Uang kurang, Dll)"></textarea>
+            <div id="quickReasonWrap" class="quick-reason-grid" style="margin-top:15px;">
+                <button class="reason-pill" onclick="applyQuickReason('Rumah kosong')">Rumah kosong</button>
+                <button class="reason-pill" onclick="applyQuickReason('Pelanggan minta sore')">Minta sore</button>
+                <button class="reason-pill" onclick="applyQuickReason('Alamat sulit ditemukan')">Alamat sulit</button>
+                <button class="reason-pill" onclick="applyQuickReason('Pembayaran kurang')">Uang kurang</button>
+            </div>
+            <textarea id="textAlasan" class="modal-input" style="height:100px; margin-top:5px;" placeholder="Tulis alasan jelas (Rumah kosong, Uang kurang, Dll)"></textarea>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
                 <button class="btn-main" style="background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalAlasan').style.display='none'">BATAL</button>
                 <button class="btn-main" style="background:var(--warning); color:black;" onclick="prosesSimpanAlasan()"><i class="fa-solid fa-check"></i> KONFIRMASI</button>
@@ -543,6 +1417,17 @@
             </div>
         </div>
     </div>
+
+    <div id="modalAudit" class="modal-overlay">
+        <div class="glass-card bottom-sheet" style="border-color:var(--gold);">
+            <div class="sheet-pill"></div>
+            <h2 style="color:var(--gold); text-align:center; font-size: 16px; margin-bottom:12px;"><i class="fa-solid fa-shield-halved"></i> AUDIT LOG OPERASIONAL</h2>
+            <div id="auditListView"></div>
+            <button class="btn-main" style="margin-top:14px; background:rgba(255,255,255,0.05); color:white; box-shadow:none;" onclick="document.getElementById('modalAudit').style.display='none'">TUTUP</button>
+        </div>
+    </div>
+
+    <div id="toastBox"></div>
 
     <div id="modalLogout" class="modal-overlay">
         <div class="glass-card bottom-sheet" style="border-color:var(--danger); text-align:center;">
@@ -598,6 +1483,72 @@
         let lastGpsTime = null;
         let gpsWatchId = null;
         let lastScanText = "";
+        let auditLogs = [];
+
+        function showToast(msg) {
+            const el = document.getElementById('toastBox');
+            if (!el) return;
+            el.innerText = msg;
+            el.classList.add('show');
+            clearTimeout(showToast.timer);
+            showToast.timer = setTimeout(() => el.classList.remove('show'), 2400);
+        }
+
+        function addAuditLog(title, note = '') {
+            auditLogs.unshift({ title, note, waktu: new Date().toLocaleTimeString('id-ID') });
+            if (auditLogs.length > 40) auditLogs = auditLogs.slice(0, 40);
+            renderAuditLog();
+        }
+
+        function renderAuditLog() {
+            const box = document.getElementById('auditListView');
+            if (!box) return;
+            if (!auditLogs.length) {
+                box.innerHTML = '<div style="text-align:center; padding:30px 10px; color:gray;">Belum ada log aktivitas.</div>';
+                return;
+            }
+            box.innerHTML = auditLogs.map(item => `
+                <div class="audit-item">
+                    <span class="audit-dot"></span>
+                    <div>
+                        <b>${item.title}</b>
+                        <p>${item.note ? item.note + ' • ' : ''}${item.waktu}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function tampilkanAuditLog() {
+            renderAuditLog();
+            document.getElementById('modalAudit').style.display = 'flex';
+        }
+
+        function applyQuickReason(text) {
+            const area = document.getElementById('textAlasan');
+            area.value = text;
+            area.focus();
+        }
+
+        function urutkanRuteCepat(mode) {
+            if (!myName) return;
+            if (currentTab !== 'Proses') setTab('Proses');
+            const me = myName.toLowerCase();
+            let proses = allData.filter(o => {
+                const ok = String(o.kurir || '').toLowerCase();
+                return ok === me && o.status !== 'Terkirim' && o.status !== 'Gagal' && o.status !== 'Gudang';
+            });
+            if (!proses.length) {
+                showToast('Tidak ada order proses untuk diurutkan.');
+                return;
+            }
+            if (mode === 'nominal') proses.sort((a,b) => safeNumber(b.total) - safeNumber(a.total));
+            else if (mode === 'nama') proses.sort((a,b) => String(a.namaPembeli||'').localeCompare(String(b.namaPembeli||''), 'id'));
+            const ids = proses.map(o => o.id);
+            localStorage.setItem('rute_' + myName, JSON.stringify(ids));
+            renderOrders();
+            addAuditLog('Urutan rute diperbarui', mode === 'manual' ? 'Menggunakan urutan tersimpan kurir.' : 'Mode: ' + mode);
+            showToast(mode === 'manual' ? 'Rute memakai urutan tersimpan.' : 'Rute berhasil diurutkan.');
+        }
 
         function getTgl() {
             const d = new Date();
@@ -717,6 +1668,7 @@
         window.onload = () => {
             updateJamDanHari();
             updateStatusInternet();
+            renderAuditLog();
 
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
@@ -732,6 +1684,8 @@
                     myName = emailAuth.split('@')[0];
                     document.getElementById('loginOverlay').style.display = 'none';
                     document.getElementById('namaKurirHeader').innerText = myName.toUpperCase();
+                    addAuditLog('Login kurir berhasil', myName.toUpperCase() + ' masuk ke aplikasi.');
+                    showToast('Selamat datang, ' + myName.toUpperCase() + '!');
 
                     if (!listenersStarted) {
                         mulaiTarikData();
@@ -773,6 +1727,8 @@
             const icon = document.getElementById('iconRefresh');
             icon.classList.add('fa-spin');
             db.goOffline();
+            addAuditLog('Sinkronisasi manual', 'Refresh data dan GPS dijalankan.');
+            showToast('Sinkronisasi data dimulai...');
 
             setTimeout(() => {
                 db.goOnline();
@@ -827,6 +1783,11 @@
 
             const bersih = codK - expK - setK;
             document.getElementById('setoranBersih').innerText = "Rp " + Math.max(0, bersih).toLocaleString('id-ID');
+            const urgentAktif = allData.filter(o => String(o.kurir || '').toLowerCase() === me && !!o.urgent && (o.status === 'Proses' || o.status === 'Menunggu' || o.status === 'Tunda')).length;
+            document.getElementById('metricAktif').innerText = p;
+            document.getElementById('metricUrgent').innerText = urgentAktif;
+            document.getElementById('metricSukses').innerText = s;
+            document.getElementById('metricGagal').innerText = g;
 
             renderOrders();
         }
@@ -893,6 +1854,14 @@
                     ? `<span style="background:var(--warning); color:black; padding:2px 5px; border-radius:4px; font-size:8px; font-weight:800;">COD</span>`
                     : `<span style="background:var(--blue); color:white; padding:2px 5px; border-radius:4px; font-size:8px; font-weight:800;">TF</span>`;
 
+                const hpMini = String(o.nohp || '-').trim() || '-';
+                const areaMini = String((o.alamat || '').split(',')[0] || 'Alamat pelanggan').trim().slice(0, 28);
+                const progressWidth = o.status === 'Terkirim' ? 100 : o.status === 'Gudang' ? 24 : o.status === 'Gagal' ? 100 : Math.max(34, 88 - (index * 9));
+                const progressLabel = o.status === 'Terkirim' ? 'SELESAI' : o.status === 'Gudang' ? 'SIAP PICKUP' : o.status === 'Gagal' ? 'BUTUH FOLLOW UP' : `STOP ${index + 1}`;
+                const proofInfo = o.status === 'Terkirim' && o.catatanKurir
+                    ? `<div class="mini-order-chips" style="margin-top:0;"><span class="mini-order-chip"><i class="fa-solid fa-camera"></i> ${String(o.catatanKurir)}</span></div>`
+                    : '';
+
                 const dragBar = currentTab === 'Proses' ? `
                     <div class="drag-handle" style="background:rgba(212,175,55,0.1); display:flex; align-items:center; padding:8px 15px; color:var(--gold); font-size:10px; font-weight:800; letter-spacing:1px; border-bottom:1px solid rgba(212,175,55,0.2);">
                         <div class="nomor-urut" style="background:var(--gold); color:black; width:22px; height:22px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:12px; margin-right:10px;">${index + 1}</div>
@@ -921,10 +1890,29 @@
                                 <div style="font-size:10px; color:gray;"><i class="fa-regular fa-clock"></i> ${String(o.tanggal || '-')}</div>
                             </div>
 
-                            <div style="font-size:12px; color:#ddd; margin-bottom:15px; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; border-left:2px solid ${o.status === 'Gudang' ? 'gray' : 'var(--gold)'}; line-height:1.4;">
-                                <b style="color:var(--danger); font-size:10px; display:block; margin-bottom:3px;">ALAMAT PENGIRIMAN:</b>
+                            <div class="address-soft" style="font-size:12px; color:#ddd; margin-bottom:15px; line-height:1.45;">
+                                <b style="color:var(--danger); font-size:10px; display:block; margin-bottom:5px;">ALAMAT PENGIRIMAN:</b>
                                 ${String(o.alamat || '-')}
                             </div>
+
+                            <div class="mini-order-chips">
+                                <span class="mini-order-chip"><i class="fa-solid fa-route"></i> Stop ${index + 1}</span>
+                                <span class="mini-order-chip"><i class="fa-solid fa-phone"></i> ${hpMini}</span>
+                                <span class="mini-order-chip"><i class="fa-solid fa-location-dot"></i> ${areaMini}</span>
+                                ${o.urgent ? '<span class="mini-order-chip urgent"><i class="fa-solid fa-bolt"></i> PRIORITAS</span>' : ''}
+                            </div>
+
+                            <div class="route-progress">
+                                <div class="route-progress-head">
+                                    <span>Progress panel</span>
+                                    <b>${progressLabel}</b>
+                                </div>
+                                <div class="route-progress-track"><div class="route-progress-fill" style="width:${progressWidth}%"></div></div>
+                            </div>
+
+                            ${proofInfo}
+
+                            <hr class="detail-divider">
 
                             ${o.status === 'Gudang'
                                 ? `<button class="btn-main" onclick="ambilPaket('${o.id}')"><i class="fa-solid fa-box-open"></i> KLAIM & MASUKKAN TAS SAYA</button>`
@@ -1052,6 +2040,8 @@
                 waktuAmbil: new Date().toLocaleTimeString('id-ID')
             }).then(() => {
                 document.getElementById('searchOrder').value = "";
+                addAuditLog('Pickup paket', 'Order masuk ke tas kurir.');
+                showToast('Paket berhasil masuk ke tas Anda.');
                 setTab('Proses');
             });
         }
@@ -1173,6 +2163,8 @@
                             document.getElementById('modalPenerima').style.display = 'none';
                             btnUpload.innerHTML = teksAsli;
                             btnUpload.disabled = false;
+                            addAuditLog('Bukti kirim tersimpan', 'Pesanan selesai dan foto berhasil diupload.');
+                            showToast('Bukti kirim berhasil disimpan.');
                             document.getElementById('inputNamaPenerima').value = "";
                             tempFileSukses = null;
                             tempIdSukses = null;
@@ -1267,6 +2259,8 @@
 
                             html5QrCode = null;
                             document.getElementById('reader').style.display = 'none';
+                            addAuditLog('Scan barcode berhasil', target.noPesanan || target.id);
+                            showToast('Barcode terdeteksi: ' + (target.noPesanan || target.id));
                         }
                     }
                 );
@@ -1298,6 +2292,8 @@
                 waktu: new Date().toLocaleTimeString('id-ID')
             }).then(() => {
                 document.getElementById('modalExpense').style.display = 'none';
+                addAuditLog('Pengeluaran ditambahkan', k + ' • Rp ' + safeNumber(n).toLocaleString('id-ID'));
+                showToast('Pengeluaran berhasil disimpan.');
                 document.getElementById('expKet').value = "";
                 document.getElementById('expNom').value = "";
             });
@@ -1324,6 +2320,8 @@
                 waktuUpdate: new Date().toLocaleTimeString('id-ID')
             }).then(() => {
                 document.getElementById('modalAlasan').style.display = 'none';
+                addAuditLog('Status ' + tempStat, a);
+                showToast('Status berhasil diupdate ke ' + tempStat + '.');
                 document.getElementById('textAlasan').value = "";
             });
         }
@@ -1414,5 +2412,49 @@
             } catch (e) {}
         });
     </script>
+
+<script>
+(function(){
+    const dock = document.getElementById('premiumDock');
+    if (!dock) return;
+    const targets = ['sectionWallet','sectionTabs','sectionOrders'];
+
+    function setActive(target){
+        dock.querySelectorAll('.dock-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.target === target);
+        });
+    }
+
+    function scrollToTarget(target){
+        if (target === 'top') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setActive('top');
+            return;
+        }
+        const el = document.getElementById(target);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setActive(target);
+        }
+    }
+
+    dock.addEventListener('click', function(e){
+        const btn = e.target.closest('.dock-btn');
+        if (!btn) return;
+        scrollToTarget(btn.dataset.target);
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+        const visible = entries.filter(entry => entry.isIntersecting).sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActive(visible.target.id);
+    }, { rootMargin: '-20% 0px -55% 0px', threshold: [0.05, 0.2, 0.35] });
+
+    targets.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+    });
+})();
+</script>
+
 </body>
 </html>
