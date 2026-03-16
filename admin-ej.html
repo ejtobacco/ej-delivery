@@ -757,7 +757,7 @@
             if (authListenersStarted) return;
             authListenersStarted = true;
 
-            db.ref('pesanan').limitToLast(150).on('value', snap => {
+            db.ref('pesanan').limitToLast(2000).on('value', snap => {
                 const data = snap.val();
                 allOrders = data ? Object.keys(data).map(k => ({id:k, ...data[k]})).reverse() : [];
 
@@ -1382,21 +1382,12 @@
             }, 400);
         }
 
+        // CARI DAN HAPUS SEMUA BARIS INI:
         function bersihkanDataLama() {
             const BATAS = 90 * 24 * 60 * 60 * 1000;
             const skr = new Date().getTime();
             db.ref('pesanan').once('value', s => {
-                const d = s.val();
-                if (!d) return;
-                for (let id in d) {
-                    if (d[id].tanggal) {
-                        const p = d[id].tanggal.split('/');
-                        if (skr - new Date(`${p[2]}-${p[1]}-${p[0]}`).getTime() > BATAS) {
-                            db.ref('pesanan/' + id).remove();
-                            db.ref('foto_bukti/' + id).remove();
-                        }
-                    }
-                }
+                // ... (hapus semua isi blok ini)
             });
         }
         setTimeout(bersihkanDataLama, 10000);
