@@ -280,7 +280,8 @@
 const db = firebase.database();
 let myName = localStorage.getItem('namaKurir') || "";
 let currentTab = 'Proses', allData = [], allPengeluaranData = {}, allSetoranData = {};
-
+let html5QrCode = null; // <--- TAMBAHKAN INI AGAR KAMERA LANCAR
+        
 // 1. CEK STATUS LOGIN SAAT BUKA APLIKASI
 window.onload = () => {
     firebase.auth().onAuthStateChanged((user) => {
