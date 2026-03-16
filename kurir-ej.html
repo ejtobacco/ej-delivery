@@ -677,7 +677,7 @@
             btn.disabled = true;
             err.style.display = 'none';
 
-            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
                 .then(() => firebase.auth().signInWithEmailAndPassword(email, pass))
                 .then(() => {})
                 .catch((error) => {
