@@ -560,6 +560,7 @@
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-storage-compat.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -1128,27 +1129,35 @@
                     let w = img.width;
                     let h = img.height;
 
+                    // KOMPRESI EKSTRIM: Maksimal ukuran 400px agar kuota gratis aman selamanya
                     if (w > h) {
-                        if (w > 600) {
-                            h *= 600 / w;
-                            w = 600;
-                        }
+                        if (w > 400) { h *= 400 / w; w = 400; }
                     } else {
-                        if (h > 800) {
-                            w *= 800 / h;
-                            h = 800;
-                        }
+                        if (h > 400) { w *= 400 / h; h = 400; }
                     }
 
                     canvas.width = w;
                     canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
 
-                    db.ref('foto_bukti/' + id).set(canvas.toDataURL('image/jpeg', 0.5))
-                        .then(() => {
+                    // Turunkan kualitas gambar jadi 40% (0.4)
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.4);
+                    
+                    // Lokasi simpan di Firebase Storage
+                    const storageRef = firebase.storage().ref('bukti_pengiriman/' + id + '.jpg');
+
+                    // Mulai upload ke Storage
+                    storageRef.putString(dataUrl, 'data_url')
+                        .then((snapshot) => {
+                            // Minta link URL foto yang berhasil diupload
+                            return snapshot.ref.getDownloadURL();
+                        })
+                        .then((downloadURL) => {
+                            // Simpan link URL tersebut ke Database Pesanan
                             return db.ref('pesanan/' + id).update({
                                 status: 'Terkirim',
                                 adaFoto: true,
+                                buktiFoto: downloadURL, // Simpan link, bukan Base64
                                 catatanKurir: "Diterima: " + n,
                                 tanggal: getTgl(),
                                 waktuSelesai: new Date().toLocaleTimeString('id-ID')
@@ -1163,7 +1172,8 @@
                             tempIdSukses = null;
                             if (navigator.vibrate) navigator.vibrate(100);
                         })
-                        .catch(() => {
+                        .catch((error) => {
+                            console.error("Error Upload:", error);
                             alert("❌ Gagal mengirim foto! Pastikan sinyal internet stabil.");
                             btnUpload.innerHTML = teksAsli;
                             btnUpload.disabled = false;
