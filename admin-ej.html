@@ -1382,16 +1382,6 @@
             }, 400);
         }
 
-        // CARI DAN HAPUS SEMUA BARIS INI:
-        function bersihkanDataLama() {
-            const BATAS = 90 * 24 * 60 * 60 * 1000;
-            const skr = new Date().getTime();
-            db.ref('pesanan').once('value', s => {
-                // ... (hapus semua isi blok ini)
-            });
-        }
-        setTimeout(bersihkanDataLama, 10000);
-
         function updateStatusInternet() {
             const l = document.getElementById('lampuKoneksi');
             const t = document.getElementById('teksKoneksi');
