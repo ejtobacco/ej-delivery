@@ -742,7 +742,7 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> MEMVERIFIKASI...';
 
-            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
                 .then(() => firebase.auth().signInWithEmailAndPassword(email, password))
                 .catch((error) => {
                     console.error(error);
