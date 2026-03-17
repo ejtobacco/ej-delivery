@@ -2,314 +2,208 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EJ TOBACCO APP</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EJ TOBACCO OLSHOP</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <style>
-        :root {
-            --gold: #D4AF37; --bg: #050505; --text-main: #FFFFFF;
-            --safe: #22C55E; --warning: #F59E0B; --danger: #EF4444; --blue: #3B82F6;
-            --gradient-gold: linear-gradient(135deg, #F7E08C, #D4AF37);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        :root { --gold: #D4AF37; --bg: #050505; --safe: #22C55E; --blue: #3B82F6; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: radial-gradient(circle at top, rgba(212,175,55,0.1), transparent 40%), #07090d; color: white; padding-bottom: 90px; }
         
-        body { background: radial-gradient(circle at top left, rgba(212,175,55,0.10), transparent 30%), #07090d; color: var(--text-main); padding-bottom: 90px; min-height: 100vh;}
+        .header { text-align: center; padding: 15px; position: sticky; top: 0; background: rgba(7,9,13,0.9); backdrop-filter: blur(10px); z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .view-section { display: none; padding: 15px; } .view-section.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
 
-        .header { text-align: center; padding: 20px 20px 10px; position: sticky; top: 0; background: rgba(7,9,13,0.9); backdrop-filter: blur(10px); z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { color: var(--gold); font-size: 18px; font-weight: 800; text-shadow: 0 0 15px rgba(212,175,55,0.3); margin: 0 auto;}
+        /* Style Katalog */
+        .grid-katalog { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .card-produk { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 15px; text-align: center; position: relative; }
+        .card-produk img { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 10px; background: rgba(0,0,0,0.5); }
+        .btn-add { background: linear-gradient(135deg, #F7E08C, #D4AF37); color: black; border: none; padding: 10px; width: 100%; border-radius: 10px; font-weight: 800; font-size: 11px; margin-top: 10px; cursor: pointer; }
 
-        .container { padding: 15px; }
-        .view-section { display: none; animation: fadeIn 0.3s ease; }
-        .view-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .glass-card { background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); margin-bottom: 15px; position: relative; overflow: hidden; }
-        .glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gradient-gold); opacity: 0.5; }
-
+        /* Style Checkout & Cart */
+        .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
         .input-group { position: relative; margin-bottom: 15px; }
-        .input-group i { position: absolute; left: 15px; top: 15px; color: var(--gold); font-size: 14px; opacity: 0.8; }
-        .input-box { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px 15px 14px 45px; color: white; outline: none; font-size: 13px; transition: 0.3s; }
-        .input-box:focus { border-color: var(--gold); }
-        .input-box:read-only { background: rgba(255,255,255,0.05); color: gray; }
-        textarea.input-box { padding-top: 15px; min-height: 80px; }
+        .input-box { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 15px; color: white; font-size: 12px; }
+        .input-box:focus { border-color: var(--gold); outline: none; }
+        #map { height: 200px; width: 100%; border-radius: 12px; margin-bottom: 15px; }
 
-        .section-title { font-size: 12px; font-weight: 800; color: var(--gold); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
-
-        #map { height: 200px; width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; z-index: 1; }
-        
-        .shipping-box { background: rgba(34, 197, 94, 0.1); border: 1px solid var(--safe); border-radius: 16px; padding: 12px; display: none; align-items: center; gap: 12px; margin-bottom: 15px; }
-        .shipping-box.external { background: rgba(59, 130, 246, 0.1); border-color: var(--blue); }
-        .payment-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .pay-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 12px 10px; text-align: center; color: white; font-size: 11px; font-weight: 800; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 8px; align-items: center; }
-        .pay-btn.active { background: rgba(212,175,55,0.15); border-color: var(--gold); color: var(--gold); box-shadow: 0 0 15px rgba(212,175,55,0.2); }
-        .btn-main { background: var(--gradient-gold); color: #000; border: none; padding: 16px; border-radius: 16px; font-weight: 800; width: 100%; cursor: pointer; font-size: 14px; box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
-
-        .order-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 15px; margin-bottom: 15px; }
-        .status-badge { display: inline-block; padding: 6px 12px; border-radius: 50px; font-size: 10px; font-weight: 800; }
-        .progress-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin: 15px 0 10px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #F7E08C, #D4AF37, #22C55E); width: 0%; transition: 0.5s ease-in-out; border-radius: 10px; }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,12,18,0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-around; padding: 10px 15px 25px; z-index: 1000; display: none; }
-        .nav-item { color: gray; font-size: 10px; font-weight: 800; text-align: center; display: flex; flex-direction: column; gap: 5px; cursor: pointer; transition: 0.3s; flex: 1; padding: 10px 0; border-radius: 15px; }
-        .nav-item i { font-size: 20px; }
-        .nav-item.active { color: var(--gold); background: rgba(212,175,55,0.1); }
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(10,12,18,0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-around; padding: 10px 15px 20px; z-index: 1000; }
+        .nav-item { color: gray; font-size: 10px; font-weight: 800; text-align: center; cursor: pointer; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+        .nav-item i { font-size: 20px; } .nav-item.active { color: var(--gold); }
+        .badge-cart { position: absolute; top: -5px; right: 25px; background: var(--danger); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 9px; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <div class="header" id="mainHeader" style="display:none;">
-        <h1 style="margin-left:auto; margin-right:auto;"><i class="fa-solid fa-crown" style="font-size:16px;"></i> EJ TOBACCO</h1>
-        <button onclick="logoutWA()" style="background:transparent; border:none; color:var(--danger); position:absolute; right:20px; font-size:16px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+    <div class="header">
+        <h1 style="color:var(--gold); font-size: 18px; font-weight:800;"><i class="fa-solid fa-crown"></i> EJ TOBACCO</h1>
     </div>
 
-    <div class="container">
-        <div id="view-login" class="view-section active">
-            <div style="text-align:center; margin-top:50px; margin-bottom:40px;">
-                <i class="fa-solid fa-crown" style="font-size:60px; color:var(--gold); text-shadow:0 0 20px rgba(212,175,55,0.5);"></i>
-                <h2 style="color:white; font-size:24px; margin-top:15px; letter-spacing:2px;">EJ TOBACCO</h2>
-                <p style="color:gray; font-size:12px; margin-top:5px;">Aplikasi Pelanggan Setia</p>
-            </div>
-
-            <div class="glass-card">
-                <div class="section-title" style="justify-content:center; margin-bottom:20px;"><i class="fa-brands fa-whatsapp"></i> MASUK DENGAN WHATSAPP</div>
-                <p style="font-size:11px; color:gray; text-align:center; margin-bottom:15px;">Riwayat belanja akan tersimpan aman dengan nomor ini.</p>
-                <div class="input-group">
-                    <i class="fa-brands fa-whatsapp"></i>
-                    <input type="number" id="loginWA" class="input-box" placeholder="Contoh: 08123456789">
-                </div>
-                <button class="btn-main" onclick="prosesLoginWA()"><i class="fa-solid fa-arrow-right-to-bracket"></i> MASUK SEKARANG</button>
-            </div>
-        </div>
-
-        <div id="view-checkout" class="view-section">
-            <div class="glass-card">
-                <div class="section-title"><i class="fa-solid fa-user"></i> Data Penerima</div>
-                <div class="input-group"><i class="fa-solid fa-user"></i><input type="text" id="custName" class="input-box" placeholder="Nama Lengkap"></div>
-                <div class="input-group"><i class="fa-brands fa-whatsapp"></i><input type="number" id="custWA" class="input-box" readonly></div>
-            </div>
-
-            <div class="glass-card">
-                <div class="section-title"><i class="fa-solid fa-location-dot"></i> Titik Lokasi Pengiriman</div>
-                <div id="map"></div>
-                <div style="text-align:center; font-size:10px; color:var(--gold); font-weight:800; margin-bottom:15px;" id="distanceInfo">Tap peta untuk menentukan lokasi</div>
-                <div class="input-group"><i class="fa-solid fa-map"></i><textarea id="custAddress" class="input-box" placeholder="Detail Alamat (Jalan, RT/RW)"></textarea></div>
-
-                <div id="shippingInternal" class="shipping-box"><div style="font-size:20px; color:var(--safe);"><i class="fa-solid fa-motorcycle"></i></div><div><div style="font-size:12px; font-weight:800;">Kurir Internal EJ</div><div style="font-size:10px; color:#ccc;">Dikirim hari ini oleh kurir toko.</div></div></div>
-                <div id="shippingExternal" class="shipping-box external"><div style="font-size:20px; color:var(--blue);"><i class="fa-solid fa-truck-fast"></i></div><div><div style="font-size:12px; font-weight:800; color:var(--blue);">Ekspedisi Luar</div><div style="font-size:10px; color:#ccc;">Dikirim via kurir reguler.</div></div></div>
-            </div>
-
-            <div class="glass-card">
-                <div class="section-title"><i class="fa-solid fa-wallet"></i> Pembayaran</div>
-                <div class="payment-options">
-                    <div class="pay-btn active" id="btnCOD" onclick="setPayment('COD')"><i class="fa-solid fa-hand-holding-dollar"></i> Tunai (COD)</div>
-                    <div class="pay-btn" id="btnTF" onclick="setPayment('Transfer')"><i class="fa-solid fa-building-columns"></i> Transfer</div>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:800; color:var(--gold); border-top:1px dashed rgba(255,255,255,0.2); padding-top:10px; margin-top:10px;">
-                    <span>TOTAL BAYAR</span> <span id="txtGrandTotal">Rp 85.000</span>
-                </div>
-                <button class="btn-main" id="btnCheckout" onclick="prosesCheckout()" style="margin-top:20px;"><i class="fa-solid fa-bag-shopping"></i> BUAT PESANAN</button>
-            </div>
-        </div>
-
-        <div id="view-pesanan" class="view-section">
-            <h2 style="font-size:16px; font-weight:800; color:white; margin-bottom:15px;"><i class="fa-solid fa-boxes-stacked" style="color:var(--gold);"></i> Riwayat Pesanan Saya</h2>
-            <div id="orderListContainer"></div>
+    <div id="view-katalog" class="view-section active">
+        <div style="margin-bottom:20px; font-size:14px; font-weight:800;">Produk Pilihan</div>
+        <div class="grid-katalog" id="katalogOnline">
+            <div style="text-align:center; color:gray; grid-column: span 2;">Memuat produk...</div>
         </div>
     </div>
 
-    <div class="bottom-nav" id="mainNav">
-        <div class="nav-item active" id="nav-checkout" onclick="switchView('checkout')"><i class="fa-solid fa-shop"></i> Beli Baru</div>
-        <div class="nav-item" id="nav-pesanan" onclick="switchView('pesanan')"><i class="fa-solid fa-clipboard-list"></i> Pesanan Saya</div>
+    <div id="view-cart" class="view-section">
+        <div class="glass-card" id="cartSummary">
+            <h2 style="font-size:12px; color:var(--gold); margin-bottom:10px;"><i class="fa-solid fa-cart-shopping"></i> Item Belanja</h2>
+            <div id="cartItemsHtml" style="font-size:12px; color:#ccc; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:10px; margin-bottom:10px;">Belum ada barang.</div>
+            <div style="display:flex; justify-content:space-between; font-weight:800;"><span>Subtotal:</span><span id="subTotApp" style="color:white;">Rp 0</span></div>
+        </div>
+
+        <div class="glass-card">
+            <h2 style="font-size:12px; color:var(--gold); margin-bottom:10px;"><i class="fa-solid fa-location-dot"></i> Pengiriman</h2>
+            <div class="input-group"><input type="text" id="custName" class="input-box" placeholder="Nama Lengkap"></div>
+            <div class="input-group"><input type="number" id="custWA" class="input-box" placeholder="Nomor WhatsApp"></div>
+            
+            <div id="map"></div>
+            <div style="text-align:center; font-size:10px; color:var(--gold); margin-bottom:10px;" id="distInfo">Tap peta untuk titik akurat</div>
+            <textarea id="custAddress" class="input-box" placeholder="Detail Alamat (Jalan, RT/RW)"></textarea>
+            
+            <div id="ongkirLabel" style="margin-top:15px; font-size:12px; display:flex; justify-content:space-between; color:gray;">
+                <span>Ongkir (Radius)</span><strong id="valOngkir" style="color:white;">Rp 0</strong>
+            </div>
+        </div>
+
+        <button class="btn-add" onclick="prosesCheckoutApp()" style="padding:15px; font-size:14px;">BUAT PESANAN</button>
+    </div>
+
+    <div id="view-pesanan" class="view-section">
+        <div style="margin-bottom:20px; font-size:14px; font-weight:800;"><i class="fa-solid fa-boxes-stacked"></i> Pesanan Aktif</div>
+        <div id="orderList"></div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchNav('katalog', this)"><i class="fa-solid fa-shop"></i> Beranda</div>
+        <div class="nav-item" style="position:relative;" onclick="switchNav('cart', this)">
+            <i class="fa-solid fa-cart-shopping"></i> Keranjang <span class="badge-cart" id="cartCount">0</span>
+        </div>
+        <div class="nav-item" onclick="switchNav('pesanan', this)"><i class="fa-solid fa-clipboard-list"></i> Pesanan</div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
 
     <script>
-        // --- KONFIGURASI FIREBASE ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg",
-            authDomain: "ejtobacco-v2.firebaseapp.com",
-            databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "ejtobacco-v2",
-            storageBucket: "ejtobacco-v2.firebasestorage.app"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg", authDomain: "ejtobacco-v2.firebaseapp.com", databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "ejtobacco-v2" };
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        let userWA = "";
+        let myCart = []; let subtotalOnline = 0;
+        const STORE_LAT = -6.8694; const STORE_LNG = 109.0435; const MAX_RADIUS = 10;
+        let finalJarak = 0; let finalOngkir = 0; let finalLat = 0; let finalLng = 0;
 
-        // --- SISTEM LOGIN WA SEDERHANA ---
-        window.onload = () => {
-            const savedWA = localStorage.getItem('ej_customer_wa');
-            if (savedWA) {
-                userWA = savedWA;
-                document.getElementById('custWA').value = userWA;
-                masukKeAplikasi();
-            }
-        };
+        // Muat Katalog dari Firebase
+        db.ref('produk').on('value', snap => {
+            let html = '';
+            snap.forEach(c => {
+                let p = c.val(); p.id = c.key;
+                // Asumsi olshop melayani dari stok PUSAT
+                let stokPusat = p.stok ? (p.stok['pusat'] || 0) : 0;
+                let btn = stokPusat > 0 
+                    ? `<button class="btn-add" onclick="addToCart('${p.id}', '${p.nama}', ${p.harga})">+ KERANJANG</button>` 
+                    : `<button class="btn-add" style="background:gray; color:white;" disabled>HABIS</button>`;
+                
+                html += `
+                <div class="card-produk">
+                    <div style="font-size:11px; font-weight:800; margin-bottom:5px;">${p.nama}</div>
+                    <div style="color:var(--gold); font-size:12px; font-weight:800;">Rp ${p.harga.toLocaleString('id-ID')}</div>
+                    ${btn}
+                </div>`;
+            });
+            document.getElementById('katalogOnline').innerHTML = html || 'Katalog kosong.';
+        });
 
-        function prosesLoginWA() {
-            const noWA = document.getElementById('loginWA').value.trim();
-            if(noWA.length < 10) return alert("Masukkan nomor WA yang valid.");
+        function addToCart(id, nama, harga) {
+            myCart.push({id, nama, harga});
+            document.getElementById('cartCount').innerText = myCart.length;
+            subtotalOnline = myCart.reduce((sum, item) => sum + item.harga, 0);
             
-            userWA = noWA;
-            localStorage.setItem('ej_customer_wa', userWA);
-            document.getElementById('custWA').value = userWA;
-            masukKeAplikasi();
+            let htmlItems = myCart.map(i => `<div style="display:flex; justify-content:space-between;"><span>${i.nama}</span><b>Rp ${i.harga.toLocaleString()}</b></div>`).join('');
+            document.getElementById('cartItemsHtml').innerHTML = htmlItems;
+            document.getElementById('subTotApp').innerText = 'Rp ' + subtotalOnline.toLocaleString();
+            alert("Berhasil masuk keranjang!");
         }
 
-        function masukKeAplikasi() {
-            document.getElementById('mainHeader').style.display = 'flex';
-            document.getElementById('mainNav').style.display = 'flex';
-            switchView('checkout');
-        }
-
-        function logoutWA() {
-            if(confirm("Yakin ingin keluar dari akun ini?")) {
-                localStorage.removeItem('ej_customer_wa');
-                userWA = "";
-                document.getElementById('mainHeader').style.display = 'none';
-                document.getElementById('mainNav').style.display = 'none';
-                switchView('login');
-            }
-        }
-
-        // --- LOGIKA CHECKOUT ---
-        const STORE_LAT = -6.8694; const STORE_LNG = 109.0435; const MAX_RADIUS_KM = 10;
-        const CART_SUBTOTAL = 85000; const ONGKIR_INTERNAL = 5000; const ONGKIR_EXTERNAL = 15000;
-        let selectedPayment = 'COD', finalDistance = 0, finalShippingType = "", finalLat = "", finalLng = "", finalOngkir = 0;
-
+        // Setup Map Radius di Tab Cart
         const map = L.map('map').setView([STORE_LAT, STORE_LNG], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         let marker = L.marker([STORE_LAT, STORE_LNG], {draggable: true}).addTo(map);
 
-        function calcDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; const dLat = (lat2-lat1)*Math.PI/180; const dLon = (lon2-lon1)*Math.PI/180;
-            const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        }
+        marker.on('dragend', function (e) { hitungOngkirApp(marker.getLatLng()); });
+        map.on('click', function (e) { marker.setLatLng(e.latlng); hitungOngkirApp(e.latlng); });
 
-        marker.on('dragend', function (e) { updateShippingLogic(marker.getLatLng()); });
-        map.on('click', function (e) { marker.setLatLng(e.latlng); updateShippingLogic(e.latlng); });
-
-        function updateShippingLogic(latlng) {
-            finalLat = latlng.lat; finalLng = latlng.lng; finalDistance = calcDistance(STORE_LAT, STORE_LNG, finalLat, finalLng);
-            document.getElementById('distanceInfo').innerText = `Jarak: ${finalDistance.toFixed(2)} KM`;
+        function hitungOngkirApp(latlng) {
+            finalLat = latlng.lat; finalLng = latlng.lng;
+            const R = 6371; const dLat = (finalLat-STORE_LAT)*Math.PI/180; const dLon = (finalLng-STORE_LNG)*Math.PI/180;
+            const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(STORE_LAT*Math.PI/180)*Math.cos(finalLat*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+            finalJarak = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
             
-            if (finalDistance <= MAX_RADIUS_KM) {
-                finalShippingType = "Internal"; finalOngkir = ONGKIR_INTERNAL;
-                document.getElementById('shippingInternal').style.display = 'flex'; document.getElementById('shippingExternal').style.display = 'none';
-            } else {
-                finalShippingType = "External"; finalOngkir = ONGKIR_EXTERNAL;
-                document.getElementById('shippingInternal').style.display = 'none'; document.getElementById('shippingExternal').style.display = 'flex';
-            }
-            document.getElementById('txtGrandTotal').innerText = "Rp " + (CART_SUBTOTAL + finalOngkir).toLocaleString('id-ID');
+            finalOngkir = finalJarak <= MAX_RADIUS ? 5000 : 15000;
+            document.getElementById('distInfo').innerText = `Jarak: ${finalJarak.toFixed(1)} KM`;
+            document.getElementById('valOngkir').innerText = `Rp ${finalOngkir.toLocaleString()} (${finalJarak<=MAX_RADIUS?'Kurir EJ':'Ekspedisi'})`;
         }
 
-        function setPayment(method) {
-            selectedPayment = method;
-            document.getElementById('btnCOD').classList.remove('active'); document.getElementById('btnTF').classList.remove('active');
-            if(method === 'COD') document.getElementById('btnCOD').classList.add('active'); else document.getElementById('btnTF').classList.add('active');
-        }
+        function prosesCheckoutApp() {
+            if(myCart.length === 0) return alert("Keranjang kosong!");
+            const nama = document.getElementById('custName').value;
+            const wa = document.getElementById('custWA').value;
+            const alamat = document.getElementById('custAddress').value;
+            if(!nama || !wa || !alamat) return alert("Lengkapi data pengiriman!");
 
-        function prosesCheckout() {
-            const nama = document.getElementById('custName').value.trim();
-            const alamat = document.getElementById('custAddress').value.trim();
-
-            if (!nama || !alamat) return alert("Mohon lengkapi Nama dan Alamat.");
-            if (!finalShippingType) return alert("Mohon tandai titik di peta.");
-
-            const btn = document.getElementById('btnCheckout');
-            btn.innerHTML = 'MEMPROSES...'; btn.disabled = true;
-
-            const dateObj = new Date();
-            const noResi = "EJ" + dateObj.getTime().toString().slice(-6);
-
-            const orderData = {
-                noPesanan: noResi, namaPembeli: nama, 
-                nohp: userWA, // Otomatis pakai nomor WA yang login
-                alamat: `${alamat} \n(Jarak: ${finalDistance.toFixed(1)}KM | ${finalShippingType})`, 
-                mapLink: `https://www.google.com/maps?q=${finalLat},${finalLng}`,
-                total: CART_SUBTOTAL + finalOngkir, metode: selectedPayment, urgent: false,
-                status: 'Menunggu', kurir: "", tipePengiriman: finalShippingType,
-                tanggal: `${String(dateObj.getDate()).padStart(2,'0')}/${String(dateObj.getMonth()+1).padStart(2,'0')}/${dateObj.getFullYear()}`,
-                waktu: dateObj.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})
-            };
-
-            db.ref('pesanan').push(orderData).then(() => {
-                alert(`Pesanan Berhasil!\nNomor Pesanan: ${noResi}\nPantau statusnya di menu Pesanan Saya.`);
-                switchView('pesanan'); 
-                document.getElementById('custName').value = ""; document.getElementById('custAddress').value = "";
-                btn.innerHTML = '<i class="fa-solid fa-bag-shopping"></i> BUAT PESANAN'; btn.disabled = false;
-            });
-        }
-
-        // --- LOGIKA NAVIGASI & PESANAN SAYA ---
-        let liveTrackingListener = null;
-
-        function switchView(viewName) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const resi = "EJ" + new Date().getTime().toString().slice(-6);
             
-            document.getElementById('view-' + viewName).classList.add('active');
-            if(document.getElementById('nav-' + viewName)) document.getElementById('nav-' + viewName).classList.add('active');
-
-            if (viewName === 'checkout') setTimeout(() => map.invalidateSize(), 100);
-            else if (viewName === 'pesanan') muatPesananSaya();
-        }
-
-        function muatPesananSaya() {
-            const container = document.getElementById('orderListContainer');
-            container.innerHTML = '<div style="text-align:center; color:gray;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat data pesanan...</div>';
-
-            if(liveTrackingListener) db.ref('pesanan').off('value', liveTrackingListener);
-
-            // Tarik data berdasarkan Nomor WA yang aktif!
-            liveTrackingListener = db.ref('pesanan').orderByChild('nohp').equalTo(userWA).on('value', (snapshot) => {
-                let html = '';
-                snapshot.forEach(child => {
-                    let o = child.val();
-                    let badgeBg = "", badgeTxt = "", prog = 0, statusLabel = "";
-                    
-                    if(o.status === 'Menunggu') { badgeBg = "rgba(245,158,11,0.2)"; badgeTxt = "var(--warning)"; prog = 15; statusLabel = "Menunggu ACC Admin"; }
-                    else if(o.status === 'Gudang') { badgeBg = "rgba(59,130,246,0.2)"; badgeTxt = "var(--blue)"; prog = 40; statusLabel = "Disiapkan Toko"; }
-                    else if(o.status === 'Proses') { badgeBg = "rgba(212,175,55,0.2)"; badgeTxt = "var(--gold)"; prog = 75; statusLabel = `Dibawa Kurir (${o.kurir.toUpperCase()})`; }
-                    else if(o.status === 'Terkirim') { badgeBg = "rgba(34,197,94,0.2)"; badgeTxt = "var(--safe)"; prog = 100; statusLabel = "Pesanan Selesai"; }
-                    else { badgeBg = "rgba(239,68,68,0.2)"; badgeTxt = "var(--danger)"; prog = 100; statusLabel = o.status === 'Tunda' ? "Ditunda Kurir" : "Dibatalkan / Gagal"; }
-
-                    let fotoHtml = (o.status === 'Terkirim' && o.buktiFoto) ? `<img src="${o.buktiFoto}" style="width:100%; border-radius:10px; margin-top:10px; border:1px solid var(--safe);">` : '';
-                    let catatanHtml = o.catatanKurir ? `<div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-size:11px; margin-top:10px; color:gray;"><i class="fa-solid fa-comment-dots"></i> ${o.catatanKurir}</div>` : '';
-
-                    html = `
-                    <div class="order-card">
-                        <div style="display:flex; justify-content:space-between; align-items:start;">
-                            <div>
-                                <div style="font-size:10px; color:gray;">No. Pesanan • ${o.tanggal}</div>
-                                <div style="font-size:14px; font-weight:800; color:white;">${o.noPesanan}</div>
-                            </div>
-                            <div class="status-badge" style="background:${badgeBg}; color:${badgeTxt};">${statusLabel.toUpperCase()}</div>
-                        </div>
-                        
-                        <div class="progress-track"><div class="progress-fill" style="width:${prog}%; background:${badgeTxt}"></div></div>
-                        
-                        <div style="display:flex; justify-content:space-between; font-size:11px; color:#ccc; margin-top:15px;">
-                            <span>Tagihan (${o.metode}):</span><strong style="color:var(--gold);">Rp ${Number(o.total).toLocaleString('id-ID')}</strong>
-                        </div>
-                        
-                        ${catatanHtml}
-                        ${fotoHtml}
-                    </div>` + html; 
-                });
+            db.ref('pesanan').push({
+                noPesanan: resi, namaPembeli: nama, nohp: wa,
+                alamat: `${alamat} \n(Jarak: ${finalJarak.toFixed(1)}KM)`,
+                mapLink: `https://www.google.com/maps?q=$${finalLat},${finalLng}`,
+                total: subtotalOnline + finalOngkir, metode: 'COD', urgent: false,
+                status: 'Menunggu', items: myCart, // Mengirim data keranjang ke Admin
+                tanggal: new Date().toLocaleDateString('id-ID'), waktu: new Date().toLocaleTimeString('id-ID')
+            }).then(() => {
+                let saved = JSON.parse(localStorage.getItem('ej_orders')) || [];
+                saved.push(resi); localStorage.setItem('ej_orders', JSON.stringify(saved));
                 
-                container.innerHTML = html || '<div style="text-align:center; padding:40px 20px; opacity:0.5; color:gray;"><i class="fa-solid fa-receipt" style="font-size:40px; margin-bottom:10px;"></i><br>Belum ada riwayat pesanan.</div>';
+                alert("Pesanan dikirim ke Admin!");
+                myCart = []; document.getElementById('cartCount').innerText = "0";
+                document.getElementById('cartItemsHtml').innerHTML = "Belum ada barang.";
+                switchNav('pesanan', document.querySelectorAll('.nav-item')[2]);
             });
+        }
+
+        // Tampilkan Pesanan Saya (Baca dari LocalStorage)
+        function muatPesanan() {
+            let saved = JSON.parse(localStorage.getItem('ej_orders')) || [];
+            db.ref('pesanan').on('value', snap => {
+                let html = '';
+                snap.forEach(c => {
+                    let o = c.val();
+                    if(saved.includes(o.noPesanan)) {
+                        html += `<div class="glass-card" style="padding:15px; font-size:12px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <b>${o.noPesanan}</b> <span style="color:var(--gold);">${o.status.toUpperCase()}</span>
+                            </div>
+                            <div style="color:gray;">Total Bayar: <b style="color:white;">Rp ${o.total.toLocaleString()}</b></div>
+                        </div>`;
+                    }
+                });
+                document.getElementById('orderList').innerHTML = html || '<div style="color:gray;">Belum ada pesanan.</div>';
+            });
+        }
+
+        function switchNav(view, el) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('view-' + view).classList.add('active');
+            el.classList.add('active');
+            if(view === 'cart') setTimeout(() => map.invalidateSize(), 100);
+            if(view === 'pesanan') muatPesanan();
         }
     </script>
 </body>
