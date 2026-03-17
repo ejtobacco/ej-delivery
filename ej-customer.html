@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Lacak Pesanan - EJ TOBACCO</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --gold: #D4AF37; --bg: #050505; --text-main: #FFFFFF;
+            --safe: #22C55E; --warning: #F59E0B; --danger: #EF4444; --blue: #3B82F6;
+            --gradient-gold: linear-gradient(135deg, #F7E08C, #D4AF37);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background: radial-gradient(circle at top right, rgba(212,175,55,0.10), transparent 30%), #07090d;
+            color: var(--text-main); padding: 20px; min-height: 100vh;
+        }
+
+        .header { text-align: center; margin-bottom: 30px; margin-top: 20px; }
+        .header h1 { color: var(--gold); font-size: 24px; font-weight: 800; text-shadow: 0 0 15px rgba(212,175,55,0.3); }
+        .header p { color: gray; font-size: 11px; margin-top: 5px; }
+
+        .glass-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 25px 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4); margin-bottom: 20px; position: relative; overflow: hidden;
+        }
+        .glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gradient-gold); opacity: 0.7; }
+
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group i { position: absolute; left: 15px; top: 15px; color: var(--gold); font-size: 14px; opacity: 0.8; }
+        .input-box {
+            width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 14px 15px 14px 45px; color: white; outline: none; font-size: 13px; transition: 0.3s;
+        }
+        .input-box:focus { border-color: var(--gold); box-shadow: 0 0 12px rgba(212, 175, 55, 0.2); }
+
+        .btn-main {
+            background: var(--gradient-gold); color: #000; border: none; padding: 16px; border-radius: 16px; font-weight: 800; width: 100%; cursor: pointer; font-size: 14px; box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-main:active { transform: scale(0.98); }
+        .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Hasil Tracking Area */
+        #resultArea { display: none; }
+        
+        .status-badge {
+            display: inline-block; padding: 8px 16px; border-radius: 50px; font-size: 11px; font-weight: 800; margin-bottom: 15px;
+        }
+        
+        .progress-container { margin: 25px 0; position: relative; }
+        .progress-track { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #F7E08C, #D4AF37, #22C55E); width: 0%; transition: 1s ease-in-out; border-radius: 10px; }
+        
+        .step-labels { display: flex; justify-content: space-between; margin-top: 10px; font-size: 10px; color: gray; font-weight: 800; }
+        .step-labels span { text-align: center; flex: 1; }
+        .step-labels span.active { color: var(--gold); }
+        .step-labels span.done { color: var(--safe); }
+
+        .detail-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; margin-bottom: 15px; font-size: 12px; color: #ccc; line-height: 1.6; }
+        .detail-box b { color: white; display: block; margin-bottom: 5px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .proof-img { width: 100%; border-radius: 12px; border: 2px solid var(--safe); margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1><i class="fa-solid fa-satellite-dish"></i> EJ TRACKING</h1>
+        <p>Pantau pesanan Anda secara real-time</p>
+    </div>
+
+    <div class="glass-card" id="searchArea">
+        <div class="input-group">
+            <i class="fa-solid fa-hashtag"></i>
+            <input type="text" id="inputResi" class="input-box" placeholder="Nomor Pesanan (Contoh: EJ1710502000)">
+        </div>
+        <div class="input-group">
+            <i class="fa-brands fa-whatsapp"></i>
+            <input type="number" id="inputWA" class="input-box" placeholder="Nomor WhatsApp (Saat pesan)">
+        </div>
+        <button class="btn-main" id="btnTrack" onclick="lacakPesanan()">
+            <i class="fa-solid fa-magnifying-glass"></i> LACAK SEKARANG
+        </button>
+        <p id="errorMsg" style="color:#F87171; font-size:11px; text-align:center; margin-top:15px; display:none;"></p>
+    </div>
+
+    <div class="glass-card" id="resultArea">
+        <button onclick="resetSearch()" style="background:transparent; border:none; color:gray; font-size:11px; margin-bottom:15px; cursor:pointer;"><i class="fa-solid fa-arrow-left"></i> KEMBALI</button>
+        
+        <div style="display:flex; justify-content:space-between; align-items:start;">
+            <div>
+                <div style="font-size:10px; color:gray;">Nomor Pesanan:</div>
+                <div id="resNo" style="font-size:16px; font-weight:800; color:white; margin-bottom:5px;">EJXXXXXX</div>
+            </div>
+            <div id="resBadge" class="status-badge" style="background:rgba(212,175,55,0.2); color:var(--gold); border:1px solid var(--gold);">MENUNGGU</div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-track"><div id="resProgress" class="progress-fill"></div></div>
+            <div class="step-labels">
+                <span id="step1">Menunggu<br>ACC</span>
+                <span id="step2">Disiapkan<br>Toko</span>
+                <span id="step3">Sedang<br>Dikirim</span>
+                <span id="step4">Pesanan<br>Selesai</span>
+            </div>
+        </div>
+
+        <div class="detail-box">
+            <b><i class="fa-solid fa-box"></i> Informasi Pengiriman</b>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Tipe Kirim:</span> <span id="resTipe" style="color:white; font-weight:800;">-</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Kurir / Ekspedisi:</span> <span id="resKurir" style="color:white; font-weight:800;">-</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Tagihan (COD):</span> <span id="resTotal" style="color:var(--gold); font-weight:800;">-</span></div>
+        </div>
+
+        <div id="keteranganKhusus" class="detail-box" style="display:none; background:rgba(245, 158, 11, 0.1); border-color:var(--warning); color:var(--warning);">
+            <b><i class="fa-solid fa-circle-info"></i> Pesan dari Kurir / Admin</b>
+            <span id="resPesan">-</span>
+        </div>
+
+        <div id="buktiArea" style="display:none; text-align:center;">
+            <div style="font-size:11px; font-weight:800; color:var(--safe); margin-top:20px;"><i class="fa-solid fa-camera"></i> BUKTI PENGIRIMAN</div>
+            <img id="resFoto" class="proof-img" src="">
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
+
+    <script>
+        // --- KONFIGURASI FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg",
+            authDomain: "ejtobacco-v2.firebaseapp.com",
+            databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "ejtobacco-v2",
+            storageBucket: "ejtobacco-v2.firebasestorage.app",
+            messagingSenderId: "366973371317",
+            appId: "1:366973371317:web:c5ec32460cd9cf0f6c8ffc"
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
+
+        function lacakPesanan() {
+            const resi = document.getElementById('inputResi').value.trim();
+            const wa = document.getElementById('inputWA').value.trim();
+            const btn = document.getElementById('btnTrack');
+            const err = document.getElementById('errorMsg');
+
+            if (!resi || !wa) {
+                err.innerText = "⚠️ Mohon isi Nomor Pesanan dan Nomor WA Anda.";
+                err.style.display = 'block';
+                return;
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> MENCARI...';
+            btn.disabled = true;
+            err.style.display = 'none';
+
+            // Query ke Firebase berdasarkan Nomor Pesanan
+            db.ref('pesanan').orderByChild('noPesanan').equalTo(resi).once('value', (snapshot) => {
+                btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> LACAK SEKARANG';
+                btn.disabled = false;
+
+                if (snapshot.exists()) {
+                    let orderData = null;
+                    snapshot.forEach(child => { orderData = child.val(); });
+
+                    // Verifikasi WhatsApp (Keamanan Data)
+                    if (orderData.nohp !== wa) {
+                        err.innerText = "❌ Nomor WA tidak cocok dengan pesanan ini.";
+                        err.style.display = 'block';
+                        return;
+                    }
+
+                    tampilkanHasil(orderData);
+                } else {
+                    err.innerText = "❌ Pesanan tidak ditemukan. Periksa kembali resi Anda.";
+                    err.style.display = 'block';
+                }
+            }).catch(error => {
+                err.innerText = "Terjadi kesalahan jaringan.";
+                err.style.display = 'block';
+                btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> LACAK SEKARANG';
+                btn.disabled = false;
+            });
+        }
+
+        function tampilkanHasil(data) {
+            document.getElementById('searchArea').style.display = 'none';
+            document.getElementById('resultArea').style.display = 'block';
+
+            document.getElementById('resNo').innerText = data.noPesanan;
+            document.getElementById('resTipe').innerText = data.tipePengiriman || "Internal";
+            document.getElementById('resTotal').innerText = data.metode === 'COD' ? "Rp " + Number(data.total).toLocaleString('id-ID') : "LUNAS (Transfer)";
+            
+            let kurirName = data.kurir ? data.kurir.toUpperCase() : "Menunggu Admin";
+            document.getElementById('resKurir').innerText = kurirName;
+
+            // Reset UI
+            const badge = document.getElementById('resBadge');
+            const progress = document.getElementById('resProgress');
+            const ketKhusus = document.getElementById('keteranganKhusus');
+            const pesan = document.getElementById('resPesan');
+            const buktiArea = document.getElementById('buktiArea');
+            ketKhusus.style.display = 'none';
+            buktiArea.style.display = 'none';
+
+            // Logika Status & Progress Bar
+            let persentase = 0;
+            let statusText = "";
+
+            if (data.status === 'Menunggu') {
+                persentase = 15; statusText = "MENUNGGU ACC";
+                badge.style.cssText = "background:rgba(245,158,11,0.2); color:var(--warning); border:1px solid var(--warning);";
+                document.getElementById('step1').className = "active";
+            } 
+            else if (data.status === 'Gudang') {
+                persentase = 40; statusText = "DISIAPKAN TOKO";
+                badge.style.cssText = "background:rgba(59,130,246,0.2); color:var(--blue); border:1px solid var(--blue);";
+                document.getElementById('step1').className = "done";
+                document.getElementById('step2').className = "active";
+            } 
+            else if (data.status === 'Proses') {
+                persentase = 75; statusText = "SEDANG DIKIRIM";
+                badge.style.cssText = "background:rgba(212,175,55,0.2); color:var(--gold); border:1px solid var(--gold);";
+                document.getElementById('step1').className = "done"; document.getElementById('step2').className = "done";
+                document.getElementById('step3').className = "active";
+            } 
+            else if (data.status === 'Terkirim') {
+                persentase = 100; statusText = "SELESAI";
+                badge.style.cssText = "background:rgba(34,197,94,0.2); color:var(--safe); border:1px solid var(--safe);";
+                document.getElementById('step1').className = "done"; document.getElementById('step2').className = "done";
+                document.getElementById('step3').className = "done"; document.getElementById('step4').className = "done";
+                
+                // Munculkan Foto jika ada
+                if (data.adaFoto && data.buktiFoto) {
+                    buktiArea.style.display = 'block';
+                    document.getElementById('resFoto').src = data.buktiFoto;
+                }
+                if (data.catatanKurir) {
+                    ketKhusus.style.display = 'block';
+                    ketKhusus.style.cssText = "background:rgba(34,197,94,0.1); border-color:var(--safe); color:var(--safe);";
+                    pesan.innerText = data.catatanKurir;
+                }
+            }
+            else if (data.status === 'Tunda' || data.status === 'Gagal') {
+                persentase = data.status === 'Tunda' ? 75 : 100;
+                statusText = data.status === 'Tunda' ? "PENGIRIMAN DITUNDA" : "PESANAN DIBATALKAN";
+                badge.style.cssText = "background:rgba(239,68,68,0.2); color:var(--danger); border:1px solid var(--danger);";
+                
+                if (data.alasanTunda) {
+                    ketKhusus.style.display = 'block';
+                    ketKhusus.style.cssText = "background:rgba(239,68,68,0.1); border-color:var(--danger); color:var(--danger);";
+                    pesan.innerText = "Alasan: " + data.alasanTunda;
+                }
+            }
+
+            badge.innerText = statusText;
+            setTimeout(() => { progress.style.width = persentase + "%"; }, 100);
+        }
+
+        function resetSearch() {
+            document.getElementById('resultArea').style.display = 'none';
+            document.getElementById('searchArea').style.display = 'block';
+            document.getElementById('inputResi').value = "";
+            document.getElementById('inputWA').value = "";
+            document.getElementById('resProgress').style.width = "0%";
+            document.querySelectorAll('.step-labels span').forEach(el => el.className = "");
+        }
+    </script>
+</body>
+</html>
