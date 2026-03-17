@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EJ POS Kasir - Offline</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --gold: #D4AF37; --bg: #050505; --safe: #22C55E; --danger: #EF4444; --blue: #3B82F6; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; user-select: none; }
+        body { background: #07090d; color: white; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Layout Split: Kiri (Katalog), Kanan (Keranjang Kasir) */
+        .katalog-area { flex: 2; padding: 20px; overflow-y: auto; background: radial-gradient(circle at top left, rgba(212,175,55,0.05), transparent 50%); }
+        .cart-area { flex: 1; min-width: 320px; background: rgba(255,255,255,0.03); border-left: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; padding: 20px; }
+
+        .header-pos { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .header-pos h1 { color: var(--gold); font-size: 18px; font-weight: 800; }
+        
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .prod-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; }
+        .prod-card:active { transform: scale(0.95); border-color: var(--gold); }
+        .prod-name { font-size: 12px; font-weight: 800; margin-bottom: 5px; margin-top: 10px; }
+        .prod-price { color: var(--gold); font-size: 14px; font-weight: 800; }
+        
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+        .cart-item-name { font-size: 12px; font-weight: 800; }
+        .cart-item-qty { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 8px; }
+        .qty-btn { background: transparent; border: none; color: var(--gold); font-weight: 800; cursor: pointer; font-size: 14px; }
+        
+        .total-area { margin-top: auto; padding-top: 20px; border-top: 2px solid rgba(212,175,55,0.3); }
+        .btn-pay { background: linear-gradient(135deg, #F7E08C, #D4AF37); color: black; border: none; width: 100%; padding: 15px; border-radius: 12px; font-weight: 800; font-size: 16px; margin-top: 15px; cursor: pointer; display: flex; justify-content: center; gap: 10px; align-items: center; }
+        
+        .branch-selector { background: rgba(0,0,0,0.5); border: 1px solid var(--gold); color: var(--gold); padding: 8px 15px; border-radius: 8px; font-weight: 800; outline: none; }
+    </style>
+</head>
+<body>
+
+    <div class="katalog-area">
+        <div class="header-pos">
+            <h1><i class="fa-solid fa-cash-register"></i> EJ POS KASIR</h1>
+            <select id="lokasiCabang" class="branch-selector" onchange="muatKatalog()">
+                <option value="pusat">TOKO PUSAT</option>
+                <option value="cabang_a">CABANG A</option>
+            </select>
+        </div>
+        <div class="product-grid" id="katalogPos">
+            <div style="color:gray; font-size:12px;"><i class="fa-solid fa-spinner fa-spin"></i> Menghubungkan ke Master Data...</div>
+        </div>
+    </div>
+
+    <div class="cart-area">
+        <h2 style="font-size:14px; font-weight:800; color:var(--gold); margin-bottom:15px;"><i class="fa-solid fa-cart-shopping"></i> KERANJANG KASIR</h2>
+        <div id="cartList" style="flex:1; overflow-y:auto;">
+            </div>
+        
+        <div class="total-area">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:12px; color:gray;">
+                <span>Total Item</span> <b id="totItem" style="color:white;">0</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:800; color:var(--gold);">
+                <span>TOTAL</span> <b id="totHarga">Rp 0</b>
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn-pay" style="flex:1; background:rgba(34,197,94,0.1); color:var(--safe); border:1px solid var(--safe);" onclick="bayar('QRIS')"><i class="fa-solid fa-qrcode"></i> QRIS</button>
+                <button class="btn-pay" style="flex:1;" onclick="bayar('TUNAI')"><i class="fa-solid fa-money-bill-wave"></i> TUNAI</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCP6q75dxdWmsvXlAU-ON0KyvzqGXeCaUg",
+            authDomain: "ejtobacco-v2.firebaseapp.com",
+            databaseURL: "https://ejtobacco-v2-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "ejtobacco-v2"
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
+
+        let produkAktif = [];
+        let keranjang = [];
+
+        function muatKatalog() {
+            const cabang = document.getElementById('lokasiCabang').value;
+            db.ref('produk').on('value', snap => {
+                produkAktif = [];
+                let html = '';
+                snap.forEach(child => {
+                    let p = child.val();
+                    p.id = child.key;
+                    produkAktif.push(p);
+                    let stokLokal = p.stok ? (p.stok[cabang] || 0) : 0;
+                    
+                    html += `
+                    <div class="prod-card" onclick="tambahKeKeranjang('${p.id}', '${p.nama}', ${p.harga}, ${stokLokal})">
+                        <i class="fa-solid fa-box" style="font-size:30px; color:rgba(255,255,255,0.2);"></i>
+                        <div class="prod-name">${p.nama}</div>
+                        <div class="prod-price">Rp ${p.harga.toLocaleString('id-ID')}</div>
+                        <div style="font-size:9px; color:gray; margin-top:5px;">Stok Rak: <b style="color:${stokLokal>0?'var(--safe)':'var(--danger)'}">${stokLokal}</b></div>
+                    </div>`;
+                });
+                document.getElementById('katalogPos').innerHTML = html || '<div style="color:gray;">Belum ada produk.</div>';
+            });
+        }
+        muatKatalog();
+
+        function tambahKeKeranjang(id, nama, harga, stokMaksimal) {
+            if(stokMaksimal <= 0) return alert("Stok di cabang ini habis!");
+            let item = keranjang.find(x => x.id === id);
+            if(item) {
+                if(item.qty >= stokMaksimal) return alert("Melebihi stok yang ada!");
+                item.qty++;
+            } else {
+                keranjang.push({ id, nama, harga, qty: 1 });
+            }
+            renderKeranjang();
+        }
+
+        function ubahQty(id, delta) {
+            let item = keranjang.find(x => x.id === id);
+            if(item) {
+                item.qty += delta;
+                if(item.qty <= 0) keranjang = keranjang.filter(x => x.id !== id);
+            }
+            renderKeranjang();
+        }
+
+        function renderKeranjang() {
+            let html = ''; let total = 0; let items = 0;
+            keranjang.forEach(k => {
+                total += (k.harga * k.qty); items += k.qty;
+                html += `
+                <div class="cart-item">
+                    <div>
+                        <div class="cart-item-name">${k.nama}</div>
+                        <div style="font-size:10px; color:gray;">Rp ${k.harga.toLocaleString('id-ID')}</div>
+                    </div>
+                    <div class="cart-item-qty">
+                        <button class="qty-btn" onclick="ubahQty('${k.id}', -1)">-</button>
+                        <span style="font-size:12px; font-weight:800; width:15px; text-align:center;">${k.qty}</span>
+                        <button class="qty-btn" onclick="ubahQty('${k.id}', 1)">+</button>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('cartList').innerHTML = html || '<div style="color:gray; font-size:11px; text-align:center; margin-top:20px;">Keranjang kosong. Tap produk untuk menambah.</div>';
+            document.getElementById('totItem').innerText = items;
+            document.getElementById('totHarga').innerText = 'Rp ' + total.toLocaleString('id-ID');
+        }
+
+        function bayar(metode) {
+            if(keranjang.length === 0) return alert("Keranjang kosong!");
+            const cabang = document.getElementById('lokasiCabang').value;
+            const total = keranjang.reduce((sum, item) => sum + (item.harga * item.qty), 0);
+            const dateObj = new Date();
+            const resiOff = "POS-" + dateObj.getTime().toString().slice(-6);
+
+            // 1. Catat ke Penjualan Offline
+            db.ref('penjualan_offline/' + cabang).push({
+                noNota: resiOff, metode: metode, total: total, items: keranjang,
+                tanggal: `${String(dateObj.getDate()).padStart(2,'0')}/${String(dateObj.getMonth()+1).padStart(2,'0')}/${dateObj.getFullYear()}`,
+                waktu: dateObj.toLocaleTimeString('id-ID')
+            });
+
+            // 2. Potong Stok Master Data secara Real-Time
+            keranjang.forEach(k => {
+                let refStok = db.ref(`produk/${k.id}/stok/${cabang}`);
+                refStok.transaction(currentStok => (currentStok || 0) - k.qty);
+            });
+
+            alert(`✅ Pembayaran ${metode} Berhasil!\nKembalian: Rp 0\nStok otomatis terpotong.`);
+            keranjang = []; renderKeranjang();
+        }
+    </script>
+</body>
+</html>
